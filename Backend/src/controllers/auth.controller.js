@@ -14,7 +14,7 @@ async function sendTokenResponse(user, res, message) {
   res.cookie("token", token, {
     httpOnly: true,
     secure: config.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: config.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
@@ -111,6 +111,30 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const logout = async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: config.NODE_ENV === "production",
+    sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+  });
+
+  return res.status(200).json({ success: true, message: "User logged out successfully" });
+}
+
+export const getMe = async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    user: {
+      id: req.user._id,
+      email: req.user.email,
+      contact: req.user.contact,
+      fullName: req.user.fullName,
+      role: req.user.role,
+      provider: req.user.provider,
+    },
+  });
+}
 
 export const googleCallback = async (req, res) => {
   if (!req.user.isNewUser) {

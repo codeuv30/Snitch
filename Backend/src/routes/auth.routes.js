@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { registerValidator, loginValidator } from '../validators/auth.validator.js';
-import { googleCallback, login, register } from '../controllers/auth.controller.js';
+import { getMe, googleCallback, login, logout, register } from '../controllers/auth.controller.js';
 import passport from 'passport';
 import config from '../config/config.js';
+import { authenticateUser } from '../middlewares/auth.middleware.js';
 
 const authRouter = Router();
 
@@ -21,6 +22,20 @@ authRouter.post("/register", registerValidator, register);
  * @body { email: String, password: String }
 */
 authRouter.post("/login", loginValidator, login)
+
+/**
+ * @route GET /api/v1/auth/logout
+ * @desc Logout a user
+ * @access Private
+*/
+authRouter.get("/logout", authenticateUser, logout);
+
+/**
+ * @route GET /api/v1/auth/me
+ * @desc Get current logged in user details
+ * @access Private
+*/
+authRouter.get("/me", authenticateUser, getMe);
 
 /**
  * @route GET /api/v1/auth/google

@@ -1,4 +1,4 @@
-import { createProduct, fetchSellerProducts } from "../services/products.api";
+import { createProduct, deleteProduct, fetchSellerProducts } from "../services/products.api";
 import { useDispatch } from "react-redux";
 import { setError, setSellerProducts } from "../state/product.slice";
 
@@ -21,13 +21,19 @@ const useProduct = () => {
 
     const data = await fetchSellerProducts(dispatch);
 
-    dispatch(setSellerProducts(data.products || []));
+    dispatch(setSellerProducts(data.data.products || []));
 
-    return data?.products || []
+    return data.data.products || []
 
   };
 
-  return { handleCreateProduct, handleGetSellerProducts };
+  const handleDeleteProduct = async (productId) => {
+    const data = await deleteProduct(productId, dispatch);
+
+    return data;
+  }
+
+  return { handleCreateProduct, handleGetSellerProducts, handleDeleteProduct };
 };
 
 export default useProduct;

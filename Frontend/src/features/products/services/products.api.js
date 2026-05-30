@@ -5,18 +5,18 @@ const API_BASE_URL = "/api/v1/products";
 
 const productApiInstance = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
 });
 
 export const createProduct = async (formData, dispatch) => {
   try {
-    setLoading(true);
+    dispatch(setLoading(true));
 
+    console.log("sending form data:", formData);
     const response = await productApiInstance.post("/", formData);
+    console.log("API response:", response.data);
 
     dispatch(setSuccessMessage(response.data.message));
-
-    console.log(response);
-
     return response.data;
   } catch (err) {
     if (err.response && err.response.data) {
@@ -42,6 +42,31 @@ export const fetchSellerProducts = async (dispatch) => {
     const response = await productApiInstance.get("/seller");
 
     return response;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      dispatch(setError(error.response.data.message));
+      return null;
+    }
+
+    dispatch(
+      setError(
+        `An unexpected error occurred. Please try again later. If the issue persists, please contact support through ${import.meta.env.VITE_FRONTEND_URL}`,
+      ),
+    );
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const deleteProduct = async (productId, dispatch) => {
+  try {
+    dispatch(setLoading(true));
+
+    const response = await productApiInstance.get(`/delete/${productId}`);
+
+    dispatch(setSuccessMessage(response.data.message));
+
+    return response.data;
   } catch (error) {
     if (error.response && error.response.data) {
       dispatch(setError(error.response.data.message));

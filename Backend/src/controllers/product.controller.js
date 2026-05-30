@@ -60,7 +60,7 @@ export const getSellerProducts = async (req, res) => {
 
   try {
     const products = await productModel.find({ seller });
-
+    
     return res.status(200).json({
       success: true,
       products,
@@ -69,6 +69,29 @@ export const getSellerProducts = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: `We were unable to fetch your products at this time. Please try again later. If the problem continues, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
+    });
+  }
+};
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const seller = req.user._id;
+
+    await productModel.findOneAndDelete({ _id: productId, seller });
+
+    return res.status(200).json({
+      success: true,
+      message: "Product deleted successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `We were unable to delete the product at this time. Please try again later. If the problem continues, please contact support through ${
         config.NODE_ENV === "production"
           ? config.FRONTEND_PRODUCTION_URL
           : config.FRONTEND_DEVELOPMENT_URL

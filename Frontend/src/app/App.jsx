@@ -1,53 +1,62 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { RouterProvider } from "react-router";
 import { routes } from "./app.routes";
 import { useDispatch, useSelector } from "react-redux";
-import { setSuccessMessage as setAuthSuccessMessage } from "../features/auth/state/auth.slice.js";
+import {
+  setSuccessMessage as setAuthSuccessMessage,
+} from "../features/auth/state/auth.slice.js";
 import { setSuccessMessage as setProductSuccessMessage } from "../features/products/state/product.slice.js";
 import Toast from "@/components/ui/Toast.js";
-import Footer from "@/components/ui/Footer";
+import { getCurrentUser } from "../features/auth/service/auth.api";
 
 const App = () => {
-  /* Auth */
-  const { error: AuthError, successMessage: AuthSuccessMessage } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
+  // Fetch current user on app mount.
+  // getCurrentUser handles setUser internally — do NOT dispatch setUser here.
   useEffect(() => {
-    if (AuthError) {
-      Toast.error(AuthError);
+    const fetchUser = async () => {
+      await getCurrentUser(dispatch);
+    };
+    fetchUser();
+  }, [dispatch]);
+
+  /* Auth toast notifications */
+  const { error: authError, successMessage: authSuccessMessage } = useSelector(
+    (state) => state.auth,
+  );
+
+  useEffect(() => {
+    if (authError) {
+      Toast.error(authError);
     }
-  }, [AuthError]);
+  }, [authError]);
 
   useEffect(() => {
-    if (AuthSuccessMessage) {
-      Toast.success(AuthSuccessMessage);
-
+    if (authSuccessMessage) {
+      Toast.success(authSuccessMessage);
       dispatch(setAuthSuccessMessage(null));
     }
-  }, [AuthSuccessMessage]);
+  }, [authSuccessMessage, dispatch]);
 
-  /* Product */
-  const { error: ProductError, successMessage: ProductSuccessMessage } = useSelector((state) => state.products);
+  /* Product toast notifications */
+  const { error: productError, successMessage: productSuccessMessage } =
+    useSelector((state) => state.products);
 
   useEffect(() => {
-    if (ProductError) {
-      Toast.error(ProductError);
+    if (productError) {
+      Toast.error(productError);
     }
-  }, [ProductError]);
+  }, [productError]);
 
   useEffect(() => {
-    if (ProductSuccessMessage) {
-      Toast.success(ProductSuccessMessage);
-
+    if (productSuccessMessage) {
+      Toast.success(productSuccessMessage);
       dispatch(setProductSuccessMessage(null));
     }
-  }, [ProductSuccessMessage]);
+  }, [productSuccessMessage, dispatch]);
 
-  return (
-    <>
-      <RouterProvider router={routes} />
-    </>
-  );
+  return <RouterProvider router={routes} />;
 };
 
 export default App;

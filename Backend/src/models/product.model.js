@@ -33,7 +33,15 @@ const productSchema = new mongoose.Schema({
                 required: true,
             }
         }
-    ]
+    ],
+    views: {
+        type: Number,
+        default: 0,
+    },
+    sales: {
+        type: Number,
+        default: 0,
+    }
 }, { timestamps: true });
 
 const productModel = mongoose.model("products", productSchema);

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticateSeller } from "../middlewares/auth.middleware.js";
-import { createProduct, getSellerProducts } from "../controllers/product.controller.js";
+import { createProduct, deleteProduct, getSellerProducts } from "../controllers/product.controller.js";
 import multer from "multer"
 import { productValidator } from "../validators/product.validator.js";
 
@@ -25,5 +25,13 @@ productRouter.post("/", authenticateSeller, upload.array('images', 7), productVa
  * @access Private
 */
 productRouter.get("/seller", authenticateSeller, getSellerProducts);
+
+/**
+ * @route GET /api/v1/products/delete/:productId
+ * @param {String} productId - ID of the product to delete
+ * @desc Delete a product by ID (Seller only)
+ * @access Private
+*/
+productRouter.get("/delete/:productId", authenticateSeller, deleteProduct);
 
 export default productRouter;
