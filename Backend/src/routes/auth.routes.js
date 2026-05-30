@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { registerValidator, loginValidator } from '../validators/auth.validator.js';
-import { login, register } from '../controllers/auth.controller.js';
+import { googleCallback, login, register } from '../controllers/auth.controller.js';
+import passport from 'passport';
+import config from '../config/config.js';
 
 const authRouter = Router();
 
@@ -19,5 +21,19 @@ authRouter.post("/register", registerValidator, register);
  * @body { email: String, password: String }
 */
 authRouter.post("/login", loginValidator, login)
+
+/**
+ * @route GET /api/v1/auth/google
+ * @desc Authenticate user with Google
+ * @access Public
+*/
+authRouter.get("/google", passport.authenticate("google", { scope: ['profile', 'email'], prompt: "select_account" } ))
+
+/**
+ * @route GET /api/v1/auth/google/callback
+ * @desc Google authentication callback
+ * @access Public
+*/
+authRouter.get("/google/callback", passport.authenticate("google", { session: false, failureRedirect: config }), googleCallback)
 
 export default authRouter;

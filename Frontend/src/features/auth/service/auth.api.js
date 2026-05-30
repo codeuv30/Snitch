@@ -5,27 +5,18 @@ import {
   setSuccessMessage,
 } from "../state/auth.slice.js";
 
-const BASE_API_URL = "http://localhost:3000/api/v1/auth";
+const BASE_API_URL = "/api/v1/auth";
 
 const authApiInstance = axios.create({
   baseURL: BASE_API_URL,
   withCredentials: true,
 });
 
-export const register = async (
-  { email, contact, password, fullName, isSeller },
-  dispatch,
-) => {
+export const register = async (user, dispatch) => {
   try {
     dispatch(setLoading(true));
 
-    const response = await authApiInstance.post("/register", {
-      email,
-      contact,
-      password,
-      fullName,
-      isSeller,
-    });
+    const response = await authApiInstance.post("/register", user);
 
     dispatch(setSuccessMessage(response.data.message));
 
@@ -56,14 +47,16 @@ export const login = async ({ email, password }, dispatch) => {
 
     return response.data;
   } catch (error) {
-    console.log(error);
-
     if (error.response && error.response.data) {
       dispatch(setError(error.response.data.message));
       return null;
     }
 
-    dispatch(setError("An unexpected error occurred. Please try again."));
+    dispatch(
+      setError(
+        `An unexpected error occurred. Please try again later. If the issue persists, please contact support through ${import.meta.env.VITE_FRONTEND_URL}`,
+      ),
+    );
   } finally {
     dispatch(setLoading(false));
   }

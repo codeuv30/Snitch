@@ -10,13 +10,14 @@ export const useAuth = () => {
     const loading = useSelector((state) => state.auth.loading);
     const user = useSelector((state) => state.auth.user);
 
-    async function handleRegister({ email, contact, password, fullName, isSeller=false }) {
+    async function handleRegister(user) {
         dispatch(setError(null));
         
-        const data = await register({ email, contact, password, fullName, isSeller }, dispatch);
+        const data = await register(user, dispatch);
 
         if(data?.user) {
             dispatch(setUser(data.user));
+            return data.user
         }
     }
 
@@ -26,6 +27,8 @@ export const useAuth = () => {
 
         if(data?.user) {
             dispatch(setUser(data.user));
+
+            return data.user;
         }
     }
 

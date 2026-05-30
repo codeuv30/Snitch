@@ -19,9 +19,6 @@ export const registerValidator = [
         .notEmpty().withMessage("Contact is required")
         .isLength({ min: 10, max: 15 }).withMessage("Contact must be between 10 and 15 characters")
         .isMobilePhone().withMessage("Contact must be a valid mobile number"),
-    body("password")
-        .notEmpty().withMessage("Password is required")
-        .isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
     body("fullName")
         .notEmpty().withMessage("Full name is required")
         .isLength({ min: 3 }).withMessage("Full name must be at least 3 characters long"),

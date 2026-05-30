@@ -3,81 +3,141 @@ import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 
 async function sendTokenResponse(user, res, message) {
-    const token = jwt.sign({
-        id: user._id,
-    }, config.JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign(
+    {
+      id: user._id,
+    },
+    config.JWT_SECRET,
+    { expiresIn: "7d" },
+  );
 
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: config.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
 
-    res.status(200).json({
-        message,
-        success: true,
-        token,
-        user: {
-            id: user._id,
-            email: user.email,
-            contact: user.contact,
-            fullName: user.fullName,
-            role: user.role
-        }        
-    })
+  res.status(200).json({
+    message,
+    success: true,
+    token,
+    user: {
+      id: user._id,
+      email: user.email,
+      contact: user.contact,
+      fullName: user.fullName,
+      role: user.role,
+    },
+  });
 }
 
 export const register = async (req, res) => {
+  const { email, contact, fullName, isSeller, provider } = req.body;
+  const password = req.body.password;
 
-    const { email, contact, password, fullName, isSeller } = req.body;
+  if(!password && provider !== "google") {
+    return res.status(400).json({ message: "Password is required" });
+  }
 
-    try {
-        const existingUser = await userModel.findOne({
-            $or: [
-                { email },
-                { contact }
-            ]
-        });
+  if(password?.length < 6 && provider !== "google") {
+    return res.status(400).json({ message: "Password must be at least 6 characters long" });
+  }
 
-        if(existingUser) {
-            return res.status(400).json({ message: "User with this email or contact already exists" });
-        }
+  try {
+    const existingUser = await userModel.findOne({
+      $or: [{ email }, { contact }],
+    });
 
-        const user = await userModel.create({
-            email,
-            contact,
-            password,
-            fullName,
-            role: isSeller ? "seller" : "buyer"
-        });
-
-        await sendTokenResponse(user, res, "User registered successfully");
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Server error" });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "User with this email or contact already exists" });
     }
-}
+
+    const userDetails = {
+      email,
+      contact,
+      fullName,
+      role: isSeller ? "seller" : "buyer",
+      provider,
+    }
+
+    if(password) {
+      userDetails.password = password;
+    }
+
+    const user = await userModel.create(userDetails);
+
+    await sendTokenResponse(user, res, "User registered successfully");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: `We were unable to create your account at this time. Please try again later. If the problem persists, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
+    });
+  }
+};
 
 export const login = async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    try {
-        const user = await userModel.findOne({ email });
+  try {
+    const user = await userModel.findOne({ email });
 
-        if(!user) {
-            return res.status(400).json({ message: "Invalid email or password" });
-        }
-
-        const isMatch = await user.comparePassword(password);
-
-        if(!isMatch) {
-            return res.status(400).json({ message: "Invalid email or password" });
-        }
-
-        await sendTokenResponse(user, res, "User logged in successfully");
-    } catch (error) {
-        
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
     }
-}
+
+    const isMatch = await user.comparePassword(password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    await sendTokenResponse(user, res, "User logged in successfully");
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `We were unable to log you in at this time. Please try again later. If the problem persists, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
+    });
+  }
+};
+
+export const googleCallback = async (req, res) => {
+  if (!req.user.isNewUser) {
+    const token = jwt.sign(
+      {
+        id: req.user.user._id,
+      },
+      config.JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: config.NODE_ENV === "production",
+      sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+    });
+
+    return res.redirect(
+      config.NODE_ENV === "production"
+        ? config.FRONTEND_PRODUCTION_URL
+        : config.FRONTEND_DEVELOPMENT_URL,
+    );
+  }
+
+  return res.redirect(
+    config.NODE_ENV === "production"
+      ? `${config.FRONTEND_PRODUCTION_URL}/register?email=${req.user.googleProfile.emails[0].value}&fullName=${req.user.googleProfile.displayName}`
+      : `${config.FRONTEND_DEVELOPMENT_URL}/register?email=${req.user.googleProfile.emails[0].value}&fullName=${req.user.googleProfile.displayName}`,
+  );
+};

@@ -4,9 +4,11 @@ import { useAuth } from "../hook/useAuth.js";
 import { Button } from "@/components/ui/button.jsx";
 import { Spinner } from "@/components/ui/spinner.jsx";
 import { useSelector } from "react-redux";
-import { Link } from "react-router";
-import DesktopFooter from "@/components/ui/Footer.jsx";
-
+import { Link, useLocation, useNavigate } from "react-router";
+import Footer from "@/components/ui/Footer.jsx";
+import ContinueWithGoogle from "../components/ContinueWithGoogle.jsx";
+import RoleSelector from "../components/RoleSelector.jsx";
+import FloatingInput from "../components/FloatingInput.jsx";
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 
 const EyeOpen = () => (
@@ -59,110 +61,7 @@ const GoogleIcon = () => (
       fill="#EA4335"
     />
   </svg>
-);
-
-// ── Sliding Pill Role Selector ────────────────────────────────────────────────
-
-function RoleSelector({ role, setRole, options }) {
-  const containerRef = useRef(null);
-  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const idx = options.findIndex((o) => o.value === role);
-    const buttons = container.querySelectorAll("button");
-    if (buttons[idx]) {
-      const btn = buttons[idx];
-      setPillStyle({
-        left: btn.offsetLeft,
-        width: btn.offsetWidth,
-      });
-    }
-  }, [role, options]);
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative flex border border-[#e2e0d8] rounded overflow-hidden"
-      style={{ padding: "3px" }}
-    >
-      {/* sliding pill */}
-      <span
-        className="absolute top-[3px] bottom-[3px] rounded bg-[#1a1a1a] transition-all duration-200 ease-in-out pointer-events-none"
-        style={{ left: pillStyle.left, width: pillStyle.width }}
-      />
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => setRole(opt.value)}
-          className={`relative flex-1 py-[7px] text-[11px] font-medium tracking-[0.08em] uppercase z-10 transition-colors duration-150
-            ${role === opt.value ? "text-white" : "text-[#888880] hover:text-[#1a1a1a]"}`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ── Floating Label Input ──────────────────────────────────────────────────────
-
-function FloatingInput({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  onBlur,
-  autoComplete,
-  suffix,
-  inputRef,
-  error,
-}) {
-  const [focused, setFocused] = useState(false);
-  const raised = focused || value.length > 0;
-
-  return (
-    <div>
-      <div className="relative border border-[#e2e0d8] rounded bg-[#f8f7f4] focus-within:border-[#c4956a] focus-within:bg-white transition-colors">
-        <label
-          className={`absolute left-3.5 transition-all duration-150 pointer-events-none select-none
-            ${
-              raised
-                ? "top-[7px] text-[9px] tracking-[0.1em] uppercase text-[#c4956a]"
-                : "top-1/2 -translate-y-1/2 text-[13px] text-[#474746]"
-            }`}
-        >
-          {label}
-        </label>
-        <input
-          ref={inputRef}
-          name={name}
-          type={type}
-          value={value}
-          onChange={onChange}
-          onBlur={(event) => {
-            setFocused(false);
-            if (onBlur) onBlur(event);
-          }}
-          onFocus={() => setFocused(true)}
-          autoComplete={autoComplete}
-          className={`w-full bg-transparent outline-none text-[13px] text-[#1a1a1a] font-light
-            ${raised ? "pt-[22px] pb-[7px] px-3.5" : "py-3 px-3.5"}
-            ${suffix ? "pr-10" : ""}`}
-        />
-        {suffix && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            {suffix}
-          </div>
-        )}
-      </div>
-      {error && <p className="mt-1 text-[11px] text-[#d14343]">{error}</p>}
-    </div>
-  );
-}
+)
 
 function getPasswordStrength(password) {
   if (!password) {
@@ -204,10 +103,18 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [contact, setContact] = useState("");
   const [password, setPassword] = useState("");
+  const [isGoogleProvider, setIsGoogleProvider] = useState(false);
 
   const { handleRegister } = useAuth();
 
   const { loading } = useSelector((state) => state.auth);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const params = new URLSearchParams(location.search);
+
+  const providerEmail = params.get("email");
+  const providerFullname = params.get("fullName");
 
   const {
     register,
@@ -225,6 +132,20 @@ export default function Register() {
     },
   });
 
+  useEffect(() => {
+    setIsGoogleProvider(!!providerEmail);
+
+    if (providerEmail) {
+      setEmail(providerEmail);
+      setValue("email", providerEmail);
+    }
+
+    if (providerFullname) {
+      setFullName(providerFullname);
+      setValue("fullName", providerFullname);
+    }
+  }, [providerEmail, providerFullname, setValue]);
+
   const fullNameRegister = register("fullName", {
     required: "Full name is required",
   });
@@ -240,17 +161,23 @@ export default function Register() {
   const contactRegister = register("contact", {
     required: "Contact is required",
     minLength: {
-      value: 7,
-      message: "Enter a valid contact number",
+      value: 10,
+      message: "Contact must be at least 10 digits",
+    },
+    pattern: {
+      value: /^[0-9]+$/,
+      message: "Contact must contain only numbers",
     },
   });
 
   const passwordRegister = register("password", {
-    required: "Password is required",
-    minLength: {
-      value: 6,
-      message: "Password must be at least 6 characters",
-    },
+    required: !isGoogleProvider ? "Password is required" : false,
+    minLength: !isGoogleProvider
+      ? {
+          value: 6,
+          message: "Password must be at least 6 characters",
+        }
+      : undefined,
   });
 
   const handleRoleChange = (value) => {
@@ -259,16 +186,24 @@ export default function Register() {
   };
 
   const onSubmit = async (data) => {
-    const user = {
-      isSeller: data.role === "seller",
-      fullName: data.fullName,
-      email: data.email,
-      contact: data.contact,
-      password: data.password,
-      role: data.role,
-    };
+    const userDetails = {
+    isSeller: data.role === "seller",
+    fullName: data.fullName,
+    email: data.email,
+    contact: data.contact,
+    role: data.role,
+    provider: isGoogleProvider ? "google" : "local",
+  };
 
-    await handleRegister(user);
+  if (!isGoogleProvider) {
+    userDetails.password = data.password;
+  }
+
+    const user = await handleRegister(userDetails);
+
+    if (user) {
+      navigate("/");
+    }
   };
 
   const passwordStrength = getPasswordStrength(password);
@@ -285,7 +220,12 @@ export default function Register() {
 
   return (
     <div
-      className="flex flex-col md:flex-row w-full bg-white"
+      className="min-h-screen flex flex-col md:flex-row w-full bg-white"
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          handleSubmit(onSubmit)();
+        }
+      }}
       style={{
         fontFamily: "'DM Sans', sans-serif",
         height: "100vh",
@@ -350,177 +290,185 @@ export default function Register() {
       </div>
 
       {/* ── FORM PANEL ────────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col px-6 py-8 md:py-12 md:px-12 bg-white overflow-y-auto">
-        <div className="flex-1 flex flex-col justify-center">
-          <div className="w-full max-w-[360px] mx-auto md:mx-0">
-            {/* Heading */}
-            <h1
-              className="text-[26px] md:text-[30px] font-medium text-[#1a1a1a] mb-1 tracking-tight"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              Create Account
-            </h1>
-            <p className="text-[12px] text-[#888880] mb-6">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-[#c4956a] font-medium border-b border-[#c4956a]/40 hover:border-[#c4956a] transition-colors"
+      <div className="flex-1 min-h-0 flex flex-col bg-white">
+        <div className="flex-1 overflow-y-auto px-6 pt-8 md:py-10 md:px-14">
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="w-full max-w-[360px] mx-auto md:mx-0">
+              {/* Heading */}
+              <h1
+                className="text-[26px] md:text-[30px] font-medium text-[#1a1a1a] mb-1 tracking-tight"
+                style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                Sign In
-              </Link>
-            </p>
-
-            {/* ── Role Selector ──────────────────────────────────────────── */}
-            <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-[#888880] mb-2">
-              I am a
-            </p>
-
-            {/* Desktop: Buyer / Seller (2 options) */}
-            <div className="hidden md:block mb-5">
-              <RoleSelector
-                role={role}
-                setRole={handleRoleChange}
-                options={desktopRoles}
-              />
-            </div>
-
-            {/* Mobile: Men / Women / Both (3 options) */}
-            <div className="md:hidden mb-5">
-              <RoleSelector
-                role={role}
-                setRole={handleRoleChange}
-                options={mobileRoles}
-              />
-            </div>
-
-            {/* ── Fields ─────────────────────────────────────────────────── */}
-            <div className="space-y-3">
-              <FloatingInput
-                label="Full Name"
-                name="fullName"
-                value={fullName}
-                onChange={(e) => {
-                  setFullName(e.target.value);
-                  fullNameRegister.onChange(e);
-                }}
-                onBlur={fullNameRegister.onBlur}
-                inputRef={fullNameRegister.ref}
-                error={errors.fullName?.message}
-                autoComplete="name"
-              />
-              <FloatingInput
-                label="Email Address"
-                name="email"
-                type="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  emailRegister.onChange(e);
-                }}
-                onBlur={emailRegister.onBlur}
-                inputRef={emailRegister.ref}
-                error={errors.email?.message}
-                autoComplete="email"
-              />
-              <FloatingInput
-                label="Phone Number"
-                name="contact"
-                type="tel"
-                value={contact}
-                onChange={(e) => {
-                  setContact(e.target.value);
-                  contactRegister.onChange(e);
-                }}
-                onBlur={contactRegister.onBlur}
-                inputRef={contactRegister.ref}
-                error={errors.contact?.message}
-                autoComplete="tel"
-              />
-              <FloatingInput
-                label="Password"
-                name="password"
-                type={showPwd ? "text" : "password"}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  passwordRegister.onChange(e);
-                }}
-                onBlur={passwordRegister.onBlur}
-                inputRef={passwordRegister.ref}
-                error={errors.password?.message}
-                autoComplete="new-password"
-                suffix={
-                  <button
-                    type="button"
-                    onClick={() => setShowPwd((v) => !v)}
-                    className="text-[#888880] hover:text-[#1a1a1a] transition-colors"
-                  >
-                    {showPwd ? <EyeOpen /> : <EyeClosed />}
-                  </button>
-                }
-              />
-              <div className="mt-2">
-                <div className="h-1 w-full overflow-hidden rounded-full bg-[#e2e0d8]">
-                  <div
-                    className={`h-full rounded-full ${passwordStrength.color}`}
-                    style={{ width: `${passwordStrength.score}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-[11px] text-[#555]">
-                  Password strength:{" "}
-                  <span className="font-semibold">
-                    {passwordStrength.label}
-                  </span>
-                </p>
-              </div>
-
-              {/* Submit */}
-              <div>
-                <Button
-                  onClick={handleSubmit(onSubmit)}
-                  className="w-full py-5 text-[11px] font-medium tracking-[0.16em] uppercase text-white
-                bg-[#1a1a1a] rounded hover:bg-[#2e2e2e] hover:text-white active:scale-[0.985] transition-all duration-150 mt-1"
-                  variant="outline"
-                  disabled={loading}
-                  size="sm"
+                Create Account {isGoogleProvider && "with Google"}
+              </h1>
+              <p className="text-[12px] text-[#888880] mb-6">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-[#c4956a] font-medium border-b border-[#c4956a]/40 hover:border-[#c4956a] transition-colors"
                 >
-                  {loading && <Spinner data-icon="inline-start" />}
-                  Create Account
-                </Button>
+                  Sign In
+                </Link>
+              </p>
+
+              {/* ── Role Selector ──────────────────────────────────────────── */}
+              <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-[#888880] mb-2">
+                I am a
+              </p>
+
+              {/* Desktop: Buyer / Seller (2 options) */}
+              <div className="hidden md:block mb-5">
+                <RoleSelector
+                  role={role}
+                  setRole={handleRoleChange}
+                  options={desktopRoles}
+                />
               </div>
+
+              {/* Mobile: Men / Women / Both (3 options) */}
+              <div className="md:hidden mb-5">
+                <RoleSelector
+                  role={role}
+                  setRole={handleRoleChange}
+                  options={mobileRoles}
+                />
+              </div>
+
+              {/* ── Fields ─────────────────────────────────────────────────── */}
+              <div className="space-y-3">
+                <FloatingInput
+                  label="Full Name"
+                  name="fullName"
+                  value={fullName}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    fullNameRegister.onChange(e);
+                  }}
+                  onBlur={fullNameRegister.onBlur}
+                  inputRef={fullNameRegister.ref}
+                  error={errors.fullName?.message}
+                  autoComplete="name"
+                  isGoogleProvider={isGoogleProvider}
+                />
+                <FloatingInput
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    emailRegister.onChange(e);
+                  }}
+                  onBlur={emailRegister.onBlur}
+                  inputRef={emailRegister.ref}
+                  error={errors.email?.message}
+                  autoComplete="email"
+                  isGoogleProvider={isGoogleProvider}
+                />
+                <FloatingInput
+                  label="Phone Number"
+                  name="contact"
+                  type="tel"
+                  value={contact}
+                  onChange={(e) => {
+                    const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
+                    setContact(cleanedValue);
+                    contactRegister.onChange(e);
+                  }}
+                  onBlur={contactRegister.onBlur}
+                  inputRef={contactRegister.ref}
+                  error={errors.contact?.message}
+                  autoComplete="tel"
+                  isGoogleProvider={isGoogleProvider}
+                />
+
+                {!isGoogleProvider && (
+                  <>
+                    <FloatingInput
+                      label="Password"
+                      name="password"
+                      type={showPwd ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        passwordRegister.onChange(e);
+                      }}
+                      onBlur={passwordRegister.onBlur}
+                      inputRef={passwordRegister.ref}
+                      error={errors.password?.message}
+                      autoComplete="new-password"
+                      isGoogleProvider={isGoogleProvider}
+                      suffix={
+                        <button
+                          type="button"
+                          onClick={() => setShowPwd((v) => !v)}
+                          className="text-[#888880] hover:text-[#1a1a1a] transition-colors"
+                        >
+                          {showPwd ? <EyeOpen /> : <EyeClosed />}
+                        </button>
+                      }
+                    />
+                    <div className="mt-2">
+                      <div className="h-1 w-full overflow-hidden rounded-full bg-[#e2e0d8]">
+                        <div
+                          className={`h-full rounded-full ${passwordStrength.color}`}
+                          style={{ width: `${passwordStrength.score}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-[11px] text-[#555]">
+                        Password strength:{" "}
+                        <span className="font-semibold">
+                          {passwordStrength.label}
+                        </span>
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* Submit */}
+                <div>
+                  <Button
+                    onClick={handleSubmit(onSubmit)}
+                    className="w-full py-5 text-[11px] font-medium tracking-[0.16em] uppercase text-white
+                bg-[#1a1a1a] rounded hover:bg-[#2e2e2e] hover:text-white active:scale-[0.985] transition-all duration-150 mt-1"
+                    variant="outline"
+                    disabled={loading}
+                    size="sm"
+                  >
+                    {loading && <Spinner data-icon="inline-start" />}
+                    Create Account
+                  </Button>
+                </div>
+              </div>
+
+              {!isGoogleProvider && (
+                <>
+                  {/* Divider */}
+                  <div className="flex items-center gap-3 my-5 text-[11px] tracking-wide text-[#474746]">
+                    <span className="flex-1 h-px bg-[#474746]" />
+                    or
+                    <span className="flex-1 h-px bg-[#474746]" />
+                  </div>
+
+                  {/* Google */}
+                  <ContinueWithGoogle />
+                </>
+              )}
+
+              {/* Mobile bottom sign-in link */}
+              <p className="md:hidden text-center text-[12px] text-[#888880] mt-6">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-[#1a1a1a] font-semibold tracking-wide uppercase text-[11px]"
+                >
+                  Sign In
+                </Link>
+              </p>
             </div>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3 my-5 text-[11px] tracking-wide text-[#474746]">
-              <span className="flex-1 h-px bg-[#474746]" />
-              or
-              <span className="flex-1 h-px bg-[#474746]" />
-            </div>
-
-            {/* Google */}
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-2.5 py-2.5 text-[12px] tracking-[0.06em] uppercase text-[#1a1a1a]
-              bg-white border border-[#e2e0d8] rounded hover:bg-[#f8f7f4] hover:border-[#c4956a]/40 transition-all duration-150"
-            >
-              <GoogleIcon />
-              <span>Sign in with Google</span>
-            </button>
-
-            {/* Mobile bottom sign-in link */}
-            <p className="md:hidden text-center text-[12px] text-[#888880] mt-6">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-[#1a1a1a] font-semibold tracking-wide uppercase text-[11px]"
-              >
-                Sign In
-              </Link>
-            </p>
           </div>
         </div>
-
-        <DesktopFooter />
+        <Footer />
       </div>
     </div>
   );

@@ -2,56 +2,40 @@ const links = ["Privacy", "Terms of Service", "Shipping", "Contact"];
 
 export default function Footer() {
   return (
-    <div className="pt-6 mt-auto border-t border-[#e8e6e0]">
+    <footer className="border-t border-[#e8e6e0] w-full">
+      
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          
+          {/* Logo */}
+          <span
+            className="text-xs sm:text-sm font-medium tracking-[0.2em] uppercase text-[#1a1a1a] text-center lg:text-left"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            SNITCH
+          </span>
 
-      {/* ── DESKTOP ─────────────────────────────────────────────────────── */}
-      <div className="hidden md:flex items-center justify-between">
-        <span
-          className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#1a1a1a]"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          SNITCH
-        </span>
-        <div className="flex items-center gap-5">
-          {links.map((l) => (
-            <a
-              key={l}
-              href="#"
-              className="text-[10px] text-[#888880] hover:text-[#1a1a1a] tracking-wide transition-colors"
-            >
-              {l}
-            </a>
-          ))}
+          {/* Links */}
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+            {links.map((l) => (
+              <a
+                key={l}
+                href="#"
+                className="text-xs text-[#888880] hover:text-[#1a1a1a] tracking-wide transition-colors"
+              >
+                {l}
+              </a>
+            ))}
+          </div>
+
+          {/* Copyright */}
+          <span className="text-[11px] text-[#888880] text-center lg:text-right">
+            © {new Date().getFullYear()} SNITCH LUXURY. ALL RIGHTS RESERVED.
+          </span>
+
         </div>
-        <span className="text-[10px] text-[#888880]">
-          © {new Date().getFullYear()} SNITCH LUXURY. ALL RIGHTS RESERVED.
-        </span>
       </div>
-
-      {/* ── MOBILE ──────────────────────────────────────────────────────── */}
-      <div className="md:hidden flex flex-col items-center gap-4">
-        <span
-          className="text-[12px] font-medium tracking-[0.2em] uppercase text-[#1a1a1a]"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          SNITCH
-        </span>
-        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
-          {links.map((l) => (
-            <a
-              key={l}
-              href="#"
-              className="text-[11px] text-[#888880] hover:text-[#1a1a1a] tracking-wide transition-colors"
-            >
-              {l}
-            </a>
-          ))}
-        </div>
-        <span className="text-[10px] text-[#888880] text-center">
-          © {new Date().getFullYear()} SNITCH LUXURY. ALL RIGHTS RESERVED.
-        </span>
-      </div>
-
-    </div>
+    </footer>
   );
 }
