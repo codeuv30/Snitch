@@ -12,26 +12,23 @@ import CurrencySelector from "../components/CurrencySelector.jsx";
 import ImageUploader from "../components/ImageUploader.jsx";
 import Footer from "../components/Footer";
 import {
-  ArrowLeft,
-  Package,
-  BarChart3,
   TrendingUp,
-  Download,
-  Settings,
-  User,
   Bell,
   Plus,
   ChevronLeft,
   Eye,
   ImageIcon,
   X,
+  Package,
+  Tag,
+  Check,
 } from "lucide-react";
 
 // ── Fonts & Animations ───────────────────────────────────────────────────────
 const FontLoader = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap');
-    
+
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -48,7 +45,7 @@ const FontLoader = () => (
       from { opacity: 0; transform: translateX(-20px); }
       to   { opacity: 1; transform: translateX(0); }
     }
-    
+
     .fade-up { animation: fadeUp 0.5s ease-out both; }
     .fade-up-1 { animation-delay: 0.05s; }
     .fade-up-2 { animation-delay: 0.12s; }
@@ -61,18 +58,16 @@ const FontLoader = () => (
     .animate-scale-in { animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
     .animate-slide-right { animation: slideRight 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-    /* Custom scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #d6d1c8; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #b5b2a8; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #444; }
 
-    /* Carousel */
     .carousel-scroll::-webkit-scrollbar { height: 3px; }
     .carousel-scroll::-webkit-scrollbar-track { background: transparent; }
-    .carousel-scroll::-webkit-scrollbar-thumb { background: rgba(196,149,106,0.4); border-radius: 3px; }
-    .carousel-scroll { scrollbar-width: thin; scrollbar-color: rgba(196,149,106,0.4) transparent; }
-    
+    .carousel-scroll::-webkit-scrollbar-thumb { background: rgba(196,149,106,0.6); border-radius: 3px; }
+    .carousel-scroll { scrollbar-width: thin; scrollbar-color: rgba(196,149,106,0.6) transparent; }
+
     .grab-cursor { cursor: grab; }
     .grab-cursor:active, .grab-cursor.dragging { cursor: grabbing; }
   `}</style>
@@ -102,6 +97,100 @@ function formatAmount(amount, currency) {
   return `${cfg.symbol}${formatted}`;
 }
 
+// ── Tag/Category config from model schema ─────────────────────────────────────
+const ALL_TAGS = [
+  "men", "women", "shirts", "t-shirts", "jeans",
+  "trousers", "blazers", "footwear", "accessories", "ethnic",
+  "tops", "dresses", "outerwear", "bottoms",
+];
+
+const ALL_CATEGORIES = [
+  "men", "women", "unisex",
+  "shirts", "t-shirts", "jeans", "trousers",
+  "blazers", "footwear", "accessories", "ethnic",
+  "tops", "dresses", "outerwear", "bottoms",
+];
+
+// ── Tag Selector ──────────────────────────────────────────────────────────────
+const TagSelector = ({ selectedTags, onChange }) => {
+  return (
+    <div>
+      <p className="text-[13px] text-[#888] mb-3 font-medium">
+        Select all that apply — used for search and filtering
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {ALL_TAGS.map((tag) => {
+          const isSelected = selectedTags.includes(tag);
+          return (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => {
+                if (isSelected) {
+                  onChange(selectedTags.filter((t) => t !== tag));
+                } else {
+                  onChange([...selectedTags, tag]);
+                }
+              }}
+              className={`px-3.5 py-2 rounded-lg text-[13px] font-medium tracking-[0.05em] capitalize
+                         transition-all duration-150 flex items-center gap-1.5 border
+                         ${isSelected
+                           ? "bg-[#c4956a] text-[#0a0a0a] border-[#c4956a] shadow-md"
+                           : "bg-[#141414] text-[#888] border-[#1a1a1a] hover:border-[#c4956a] hover:text-[#f0ede8] hover:bg-[#1a1a1a]"
+                         }`}
+            >
+              {isSelected && <Check className="w-3.5 h-3.5" />}
+              {tag}
+            </button>
+          );
+        })}
+      </div>
+      {selectedTags.length > 0 && (
+        <p className="text-[12px] text-[#c4956a] mt-3 font-medium">
+          {selectedTags.length} tag{selectedTags.length !== 1 ? "s" : ""} selected
+        </p>
+      )}
+    </div>
+  );
+};
+
+// ── Category Selector ─────────────────────────────────────────────────────────
+const CategorySelector = ({ value, onChange }) => {
+  return (
+    <div>
+      <p className="text-[13px] text-[#888] mb-3 font-medium">
+        Primary category — determines where your product appears in navigation
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {ALL_CATEGORIES.map((cat) => {
+          const isSelected = value === cat;
+          return (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => onChange(isSelected ? null : cat)}
+              className={`px-3.5 py-2 rounded-lg text-[13px] font-medium tracking-[0.05em] capitalize
+                         transition-all duration-150 flex items-center gap-1.5 border
+                         ${isSelected
+                           ? "bg-[#8B6F5A] text-white border-[#8B6F5A] shadow-md"
+                           : "bg-[#141414] text-[#888] border-[#1a1a1a] hover:border-[#8B6F5A] hover:text-[#f0ede8] hover:bg-[#1a1a1a]"
+                         }`}
+            >
+              {isSelected && <Check className="w-3.5 h-3.5" />}
+              {cat}
+            </button>
+          );
+        })}
+      </div>
+      {value && (
+        <p className="text-[12px] text-[#c4956a] mt-3 font-medium">
+          Category: <span className="font-semibold capitalize">{value}</span>
+        </p>
+      )}
+    </div>
+  );
+};
+
 // ── Preview Carousel ─────────────────────────────────────────────────
 function PreviewCarousel({ images, currentIndex, onSelect }) {
   const scrollRef = useRef(null);
@@ -109,11 +198,7 @@ function PreviewCarousel({ images, currentIndex, onSelect }) {
     if (scrollRef.current) {
       const thumb = scrollRef.current.children[currentIndex];
       if (thumb)
-        thumb.scrollIntoView({
-          behavior: "smooth",
-          inline: "center",
-          block: "nearest",
-        });
+        thumb.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
   }, [currentIndex]);
 
@@ -121,10 +206,7 @@ function PreviewCarousel({ images, currentIndex, onSelect }) {
 
   return (
     <div className="mt-3">
-      <div
-        ref={scrollRef}
-        className="flex gap-2 overflow-x-auto carousel-scroll pb-1 px-0.5"
-      >
+      <div ref={scrollRef} className="flex gap-2 overflow-x-auto carousel-scroll pb-1 px-0.5">
         {images.map((file, idx) => {
           const preview = file._previewUrl || URL.createObjectURL(file);
           if (!file._previewUrl) file._previewUrl = preview;
@@ -134,14 +216,10 @@ function PreviewCarousel({ images, currentIndex, onSelect }) {
               key={`thumb-${file.name}-${idx}`}
               type="button"
               onClick={() => onSelect(idx)}
-              className={`relative flex-shrink-0 w-10 h-10 rounded overflow-hidden transition-all duration-200
-                ${isActive ? "ring-2 ring-[#c4956a] ring-offset-1 ring-offset-[#141414] opacity-100 scale-105" : "opacity-50 hover:opacity-80 hover:scale-105"}`}
+              className={`relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden transition-all duration-200 border-2
+                ${isActive ? "border-[#c4956a] shadow-md scale-105" : "border-transparent opacity-60 hover:opacity-100 hover:border-[#333]"}`}
             >
-              <img
-                src={preview}
-                alt={`thumb-${idx}`}
-                className="w-full h-full object-cover"
-              />
+              <img src={preview} alt={`thumb-${idx}`} className="w-full h-full object-cover" />
             </button>
           );
         })}
@@ -151,7 +229,7 @@ function PreviewCarousel({ images, currentIndex, onSelect }) {
 }
 
 // ── Live Preview Card ─────────────────────────────────────────────────
-function LivePreview({ title, description, amount, currency, images }) {
+function LivePreview({ title, description, amount, currency, images, tags, category }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState("right");
   const hasImage = images.length > 0;
@@ -176,94 +254,43 @@ function LivePreview({ title, description, amount, currency, images }) {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   }, [images.length]);
 
-  const handleTouchStart = (e) => {
-    dragStartX.current = e.touches[0].clientX;
-    isDragging.current = true;
-  };
-  const handleTouchMove = (e) => {
-    if (!isDragging.current) return;
-    dragCurrentX.current = e.touches[0].clientX;
-  };
+  const handleTouchStart = (e) => { dragStartX.current = e.touches[0].clientX; isDragging.current = true; };
+  const handleTouchMove = (e) => { if (!isDragging.current) return; dragCurrentX.current = e.touches[0].clientX; };
   const handleTouchEnd = () => {
-    if (
-      !isDragging.current ||
-      dragStartX.current === null ||
-      dragCurrentX.current === null
-    ) {
-      isDragging.current = false;
-      dragStartX.current = null;
-      dragCurrentX.current = null;
-      return;
+    if (!isDragging.current || dragStartX.current === null || dragCurrentX.current === null) {
+      isDragging.current = false; dragStartX.current = null; dragCurrentX.current = null; return;
     }
     const diff = dragStartX.current - dragCurrentX.current;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) goNext();
-      else goPrev();
-    }
-    isDragging.current = false;
-    dragStartX.current = null;
-    dragCurrentX.current = null;
+    if (Math.abs(diff) > 50) { if (diff > 0) goNext(); else goPrev(); }
+    isDragging.current = false; dragStartX.current = null; dragCurrentX.current = null;
   };
 
-  const handleMouseDown = (e) => {
-    dragStartX.current = e.clientX;
-    isDragging.current = true;
-    setIsDragActive(true);
-    e.preventDefault();
-  };
-  const handleMouseMove = (e) => {
-    if (!isDragging.current) return;
-    dragCurrentX.current = e.clientX;
-  };
+  const handleMouseDown = (e) => { dragStartX.current = e.clientX; isDragging.current = true; setIsDragActive(true); e.preventDefault(); };
+  const handleMouseMove = (e) => { if (!isDragging.current) return; dragCurrentX.current = e.clientX; };
   const handleMouseUp = () => {
-    if (
-      !isDragging.current ||
-      dragStartX.current === null ||
-      dragCurrentX.current === null
-    ) {
-      isDragging.current = false;
-      setIsDragActive(false);
-      dragStartX.current = null;
-      dragCurrentX.current = null;
-      return;
+    if (!isDragging.current || dragStartX.current === null || dragCurrentX.current === null) {
+      isDragging.current = false; setIsDragActive(false); dragStartX.current = null; dragCurrentX.current = null; return;
     }
     const diff = dragStartX.current - dragCurrentX.current;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) goNext();
-      else goPrev();
-    }
-    isDragging.current = false;
-    setIsDragActive(false);
-    dragStartX.current = null;
-    dragCurrentX.current = null;
+    if (Math.abs(diff) > 50) { if (diff > 0) goNext(); else goPrev(); }
+    isDragging.current = false; setIsDragActive(false); dragStartX.current = null; dragCurrentX.current = null;
   };
   const handleMouseLeave = () => {
-    if (isDragging.current) {
-      isDragging.current = false;
-      setIsDragActive(false);
-      dragStartX.current = null;
-      dragCurrentX.current = null;
-    }
+    if (isDragging.current) { isDragging.current = false; setIsDragActive(false); dragStartX.current = null; dragCurrentX.current = null; }
   };
 
   const currentPreview = hasImage
     ? images[currentIndex]._previewUrl ||
-      (() => {
-        images[currentIndex]._previewUrl = URL.createObjectURL(
-          images[currentIndex],
-        );
-        return images[currentIndex]._previewUrl;
-      })()
+      (() => { images[currentIndex]._previewUrl = URL.createObjectURL(images[currentIndex]); return images[currentIndex]._previewUrl; })()
     : null;
 
-  const slideClass =
-    slideDirection === "right" ? "animate-slide-right" : "animate-slide-left";
+  const slideClass = slideDirection === "right" ? "animate-slide-right" : "animate-slide-left";
 
   return (
     <div className="w-full select-none">
-      <div className="rounded-xl overflow-hidden border border-[#e8e6e0] bg-white shadow-sm">
+      <div className="rounded-xl overflow-hidden border border-[#1a1a1a] bg-[#0f0f0f] shadow-sm">
         <div
-          className={`relative w-full aspect-[4/3] bg-[#f0ede8] flex items-center justify-center overflow-hidden grab-cursor ${isDragActive ? "dragging" : ""}`}
+          className={`relative w-full aspect-[4/3] bg-[#141414] flex items-center justify-center overflow-hidden grab-cursor ${isDragActive ? "dragging" : ""}`}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -274,101 +301,65 @@ function LivePreview({ title, description, amount, currency, images }) {
         >
           {hasImage ? (
             <div key={currentIndex} className={`w-full h-full ${slideClass}`}>
-              <img
-                src={currentPreview}
-                alt="preview"
-                className="w-full h-full object-cover pointer-events-none"
-                draggable={false}
-              />
+              <img src={currentPreview} alt="preview" className="w-full h-full object-cover pointer-events-none" draggable={false} />
             </div>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-              <ImageIcon className="w-10 h-10 text-[#d6d1c8]" />
-              <span className="text-[11px] text-[#b5b2a8]">
-                No image uploaded
-              </span>
+            <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+              <ImageIcon className="w-12 h-12 text-[#333]" />
+              <span className="text-[13px] text-[#555] font-medium">No image uploaded</span>
+              <span className="text-[11px] text-[#444]">Add images to see preview</span>
             </div>
           )}
 
-          <div className="absolute top-3 left-3 bg-[#1a1a1a] text-white text-[9px] font-medium tracking-widest px-2 py-1 rounded-md uppercase pointer-events-none">
+          <div className="absolute top-3 left-3 bg-[#f0ede8] text-[#0a0a0a] text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-md uppercase pointer-events-none shadow-md">
             New
           </div>
 
           {images.length > 1 && (
-            <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white/90 text-[10px] font-medium px-2.5 py-1 rounded-full pointer-events-none">
+            <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-[11px] font-bold px-3 py-1 rounded-full pointer-events-none">
               {currentIndex + 1} / {images.length}
             </div>
           )}
 
           {images.length > 1 && (
             <>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goPrev();
-                }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/80 flex items-center justify-center hover:bg-black/70 active:scale-90 transition-all duration-200 z-10"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
+              <button type="button" onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/80 active:scale-90 transition-all duration-200 z-10 shadow-lg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
               </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goNext();
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/80 flex items-center justify-center hover:bg-black/70 active:scale-90 transition-all duration-200 z-10"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+              <button type="button" onClick={(e) => { e.stopPropagation(); goNext(); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/80 active:scale-90 transition-all duration-200 z-10 shadow-lg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
               </button>
             </>
           )}
 
           {images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-sm text-white/60 text-[9px] px-2.5 py-1 rounded-full pointer-events-none select-none whitespace-nowrap">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white/80 text-[10px] px-3 py-1 rounded-full pointer-events-none select-none whitespace-nowrap font-medium">
               Drag or swipe to browse
             </div>
           )}
         </div>
 
         <div className="p-4">
-          <p
-            className={`font-['Playfair_Display'] text-[15px] font-medium leading-tight mb-1 line-clamp-2 ${title ? "text-[#1a1a1a]" : "text-[#b5b2a8]"}`}
-          >
+          <p className={`font-['Playfair_Display'] text-[16px] font-semibold leading-tight mb-2 line-clamp-2 ${title ? "text-[#f0ede8]" : "text-[#555]"}`}>
             {title || "Product Title"}
           </p>
-          <p className="text-[12px] leading-relaxed mb-3 line-clamp-2 text-[#888880]">
+          <p className="text-[13px] leading-relaxed mb-3 line-clamp-2 text-[#888]">
             {description || "Your description will appear here"}
           </p>
-          <p
-            className={`text-[15px] font-semibold tracking-wide ${amount ? "text-[#c4956a]" : "text-[#d6d1c8]"}`}
-          >
-            {amount
-              ? formatAmount(amount, currency)
-              : `${CURRENCY_CONFIG[currency]?.symbol || "$"} —`}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="text-[11px] text-[#c4956a] bg-[#1a1108] px-2 py-1 rounded-md capitalize font-medium border border-[#2a1f0a]">
+                  {tag}
+                </span>
+              ))}
+              {tags.length > 3 && <span className="text-[11px] text-[#555] font-medium">+{tags.length - 3}</span>}
+            </div>
+          )}
+          <p className={`text-[16px] font-bold tracking-wide ${amount ? "text-[#c4956a]" : "text-[#555]"}`}>
+            {amount ? formatAmount(amount, currency) : `${CURRENCY_CONFIG[currency]?.symbol || "$"} —`}
           </p>
         </div>
       </div>
@@ -376,10 +367,7 @@ function LivePreview({ title, description, amount, currency, images }) {
       <PreviewCarousel
         images={images}
         currentIndex={currentIndex}
-        onSelect={(idx) => {
-          setSlideDirection(idx > currentIndex ? "right" : "left");
-          setCurrentIndex(idx);
-        }}
+        onSelect={(idx) => { setSlideDirection(idx > currentIndex ? "right" : "left"); setCurrentIndex(idx); }}
       />
     </div>
   );
@@ -395,8 +383,12 @@ export default function CreateProduct() {
   const [imageError, setImageError] = useState("");
   const [previewImage, setPreviewImage] = useState(null);
 
+  const [tags, setTags] = useState([]);
+  const [category, setCategory] = useState(null);
+  const [tagsError, setTagsError] = useState("");
+
   const { handleCreateProduct } = useProduct();
-  const { loading } = useSelector((state) => state.auth);
+  const loading = useSelector((state) => state.auth.loading);
   const navigate = useNavigate();
 
   const {
@@ -414,10 +406,7 @@ export default function CreateProduct() {
   });
   const descReg = register("description", {
     required: "Product description is required",
-    minLength: {
-      value: 10,
-      message: "Description must be at least 10 characters",
-    },
+    minLength: { value: 10, message: "Description must be at least 10 characters" },
   });
   const amountReg = register("amount", {
     required: "Amount is required",
@@ -426,9 +415,7 @@ export default function CreateProduct() {
 
   const handleImageAdd = (files) => {
     setImageError("");
-    const incoming = Array.from(files).filter((f) =>
-      f.type.startsWith("image/"),
-    );
+    const incoming = Array.from(files).filter((f) => f.type.startsWith("image/"));
     setImages((prev) => {
       const existingNames = new Set(prev.map((f) => f.name));
       const fresh = incoming.filter((f) => !existingNames.has(f.name));
@@ -450,6 +437,10 @@ export default function CreateProduct() {
       setImageError("Please upload at least one product image");
       return;
     }
+    if (tags.length === 0) {
+      setTagsError("Please select at least one tag");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("title", data.title);
@@ -457,9 +448,10 @@ export default function CreateProduct() {
     formData.append("amount", data.amount);
     formData.append("currency", currency);
 
-    images.forEach((file) => {
-      formData.append("images", file);
-    });
+    tags.forEach((tag) => formData.append("tags[]", tag));
+    if (category) formData.append("category", category);
+
+    images.forEach((file) => formData.append("images", file));
 
     const product = await handleCreateProduct(formData);
     if (product) {
@@ -469,46 +461,39 @@ export default function CreateProduct() {
   };
 
   useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape") setPreviewImage(null);
-    };
+    const handleEscape = (e) => { if (e.key === "Escape") setPreviewImage(null); };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, []);
 
   return (
-    <>
+    <div className="flex flex-col flex-1 bg-[#0a0a0a] min-h-screen">
       <FontLoader />
 
-      {/* Main Content */}
-
       {/* Dashboard Top Bar */}
-      <header className="sticky top-0 lg:top-0 z-30 bg-[#F5EFE6]/90 backdrop-blur-md border-b border-[#e8e6e0]">
+      <header className="sticky top-0 lg:top-0 z-30 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-[#1a1a1a]">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/seller/dashboard/products")}
-              className="w-9 h-9 rounded-lg bg-white border border-[#e8e6e0] flex items-center justify-center
-                         text-[#888880] hover:text-[#1a1a1a] hover:border-[#1a1a1a] transition-all duration-200"
+              className="w-9 h-9 rounded-lg bg-[#0f0f0f] border border-[#1a1a1a] flex items-center justify-center
+                         text-[#555] hover:text-[#f0ede8] hover:border-[#2a2a2a] transition-all duration-200 shadow-sm"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-[#8B6F5A] font-medium block">
+              <span className="text-[11px] uppercase tracking-[0.2em] text-[#c4956a] font-bold block">
                 Seller Studio
               </span>
-              <h1 className="font-['Playfair_Display'] text-[22px] lg:text-[26px] text-[#1a1a1a] leading-tight">
+              <h1 className="font-['Playfair_Display'] text-[22px] lg:text-[26px] text-[#f0ede8] leading-tight font-semibold">
                 Add New Product
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              className="w-10 h-10 rounded-full bg-white border border-[#e8e6e0] flex items-center justify-center
-                               text-[#888880] hover:text-[#1a1a1a] hover:border-[#1a1a1a] transition-all duration-200
-                               hidden lg:flex"
-            >
+            <button className="w-10 h-10 rounded-full bg-[#0f0f0f] border border-[#1a1a1a] flex items-center justify-center
+                               text-[#555] hover:text-[#f0ede8] hover:border-[#2a2a2a] transition-all duration-200 shadow-sm hidden lg:flex">
               <Bell className="w-4 h-4" />
             </button>
           </div>
@@ -517,41 +502,32 @@ export default function CreateProduct() {
 
       <main className="flex-1 max-w-[1200px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-[12px] text-[#b5b2a8] mb-8 fade-up fade-up-1">
-          <button
-            onClick={() => navigate("/seller/dashboard")}
-            className="hover:text-[#1a1a1a] transition-colors"
-          >
+        <nav className="flex items-center gap-2 text-[13px] text-[#555] mb-8 fade-up fade-up-1">
+          <button onClick={() => navigate("/seller/dashboard")} className="hover:text-[#f0ede8] transition-colors font-medium">
             Dashboard
           </button>
-          <ChevronLeft className="w-3 h-3 rotate-180" />
-          <button
-            onClick={() => navigate("/seller/dashboard/products")}
-            className="hover:text-[#1a1a1a] transition-colors"
-          >
+          <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[#444]" />
+          <button onClick={() => navigate("/seller/dashboard/products")} className="hover:text-[#f0ede8] transition-colors font-medium">
             Products
           </button>
-          <ChevronLeft className="w-3 h-3 rotate-180" />
-          <span className="text-[#1a1a1a] font-medium">Add New</span>
+          <ChevronLeft className="w-3.5 h-3.5 rotate-180 text-[#444]" />
+          <span className="text-[#f0ede8] font-semibold">Add New</span>
         </nav>
 
         {/* Two Column Layout: Form + Live Preview */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Left: Form */}
           <div className="lg:col-span-3 space-y-6">
+
             {/* Section: Basic Info */}
-            <div className="bg-white rounded-xl border border-[#e8e6e0] p-6 fade-up fade-up-2">
+            <div className="bg-[#0f0f0f] rounded-xl border border-[#1a1a1a] p-6 fade-up fade-up-2 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-[#f5f0ea] flex items-center justify-center">
-                  <Package className="w-4 h-4 text-[#8B6F5A]" />
+                <div className="w-9 h-9 rounded-lg bg-[#141414] flex items-center justify-center border border-[#1a1a1a]">
+                  <Package className="w-4.5 h-4.5 text-[#c4956a]" />
                 </div>
                 <div>
-                  <h2 className="font-['Playfair_Display'] text-[18px] text-[#1a1a1a]">
-                    Basic Information
-                  </h2>
-                  <p className="text-[12px] text-[#888880]">
-                    Name and describe your product
-                  </p>
+                  <h2 className="font-['Playfair_Display'] text-[19px] text-[#f0ede8] font-semibold">Basic Information</h2>
+                  <p className="text-[13px] text-[#888] font-medium">Name and describe your product</p>
                 </div>
               </div>
 
@@ -560,10 +536,7 @@ export default function CreateProduct() {
                   label="Product Title"
                   name="title"
                   value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    titleReg.onChange(e);
-                  }}
+                  onChange={(e) => { setTitle(e.target.value); titleReg.onChange(e); }}
                   onBlur={titleReg.onBlur}
                   inputRef={titleReg.ref}
                   error={errors.title?.message}
@@ -572,10 +545,7 @@ export default function CreateProduct() {
                   label="Product Description"
                   name="description"
                   value={description}
-                  onChange={(e) => {
-                    setDescription(e.target.value);
-                    descReg.onChange(e);
-                  }}
+                  onChange={(e) => { setDescription(e.target.value); descReg.onChange(e); }}
                   onBlur={descReg.onBlur}
                   inputRef={descReg.ref}
                   error={errors.description?.message}
@@ -585,18 +555,14 @@ export default function CreateProduct() {
             </div>
 
             {/* Section: Images */}
-            <div className="bg-white rounded-xl border border-[#e8e6e0] p-6 fade-up fade-up-3">
+            <div className="bg-[#0f0f0f] rounded-xl border border-[#1a1a1a] p-6 fade-up fade-up-3 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-[#f5f0ea] flex items-center justify-center">
-                  <Eye className="w-4 h-4 text-[#8B6F5A]" />
+                <div className="w-9 h-9 rounded-lg bg-[#141414] flex items-center justify-center border border-[#1a1a1a]">
+                  <Eye className="w-4.5 h-4.5 text-[#c4956a]" />
                 </div>
                 <div>
-                  <h2 className="font-['Playfair_Display'] text-[18px] text-[#1a1a1a]">
-                    Product Images
-                  </h2>
-                  <p className="text-[12px] text-[#888880]">
-                    Upload up to 7 images (first is cover)
-                  </p>
+                  <h2 className="font-['Playfair_Display'] text-[19px] text-[#f0ede8] font-semibold">Product Images</h2>
+                  <p className="text-[13px] text-[#888] font-medium">Upload up to 7 images (first is cover)</p>
                 </div>
               </div>
               <ImageUploader
@@ -608,19 +574,51 @@ export default function CreateProduct() {
               />
             </div>
 
-            {/* Section: Pricing */}
-            <div className="bg-white rounded-xl border border-[#e8e6e0] p-6 fade-up fade-up-4">
+            {/* Section: Tags */}
+            <div className="bg-[#0f0f0f] rounded-xl border border-[#1a1a1a] p-6 fade-up fade-up-4 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-[#f5f0ea] flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-[#8B6F5A]" />
+                <div className="w-9 h-9 rounded-lg bg-[#141414] flex items-center justify-center border border-[#1a1a1a]">
+                  <Tag className="w-4.5 h-4.5 text-[#c4956a]" />
                 </div>
                 <div>
-                  <h2 className="font-['Playfair_Display'] text-[18px] text-[#1a1a1a]">
-                    Pricing
-                  </h2>
-                  <p className="text-[12px] text-[#888880]">
-                    Set your product price
-                  </p>
+                  <h2 className="font-['Playfair_Display'] text-[19px] text-[#f0ede8] font-semibold">Tags</h2>
+                  <p className="text-[13px] text-[#888] font-medium">Help customers find your product</p>
+                </div>
+              </div>
+
+              <TagSelector selectedTags={tags} onChange={(newTags) => { setTags(newTags); setTagsError(""); }} />
+              {tagsError && (
+                <p className="text-[13px] text-[#f87171] mt-3 flex items-center gap-1.5 font-medium">
+                  <X className="w-4 h-4" />
+                  {tagsError}
+                </p>
+              )}
+            </div>
+
+            {/* Section: Category */}
+            <div className="bg-[#0f0f0f] rounded-xl border border-[#1a1a1a] p-6 fade-up fade-up-4 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-lg bg-[#141414] flex items-center justify-center border border-[#1a1a1a]">
+                  <Package className="w-4.5 h-4.5 text-[#c4956a]" />
+                </div>
+                <div>
+                  <h2 className="font-['Playfair_Display'] text-[19px] text-[#f0ede8] font-semibold">Category</h2>
+                  <p className="text-[13px] text-[#888] font-medium">Primary category for navigation (optional)</p>
+                </div>
+              </div>
+
+              <CategorySelector value={category} onChange={setCategory} />
+            </div>
+
+            {/* Section: Pricing */}
+            <div className="bg-[#0f0f0f] rounded-xl border border-[#1a1a1a] p-6 fade-up fade-up-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-lg bg-[#141414] flex items-center justify-center border border-[#1a1a1a]">
+                  <TrendingUp className="w-4.5 h-4.5 text-[#c4956a]" />
+                </div>
+                <div>
+                  <h2 className="font-['Playfair_Display'] text-[19px] text-[#f0ede8] font-semibold">Pricing</h2>
+                  <p className="text-[13px] text-[#888] font-medium">Set your product price</p>
                 </div>
               </div>
 
@@ -632,35 +630,28 @@ export default function CreateProduct() {
                     type="number"
                     min="0"
                     value={amount}
-                    onChange={(e) => {
-                      setAmount(e.target.value);
-                      amountReg.onChange(e);
-                    }}
+                    onChange={(e) => { setAmount(e.target.value); amountReg.onChange(e); }}
                     onBlur={amountReg.onBlur}
                     inputRef={amountReg.ref}
                     error={errors.amount?.message}
                   />
                 </div>
                 <div className="flex-[2] w-full sm:w-auto">
-                  <CurrencySelector
-                    value={currency}
-                    onChange={setCurrency}
-                    CURRENCIES={CURRENCIES}
-                  />
+                  <CurrencySelector dark={true} value={currency} onChange={setCurrency} CURRENCIES={CURRENCIES} />
                 </div>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2 fade-up fade-up-5">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 fade-up fade-up-6">
               <Button
                 onClick={handleSubmit(onSubmit)}
                 disabled={loading}
                 variant="outline"
                 size="sm"
-                className="flex-1 py-5 text-[11px] font-medium tracking-[0.16em] uppercase text-white
-                    bg-[#1a1a1a] rounded-xl hover:bg-[#2e2e2e] hover:text-white active:scale-[0.985]
-                    transition-all duration-150 border-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-5 text-[12px] font-semibold tracking-[0.16em] uppercase text-[#0a0a0a]
+                    bg-[#c4956a] rounded-xl hover:bg-[#d4a57a] hover:text-[#0a0a0a] active:scale-[0.985]
+                    transition-all duration-150 border-none disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 {loading && <Spinner data-icon="inline-start" />}
                 <Plus className="w-4 h-4 mr-2" />
@@ -670,9 +661,9 @@ export default function CreateProduct() {
                 onClick={() => navigate("/seller/dashboard/products")}
                 variant="outline"
                 size="sm"
-                className="flex-1 py-5 text-[11px] font-medium tracking-[0.16em] uppercase text-[#1a1a1a]
-                    bg-white border border-[#e8e6e0] rounded-xl hover:bg-[#f5f0ea] active:scale-[0.985]
-                    transition-all duration-150"
+                className="flex-1 py-5 text-[12px] font-semibold tracking-[0.16em] uppercase text-[#888]
+                    bg-[#141414] border-2 border-[#1a1a1a] rounded-xl hover:bg-[#1a1a1a] hover:border-[#2a2a2a] hover:text-[#f0ede8] active:scale-[0.985]
+                    transition-all duration-150 shadow-sm"
               >
                 Cancel
               </Button>
@@ -682,10 +673,10 @@ export default function CreateProduct() {
           {/* Right: Sticky Live Preview */}
           <div className="lg:col-span-2">
             <div className="lg:sticky lg:top-28">
-              <div className="bg-white rounded-xl border border-[#e8e6e0] p-5 fade-up fade-up-2">
+              <div className="bg-[#0f0f0f] rounded-xl border border-[#1a1a1a] p-5 fade-up fade-up-2 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <Eye className="w-4 h-4 text-[#8B6F5A]" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-[#8B6F5A] font-medium">
+                  <Eye className="w-4.5 h-4.5 text-[#c4956a]" />
+                  <span className="text-[11px] uppercase tracking-[0.2em] text-[#c4956a] font-bold">
                     Live Preview
                   </span>
                 </div>
@@ -695,33 +686,29 @@ export default function CreateProduct() {
                   amount={amount}
                   currency={currency}
                   images={images}
+                  tags={tags}
+                  category={category}
                 />
-                <p className="text-[11px] text-[#b5b2a8] text-center mt-4 leading-relaxed">
-                  This is how your product will appear to customers in your
-                  store
+                <p className="text-[12px] text-[#555] text-center mt-4 leading-relaxed font-medium">
+                  This is how your product will appear to customers in your store
                 </p>
               </div>
 
               {/* Tips Card */}
-              <div className="bg-[#f5f0ea] rounded-xl border border-[#e8e6e0] p-5 mt-4 fade-up fade-up-4">
-                <h3 className="font-['Playfair_Display'] text-[14px] text-[#1a1a1a] mb-3">
+              <div className="bg-[#141414] rounded-xl border border-[#1a1a1a] p-5 mt-4 fade-up fade-up-4 shadow-sm">
+                <h3 className="font-['Playfair_Display'] text-[15px] text-[#f0ede8] mb-4 font-semibold">
                   Tips for better listings
                 </h3>
-                <ul className="space-y-2.5">
+                <ul className="space-y-3">
                   {[
                     "Use high-quality images with good lighting",
                     "Write detailed, honest descriptions",
-                    "Price competitively within your category",
-                    "Upload multiple angles of your product",
+                    "Add relevant tags for better discoverability",
+                    "Set a primary category so customers can browse easily",
                   ].map((tip, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2 text-[12px] text-[#888880] leading-relaxed"
-                    >
-                      <div className="w-4 h-4 rounded-full bg-[#c4956a]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-[10px] text-[#c4956a] font-bold">
-                          {i + 1}
-                        </span>
+                    <li key={i} className="flex items-start gap-3 text-[13px] text-[#888] leading-relaxed">
+                      <div className="w-6 h-6 rounded-full bg-[#c4956a]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-[11px] text-[#c4956a] font-bold">{i + 1}</span>
                       </div>
                       {tip}
                     </li>
@@ -733,7 +720,6 @@ export default function CreateProduct() {
         </div>
       </main>
 
-      {/* Footer */}
       <Footer />
 
       {/* Image Preview Popup */}
@@ -742,7 +728,7 @@ export default function CreateProduct() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setPreviewImage(null)}
         >
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
           <div
             className="relative z-10 max-w-[90vw] max-h-[90vh] animate-scale-in"
             onClick={(e) => e.stopPropagation()}
@@ -750,25 +736,21 @@ export default function CreateProduct() {
             <button
               type="button"
               onClick={() => setPreviewImage(null)}
-              className="absolute -top-3 -right-3 z-20 w-8 h-8 rounded-full bg-white text-[#1a1a1a] flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
+              className="absolute -top-3 -right-3 z-20 w-9 h-9 rounded-full bg-[#0f0f0f] text-[#f0ede8] flex items-center justify-center shadow-xl hover:bg-[#1a1a1a] transition-colors border border-[#1a1a1a]"
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="bg-white rounded-xl overflow-hidden shadow-2xl">
+            <div className="bg-[#0f0f0f] rounded-xl overflow-hidden shadow-2xl border border-[#1a1a1a]">
               <img
-                src={
-                  previewImage._previewUrl || URL.createObjectURL(previewImage)
-                }
+                src={previewImage._previewUrl || URL.createObjectURL(previewImage)}
                 alt={previewImage.name}
                 className="max-w-full max-h-[80vh] object-contain"
               />
             </div>
-            <p className="text-center text-white/80 text-xs mt-3 font-light">
-              {previewImage.name}
-            </p>
+            <p className="text-center text-[#f0ede8]/90 text-[13px] mt-3 font-medium">{previewImage.name}</p>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

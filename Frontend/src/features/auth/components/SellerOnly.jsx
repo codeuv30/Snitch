@@ -2,9 +2,9 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/ui/spinner"
+import { Spinner } from "@/components/ui/spinner";
 
-const ProtectedRoute = ({ children }) => {
+const SellerOnly = ({ children }) => {
   const navigate = useNavigate();
 
   const loading = useSelector((state) => state.auth.loading);
@@ -18,8 +18,19 @@ const ProtectedRoute = ({ children }) => {
     }
   }, [initialized, user, navigate]);
 
+  useEffect(() => {
+    if (initialized && user && user.role !== "seller") {
+      Toast.error("You must be a seller to access this page.");
+      navigate("/");
+    }
+  }, [initialized, user, navigate]);
+
   if (!initialized || loading) {
-    return <div className="w-screen h-screen flex justify-center items-center"><Spinner className={"size-8"} /></div>;
+    return (
+      <div className="w-screen h-screen flex justify-center items-center">
+        <Spinner className={"size-8"} />
+      </div>
+    );
   }
 
   if (!user) {
@@ -29,4 +40,4 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-export default ProtectedRoute;
+export default SellerOnly;

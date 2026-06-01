@@ -9,6 +9,7 @@ import { Link } from "react-router";
 import { useNavigate } from "react-router";
 import Footer from "@/components/ui/Footer.jsx";
 import ContinueWithGoogle from "../components/ContinueWithGoogle.jsx";
+import FloatingInput from "../components/FloatingInput.jsx";
 
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 
@@ -64,63 +65,6 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// ── Floating Label Input ──────────────────────────────────────────────────────
-
-function FloatingInput({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  onBlur,
-  autoComplete,
-  suffix,
-  inputRef,
-  error,
-}) {
-  const [focused, setFocused] = useState(false);
-  const raised = focused || (value && value.length > 0);
-
-  return (
-    <div>
-      <div className="relative border border-[#e2e0d8] rounded bg-[#f8f7f4] focus-within:border-[#c4956a] focus-within:bg-white transition-colors">
-        <label
-          className={`absolute left-3.5 transition-all duration-150 pointer-events-none select-none
-            ${
-              raised
-                ? "top-[7px] text-[9px] tracking-[0.1em] uppercase text-[#c4956a]"
-                : "top-1/2 -translate-y-1/2 text-[13px] text-[#474746]"
-            }`}
-        >
-          {label}
-        </label>
-        <input
-          ref={inputRef}
-          name={name}
-          type={type}
-          value={value}
-          onChange={onChange}
-          onFocus={() => setFocused(true)}
-          onBlur={(e) => {
-            setFocused(false);
-            if (onBlur) onBlur(e);
-          }}
-          autoComplete={autoComplete}
-          className={`w-full bg-transparent outline-none text-[13px] text-[#1a1a1a] font-light
-            ${raised ? "pt-[22px] pb-[7px] px-3.5" : "py-3 px-3.5"}
-            ${suffix ? "pr-10" : ""}`}
-        />
-        {suffix && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            {suffix}
-          </div>
-        )}
-      </div>
-      {error && <p className="mt-1 text-[11px] text-[#d14343]">{error}</p>}
-    </div>
-  );
-}
-
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function Login() {
@@ -130,7 +74,8 @@ export default function Login() {
 
   const { handleLogin } = useAuth();
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const loading = useSelector((state) => state.auth.loading);
+  const error = useSelector((state) => state.auth.error);
   const navigate = useNavigate();
 
   const {
@@ -168,7 +113,7 @@ export default function Login() {
   // Clear Redux error when user starts typing
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
-    emailRegister.onChange(e);
+  emailRegister.onChange(e);
     if (error) dispatch(setError(null));
   };
 
@@ -180,16 +125,35 @@ export default function Login() {
 
   return (
     <div
-      className="flex flex-col md:flex-row w-full bg-white"
+      className="flex flex-col md:flex-row w-full bg-[#121212]"
       style={{
         fontFamily: "'DM Sans', sans-serif",
-        height: "100vh",
-        overflow: "hidden",
+        minHeight: "100vh",
       }}
     >
       {/* Google Fonts */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #333333;
+          border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #c4956a;
+        }
+        /* Firefox */
+        * {
+          scrollbar-width: thin;
+          scrollbar-color: #333333 #0a0a0a;
+        }
       `}</style>
 
       {/* ── MOBILE HERO ───────────────────────────────────────────────────── */}
@@ -198,15 +162,15 @@ export default function Login() {
         style={{ height: "200px" }}
       >
         <img
-          src="/assets/Images/Register/Mobile/WelcomeBack.png"
+          src="/assets/Images/Login/Mobile/WelcomeBack.png"
           alt="Welcome Back"
           className="absolute inset-0 w-full h-full object-cover object-top"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/40 via-black/20 to-[#0a0a0a]/70" />
         <div className="absolute inset-0 flex flex-col justify-between p-5">
           {/* top wordmark */}
           <span
-            className="text-center text-[12px] font-medium tracking-[0.3em] uppercase text-white/90"
+            className="text-center text-[12px] font-medium tracking-[0.3em] uppercase text-[#f0ebe3]"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             SNITCH
@@ -216,21 +180,21 @@ export default function Login() {
 
       {/* ── DESKTOP LEFT PANEL ────────────────────────────────────────────── */}
       <div
-        className="hidden md:block relative flex-none overflow-hidden bg-[#111]"
-        style={{ width: "42%", height: "100%" }}
+        className="hidden md:block relative flex-none overflow-hidden bg-[#0a0a0a]"
+        style={{ width: "42%", minHeight: "100vh" }} // ← fix here
       >
         <img
-          src="/assets/Images/Register/Desktop/WelcomeBack.png"
+          src="/assets/Images/Login/Desktop/WelcomeBack.png"
           alt="Welcome Back"
           className="absolute inset-0 w-full h-full object-cover object-top"
-          style={{ opacity: 0.88 }}
+          style={{ opacity: 0.9 }}
         />
         {/* gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/40 via-transparent to-transparent" />
 
         {/* wordmark */}
         <span
-          className="absolute top-7 left-9 text-[13px] font-medium tracking-[0.28em] uppercase text-white/90"
+          className="absolute top-7 left-9 text-[13px] font-medium tracking-[0.28em] uppercase text-[#f0ebe3] drop-shadow-[0_0_8px_rgba(196,149,106,0.3)]"
           style={{ fontFamily: "'Playfair Display', serif" }}
         >
           SNITCH
@@ -238,7 +202,7 @@ export default function Login() {
 
         {/* bottom copy */}
         <div className="absolute bottom-10 left-9 right-9">
-          <p className="text-[9px] font-medium tracking-[0.2em] uppercase text-white/55 mb-2.5">
+          <p className="text-[9px] font-medium tracking-[0.2em] uppercase text-[#b5b0a8] mb-2.5">
             Welcome Back
           </p>
           <h2
@@ -252,21 +216,21 @@ export default function Login() {
             <br />
             You Again.
           </h2>
-          <p className="text-[13px] font-light text-white/55 leading-relaxed max-w-[230px]">
+          <p className="text-[13px] font-light text-[#b5b0a8] leading-relaxed max-w-[230px]">
             Your style. Your wardrobe. Pick up where you left off.
           </p>
         </div>
       </div>
 
       {/* ── FORM PANEL ────────────────────────────────────────────────────── */}
-      <div className="flex-1 min-h-0 flex flex-col bg-white">
+      <div className="flex-1 min-h-0 flex flex-col bg-[#121212]">
         <div className="flex-1 overflow-y-auto px-6 pt-8 md:py-10 md:px-14">
           <div className="flex-1 flex flex-col justify-center">
             <div className="w-full max-w-[340px] mx-auto md:mx-0">
               {/* Desktop wordmark */}
               <div className="hidden md:block mb-8">
                 <span
-                  className="text-[13px] font-medium tracking-[0.28em] uppercase text-[#1a1a1a]"
+                  className="text-[13px] font-medium tracking-[0.28em] uppercase text-[#f0ebe3] drop-shadow-[0_0_8px_rgba(196,149,106,0.3)]"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   SNITCH
@@ -275,16 +239,16 @@ export default function Login() {
 
               {/* Heading */}
               <h1
-                className="text-[28px] md:text-[32px] font-medium text-[#1a1a1a] mb-1 tracking-tight"
+                className="text-[28px] md:text-[32px] font-medium text-[#f0ebe3] mb-1 tracking-tight"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 Sign In
               </h1>
-              <p className="text-[12px] text-[#888880] mb-7">
+              <p className="text-[12px] text-[#9a9590] mb-7">
                 New to SNITCH?{" "}
                 <Link
                   to="/register"
-                  className="text-[#c4956a] font-medium border-b border-[#c4956a]/40 hover:border-[#c4956a] transition-colors"
+                  className="text-[#c4956a] font-medium border-b border-[#c4956a]/40 hover:border-[#c4956a] hover:text-[#e8c9a0] transition-all duration-200"
                 >
                   Create Account
                 </Link>
@@ -292,7 +256,7 @@ export default function Login() {
 
               {/* Redux error */}
               {error && (
-                <p className="text-[12px] text-[#d14343] mb-4 leading-relaxed">
+                <p className="text-[12px] text-[#ff6b6b] mb-4 leading-relaxed border-l-2 border-[#ff6b6b]/30 pl-3">
                   {error}
                 </p>
               )}
@@ -309,6 +273,7 @@ export default function Login() {
                   inputRef={emailRegister.ref}
                   error={errors.email?.message}
                   autoComplete="email"
+                  dark={true}
                 />
                 <div>
                   <FloatingInput
@@ -321,11 +286,12 @@ export default function Login() {
                     inputRef={passwordRegister.ref}
                     error={errors.password?.message}
                     autoComplete="current-password"
+                    dark={true}
                     suffix={
                       <button
                         type="button"
                         onClick={() => setShowPwd((v) => !v)}
-                        className="text-[#888880] hover:text-[#1a1a1a] transition-colors"
+                        className="text-[#555555] hover:text-[#c4956a] transition-colors duration-200"
                       >
                         {showPwd ? <EyeOpen /> : <EyeClosed />}
                       </button>
@@ -335,8 +301,9 @@ export default function Login() {
                   <div className="flex justify-end mt-1.5">
                     <a
                       href="/forgot-password"
-                      className="text-[11px] text-[#c4956a] hover:underline transition-all"
+                      className="text-[11px] text-[#c4956a] hover:underline hover:text-[#e8c9a0] transition-all flex items-center gap-1"
                     >
+                      <span className="w-1 h-1 rounded-full bg-[#c4956a]/50" />
                       Forgot Password?
                     </a>
                   </div>
@@ -346,8 +313,8 @@ export default function Login() {
                 <div className="pt-1">
                   <Button
                     onClick={handleSubmit(onSubmit)}
-                    className="w-full py-5 text-[11px] font-medium tracking-[0.16em] uppercase text-white
-                    bg-[#1a1a1a] rounded hover:bg-[#2e2e2e] hover:text-white active:scale-[0.985] transition-all duration-150"
+                    className="w-full py-5 text-[11px] font-medium tracking-[0.16em] uppercase text-[#f0ebe3]
+                    bg-[#1a1a1a] border border-[#333333] text-[#f0ebe3] rounded hover:bg-[#222222] hover:border-[#c4956a] hover:text-[#c4956a] active:scale-[0.985] transition-all duration-200"
                     variant="outline"
                     disabled={loading}
                     size="sm"
@@ -359,21 +326,21 @@ export default function Login() {
               </div>
 
               {/* Divider */}
-              <div className="flex items-center gap-3 my-5 text-[11px] tracking-wide text-[#474746]">
+              <div className="flex items-center gap-3 my-5 text-[11px] tracking-wide text-[#6a6560]">
                 <span className="flex-1 h-px bg-[#474746]" />
                 or
                 <span className="flex-1 h-px bg-[#474746]" />
               </div>
 
               {/* Google */}
-              <ContinueWithGoogle />
+              <ContinueWithGoogle dark={true} />
 
               {/* Mobile — create account link */}
-              <p className="md:hidden text-center text-[12px] text-[#888880] mt-6">
+              <p className="md:hidden text-center text-[12px] text-[#9a9590] mt-6">
                 Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="text-[#1a1a1a] font-semibold tracking-wide uppercase text-[11px]"
+                  className="text-[#c4956a] font-semibold tracking-wide uppercase text-[11px] hover:text-[#e8c9a0] transition-colors"
                 >
                   Create One
                 </Link>

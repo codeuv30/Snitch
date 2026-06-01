@@ -94,97 +94,6 @@ const FontLoader = () => (
   `}</style>
 );
 
-// ─── Sidebar ──────────────────────────────────────────────────────
-const Sidebar = ({ activeItem = "overview" }) => {
-  const navigate = useNavigate();
-  const items = [
-    { id: "overview",  label: "Overview",  icon: BarChart3,  path: "/seller/dashboard" },
-    { id: "products",  label: "Products",  icon: Package,    path: "/seller/dashboard/products" },
-    { id: "orders",    label: "Orders",    icon: Download,   path: "/seller/dashboard/orders" },
-    { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/seller/dashboard/analytics" },
-    { id: "settings",  label: "Settings",  icon: Settings,   path: "/seller/dashboard/settings" },
-  ];
-
-  return (
-    <aside
-      className="hidden lg:flex flex-col fixed left-0 top-0 z-40 w-[220px] min-h-screen"
-      style={{ background: "#0d0d0d", borderRight: "1px solid #1c1c1c" }}
-    >
-      {/* Logo */}
-      <div className="px-6 py-7" style={{ borderBottom: "1px solid #1c1c1c" }}>
-        <span style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: "22px",
-          letterSpacing: "0.18em",
-          color: "#f0ede8",
-          fontWeight: 500,
-        }}>SNITCH</span>
-        <p style={{ fontSize: "9px", color: "#444", letterSpacing: "0.22em", textTransform: "uppercase", marginTop: "4px" }}>
-          Seller Studio
-        </p>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {items.map(({ id, label, icon: Icon, path }) => {
-          const active = activeItem === id;
-          return (
-            <button
-              key={id}
-              onClick={() => navigate(path)}
-              className="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left"
-              style={{
-                fontSize: "12px",
-                letterSpacing: "0.04em",
-                background: active ? "#1a1a1a" : "transparent",
-                color: active ? "#f0ede8" : "#555",
-                fontFamily: "'DM Sans', sans-serif",
-                fontWeight: active ? 500 : 400,
-                borderLeft: active ? "2px solid #c4956a" : "2px solid transparent",
-              }}
-            >
-              <Icon size={14} style={{ opacity: active ? 1 : 0.5 }} />
-              {label}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* User */}
-      <div className="px-3 py-4" style={{ borderTop: "1px solid #1c1c1c" }}>
-        <div className="flex items-center gap-3 px-3 py-2.5">
-          <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}>
-            <User size={13} style={{ color: "#555" }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p style={{ fontSize: "12px", color: "#d0cdc8", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
-              Utkarsh Verma
-            </p>
-            <p style={{ fontSize: "10px", color: "#444", letterSpacing: "0.06em" }}>Seller</p>
-          </div>
-        </div>
-      </div>
-    </aside>
-  );
-};
-
-// ─── Mobile Header ────────────────────────────────────────────────
-const MobileHeader = () => (
-  <div className="lg:hidden sticky top-0 z-50 flex items-center justify-between px-4 py-3"
-    style={{ background: "#0d0d0d", borderBottom: "1px solid #1c1c1c" }}>
-    <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", letterSpacing: "0.15em", color: "#f0ede8" }}>
-      SNITCH
-    </span>
-    <div className="flex items-center gap-2">
-      <button className="w-8 h-8 rounded-full flex items-center justify-center"
-        style={{ background: "#1a1a1a", border: "1px solid #222" }}>
-        <Bell size={14} style={{ color: "#888" }} />
-      </button>
-    </div>
-  </div>
-);
-
 // ─── Sparkline SVG ────────────────────────────────────────────────
 const Sparkline = ({ data, color = "#c4956a", delay = 0 }) => {
   const max = Math.max(...data);
@@ -384,13 +293,8 @@ const Overview = () => {
   ];
 
   return (
-    <div className="min-h-screen font-['DM_Sans']" style={{ background: "#0a0a0a", color: "#f0ede8" }}>
-      <FontLoader />
-      <MobileHeader />
-      <Sidebar activeItem="overview" />
-
-      <div className="lg:ml-[220px] min-h-screen flex flex-col">
-
+      <div className="flex flex-col flex-1 font-['DM_Sans']" style={{ color: "#f0ede8" }}>
+          <FontLoader />
         {/* Top Bar */}
         <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4"
           style={{ background: "#0a0a0a", borderBottom: "1px solid #141414" }}>
@@ -634,7 +538,6 @@ const Overview = () => {
           </div>
 
         </main>
-      </div>
     </div>
   );
 };

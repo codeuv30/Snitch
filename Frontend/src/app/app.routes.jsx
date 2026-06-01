@@ -1,34 +1,52 @@
 import { createBrowserRouter } from "react-router";
-import Register        from "../features/auth/pages/Register";
-import Login           from "../features/auth/pages/Login";
-import CreateProduct   from "../features/products/pages/CreateProduct";
-import SellerProducts  from "../features/products/pages/SellerProducts";
-import Dashboard       from "../features/products/pages/Dashboard";
-import ProtectedRoute  from "../features/auth/components/ProtectedRoute";
-import Upcoming        from "../features/products/components/Upcoming";
-import SellerLayout    from "../features/products/pages/SellerLayout";
+import Register from "../features/auth/pages/Register";
+import Login from "../features/auth/pages/Login";
+import CreateProduct from "../features/products/pages/CreateProduct";
+import SellerProducts from "../features/products/pages/SellerProducts";
+import Dashboard from "../features/products/pages/Dashboard";
+import ProtectedRoute from "../features/auth/components/ProtectedRoute";
+import Upcoming from "../features/products/components/Upcoming";
+import SellerLayout from "../features/products/pages/SellerLayout";
+import Home from "../features/products/pages/Home";
+import SellerOnly from "../features/auth/components/SellerOnly";
+import NotFound from "../features/products/components/Notfound";
+import NotLoggedInOnly from "../features/auth/components/NotLoggedInOnly";
+import Store from "../features/products/pages/Store";
+import ProductDetails from "../features/products/pages/ProductDetails";
 
 // ─── Routes ───────────────────────────────────────────────────────
 export const routes = createBrowserRouter([
   // ── Public ──────────────────────────────────────────────────────
   {
     path: "/",
-    element: <h1>This is home</h1>,
+    element: <Home />,
+  },
+  {
+    path: "/store",
+    element: <Store />
+  },
+  {
+    path: "/store/product/:productId",
+    element: <ProductDetails />
   },
   {
     path: "/register",
-    element: <Register />,
+    element: <NotLoggedInOnly><Register /></NotLoggedInOnly>,
   },
   {
     path: "/login",
-    element: <Login />,
+    element: <NotLoggedInOnly><Login /></NotLoggedInOnly>,
+  },
+  {
+    path: "/",
+    element: <Home />
   },
   {
     path: "/seller/dashboard",
     element: (
-      <ProtectedRoute>
+      <SellerOnly>
         <SellerLayout />
-      </ProtectedRoute>
+      </SellerOnly>
     ),
     children: [
       // index  →  /seller/dashboard
@@ -98,11 +116,6 @@ export const routes = createBrowserRouter([
   // ── Catch-all 404 ────────────────────────────────────────────────
   {
     path: "*",
-    element: (
-      <Upcoming
-        title="Page Not Found"
-        description="The page you're looking for doesn't exist or has been moved."
-      />
-    ),
+    element: <NotFound />
   },
 ]);

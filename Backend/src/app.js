@@ -17,10 +17,12 @@ app.use(cors({
 	origin: config.NODE_ENV === "production" ? config.FRONTEND_PRODUCTION_URL : config.FRONTEND_DEVELOPMENT_URL,
 	credentials: true,
 }));
+app.use(setVisitorId);
 
 /* Importing Routers */
 import authRouter from './routes/auth.routes.js';
 import productRouter from './routes/product.routes.js';
+import { setVisitorId } from './middlewares/auth.middleware.js';
 
 /* Using Routers */
 app.use("/api/v1/auth", authRouter);

@@ -21,12 +21,15 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const ContinueWithGoogle = () => {
+const ContinueWithGoogle = ({ dark = false }) => {
+  const containerClasses = dark
+    ? "w-full flex items-center justify-center gap-2.5 py-2.5 text-[12px] tracking-[0.06em] uppercase text-[#e8e3dc] bg-[#1a1a1a] border border-[#2a2a2a] rounded hover:bg-[#222222] hover:border-[#c4956a]/40 transition-all duration-200"
+    : "w-full flex items-center justify-center gap-2.5 py-2.5 text-[12px] tracking-[0.06em] uppercase text-[#1a1a1a] bg-white border border-[#e2e0d8] rounded hover:bg-[#f8f7f4] hover:border-[#c4956a]/40 transition-all duration-150";
+
   return (
     <button
       type="button"
-      className="w-full flex items-center justify-center gap-2.5 py-2.5 text-[12px] tracking-[0.06em] uppercase text-[#1a1a1a]
-              bg-white border border-[#e2e0d8] rounded hover:bg-[#f8f7f4] hover:border-[#c4956a]/40 transition-all duration-150"
+      className={containerClasses}
     >
       <GoogleIcon />
       <a href="/api/v1/auth/google">Continue with Google</a>

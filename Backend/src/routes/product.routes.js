@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authenticateSeller } from "../middlewares/auth.middleware.js";
-import { createProduct, deleteProduct, getSellerProducts } from "../controllers/product.controller.js";
+import { authenticateSeller, authenticateUser, optionalAuth } from "../middlewares/auth.middleware.js";
+import { addView, createProduct, deleteProduct, getAllProducts, getProductDetails, getSellerProducts } from "../controllers/product.controller.js";
 import multer from "multer"
 import { productValidator } from "../validators/product.validator.js";
 
@@ -33,5 +33,28 @@ productRouter.get("/seller", authenticateSeller, getSellerProducts);
  * @access Private
 */
 productRouter.get("/delete/:productId", authenticateSeller, deleteProduct);
+
+/**
+ * @route GET /api/v1/products
+ * @description Get all products
+ * @access Public
+*/
+productRouter.get("/", getAllProducts)
+
+/**
+ * @route GET /api/v1/products/:productId
+ * @description Get details of a specific product
+ * @param {String} productId - ID of the product to fetch details of
+ * @access Public
+*/
+productRouter.get("/:productId", getProductDetails);
+
+/**
+ * @route POST /api/v1/view/:productId
+ * @description Create a view for a product
+ * @param {String} productId - ID of product to create view for
+ * @access Public
+*/
+productRouter.post("/view/:productId", optionalAuth, addView);
 
 export default productRouter;

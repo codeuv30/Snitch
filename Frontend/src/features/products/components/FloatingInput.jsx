@@ -17,13 +17,13 @@ function FloatingInput({
 
   return (
     <div>
-      <div className="relative border border-[#d6d1c8] rounded bg-[#f8f7f4] focus-within:border-[#c4956a] focus-within:bg-white transition-colors duration-150">
+      <div className="relative border border-[#1a1a1a] rounded bg-[#141414] focus-within:border-[#c4956a] focus-within:bg-[#1a1a1a] transition-colors duration-150">
         <label
           className={`absolute left-3.5 transition-all duration-150 pointer-events-none select-none
             ${
               raised
-                ? "top-[7px] text-[9px] tracking-[0.1em] uppercase text-[#c4956a]"
-                : "top-1/2 -translate-y-1/2 text-[13px] text-[#888880]"
+                ? "top-[7px] text-[9px] tracking-[0.1em] uppercase text-[#c4956a] font-bold"
+                : "top-1/2 -translate-y-1/2 text-[13px] text-[#555]"
             }`}
         >
           {label}
@@ -40,11 +40,11 @@ function FloatingInput({
             setFocused(false);
             if (onBlur) onBlur(e);
           }}
-          className={`w-full bg-transparent outline-none text-[13px] text-[#1a1a1a] font-light
+          className={`w-full bg-transparent outline-none text-[13px] text-[#f0ede8] font-medium
             ${raised ? "pt-[22px] pb-[7px] px-3.5" : "py-3 px-3.5"}`}
         />
       </div>
-      {error && <p className="mt-1 text-[11px] text-[#d14343]">{error}</p>}
+      {error && <p className="mt-1 text-[11px] text-[#f87171] font-medium">{error}</p>}
     </div>
   );
 }

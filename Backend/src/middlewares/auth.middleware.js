@@ -69,3 +69,46 @@ export const authenticateUser = async (req, res, next) => {
         return res.status(401).json({ success: false, message: "Unauthorized access. Please log in and try again.", redirect: "/login" });
     }
 }
+
+export const setVisitorId = (req, res, next) => {
+  let visitorId = req.cookies.visitorId;
+
+  if (!visitorId) {
+    visitorId = crypto.randomUUID();
+
+    res.cookie("visitorId", visitorId, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
+
+  req.visitorId = visitorId;
+  
+  next()
+};
+
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const token = req.cookies?.token;
+
+    if (!token) {
+      req.user = null;
+      return next();
+    }
+
+    const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await userModel.findById(decoded.id);
+
+    console.log("Authenticated user:", user);
+
+    req.user = user || null;
+
+    next();
+  } catch (error) {
+    req.user = null;
+    next();
+  }
+};

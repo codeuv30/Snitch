@@ -22,15 +22,7 @@ const App = () => {
   }, [dispatch]);
 
   /* Auth toast notifications */
-  const { error: authError, successMessage: authSuccessMessage } = useSelector(
-    (state) => state.auth,
-  );
-
-  useEffect(() => {
-    if (authError) {
-      Toast.error(authError);
-    }
-  }, [authError]);
+  const authSuccessMessage = useSelector(state => state.auth.successMessage);
 
   useEffect(() => {
     if (authSuccessMessage) {
@@ -40,8 +32,8 @@ const App = () => {
   }, [authSuccessMessage, dispatch]);
 
   /* Product toast notifications */
-  const { error: productError, successMessage: productSuccessMessage } =
-    useSelector((state) => state.products);
+    const productError = useSelector((state) => state.products.error);
+    const productSuccessMessage = useSelector((state) => state.products.successMessage)
 
   useEffect(() => {
     if (productError) {

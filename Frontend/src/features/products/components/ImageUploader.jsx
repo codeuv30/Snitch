@@ -10,7 +10,7 @@ const UploadIcon = () => (
     strokeWidth="1.4"
     strokeLinecap="round"
     strokeLinejoin="round"
-    style={{ color: "#b5b2a8" }}
+    style={{ color: "#555" }}
   >
     <polyline points="16 16 12 12 8 16" />
     <line x1="12" y1="12" x2="12" y2="21" />
@@ -71,23 +71,23 @@ function ImageUploader({ images, onAdd, onRemove, error, onPreview }) {
   const emptyZoneClasses = `
     flex flex-col items-center justify-center gap-2 rounded cursor-pointer transition-all duration-150
     ${isDragging 
-      ? "border-[1.5px] border-solid border-[#c4956a] bg-[#fdf8f3] shadow-[inset_0_0_0_2px_rgba(196,149,106,0.15)]" 
-      : "border-[1.5px] border-dashed border-[#d6d1c8] bg-[#f8f7f4] hover:border-[#c4956a] hover:bg-[#fdf8f3]"
+      ? "border-[1.5px] border-solid border-[#c4956a] bg-[#1a1108] shadow-[inset_0_0_0_2px_rgba(196,149,106,0.15)]" 
+      : "border-[1.5px] border-dashed border-[#333] bg-[#141414] hover:border-[#c4956a] hover:bg-[#1a1108]"
     }
   `;
 
   const filledZoneClasses = `
     rounded transition-all duration-150
     ${isDragging 
-      ? "border-[1.5px] border-solid border-[#c4956a] bg-[#fdf8f3] shadow-[inset_0_0_0_2px_rgba(196,149,106,0.15)]" 
-      : "border-[1.5px] border-dashed border-[#d6d1c8] bg-transparent"
+      ? "border-[1.5px] border-solid border-[#c4956a] bg-[#1a1108] shadow-[inset_0_0_0_2px_rgba(196,149,106,0.15)]" 
+      : "border-[1.5px] border-dashed border-[#333] bg-transparent"
     }
   `;
 
   return (
     <div>
       {/* Label */}
-      <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-[#8B6F5A] mb-2">
+      <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-[#c4956a] mb-2">
         Product Images
       </p>
 
@@ -112,10 +112,10 @@ function ImageUploader({ images, onAdd, onRemove, error, onPreview }) {
           className={`${emptyZoneClasses} min-h-[110px] p-5`}
         >
           <UploadIcon />
-          <p className="text-xs text-[#888880] font-light text-center">
+          <p className="text-xs text-[#888] font-medium text-center">
             Click or drag images here
           </p>
-          <p className="text-[10px] text-[#b5b2a8] text-center">
+          <p className="text-[10px] text-[#555] text-center font-medium">
             PNG, JPG, WEBP · Max {MAX_IMAGES} images
           </p>
         </div>
@@ -141,14 +141,14 @@ function ImageUploader({ images, onAdd, onRemove, error, onPreview }) {
                 <img
                   src={getPreview(file)}
                   alt={file.name}
-                  className="w-[52px] h-[52px] object-cover rounded-md border border-[#d6d1c8] block cursor-pointer transition-transform duration-200 group-hover:scale-[1.02]"
+                  className="w-[52px] h-[52px] object-cover rounded-md border border-[#1a1a1a] block cursor-pointer transition-transform duration-200 group-hover:scale-[1.02]"
                   onClick={() => onPreview && onPreview(file)}
                 />
 
                 {/* Hover overlay - Click to Preview */}
                 <div 
                   className={`
-                    absolute inset-0 rounded-md bg-black/50 backdrop-blur-[2px] 
+                    absolute inset-0 rounded-md bg-black/60 backdrop-blur-[2px] 
                     flex flex-col items-center justify-center gap-1 cursor-pointer
                     transition-all duration-200
                     ${hoveredIndex === idx ? "opacity-100" : "opacity-0 pointer-events-none"}
@@ -156,7 +156,7 @@ function ImageUploader({ images, onAdd, onRemove, error, onPreview }) {
                   onClick={() => onPreview && onPreview(file)}
                 >
                   <EyeIcon />
-                  <span className="text-[9px] text-white/90 font-medium tracking-wide uppercase">
+                  <span className="text-[9px] text-white/90 font-bold tracking-wide uppercase">
                     Preview
                   </span>
                 </div>
@@ -165,7 +165,7 @@ function ImageUploader({ images, onAdd, onRemove, error, onPreview }) {
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); onRemove(idx); }}
-                  className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#1a1a1a] text-white text-[10px] font-medium flex items-center justify-center cursor-pointer border-none p-0 z-10 hover:bg-[#d14343] transition-colors shadow-sm"
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#0a0a0a] text-[#f0ede8] text-[10px] font-bold flex items-center justify-center cursor-pointer border border-[#1a1a1a] p-0 z-10 hover:bg-[#f87171] hover:border-[#f87171] transition-colors shadow-sm"
                 >
                   ×
                 </button>
@@ -178,14 +178,14 @@ function ImageUploader({ images, onAdd, onRemove, error, onPreview }) {
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="mt-1 text-[11px] text-[#c4956a] font-medium border-b border-[#c4956a]/40 hover:border-[#c4956a] transition-colors bg-transparent cursor-pointer pb-0.5"
+              className="mt-1 text-[11px] text-[#c4956a] font-bold border-b border-[#c4956a]/40 hover:border-[#c4956a] transition-colors bg-transparent cursor-pointer pb-0.5"
             >
               + Add More
             </button>
           )}
 
           {/* Image count indicator */}
-          <p className="text-[10px] text-[#b5b2a8] mt-1.5">
+          <p className="text-[10px] text-[#555] mt-1.5 font-medium">
             {images.length} of {MAX_IMAGES} images
           </p>
         </div>
@@ -193,7 +193,7 @@ function ImageUploader({ images, onAdd, onRemove, error, onPreview }) {
 
       {/* Error */}
       {error && (
-        <p className="mt-1 text-[11px] text-[#d14343]">{error}</p>
+        <p className="mt-1 text-[11px] text-[#f87171] font-medium">{error}</p>
       )}
     </div>
   );

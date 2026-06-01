@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import Toast from "@/components/ui/Toast";
 import { Spinner } from "@/components/ui/spinner"
 
-const ProtectedRoute = ({ children }) => {
+const NotLoggedInOnly = ({ children }) => {
   const navigate = useNavigate();
 
   const loading = useSelector((state) => state.auth.loading);
@@ -12,9 +12,8 @@ const ProtectedRoute = ({ children }) => {
   const initialized = useSelector((state) => state.auth.initialized);
 
   useEffect(() => {
-    if (initialized && !user) {
-      Toast.error("You must be logged in to access this page.");
-      navigate("/login");
+    if (initialized && user) {
+      navigate("/");
     }
   }, [initialized, user, navigate]);
 
@@ -22,11 +21,11 @@ const ProtectedRoute = ({ children }) => {
     return <div className="w-screen h-screen flex justify-center items-center"><Spinner className={"size-8"} /></div>;
   }
 
-  if (!user) {
+  if (user) {
     return null;
   }
 
   return children;
 };
 
-export default ProtectedRoute;
+export default NotLoggedInOnly;

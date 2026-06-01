@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-function CurrencySelector({ value, onChange, CURRENCIES }) {
+function CurrencySelector({ value, onChange, CURRENCIES, dark = false }) {
   const containerRef = useRef(null);
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
 
@@ -17,18 +17,39 @@ function CurrencySelector({ value, onChange, CURRENCIES }) {
     }
   }, [value, CURRENCIES]);
 
+  // Theme classes
+  const labelClasses = dark
+    ? "text-[10px] font-medium tracking-[0.14em] uppercase text-[#7a756f] mb-2"
+    : "text-[10px] font-medium tracking-[0.14em] uppercase text-[#8B6F5A] mb-2";
+
+  const containerClasses = dark
+    ? "relative flex border border-[#2a2a2a] rounded bg-[#0f0f0f] p-[3px]"
+    : "relative flex border border-[#d6d1c8] rounded bg-[#f8f7f4] p-[3px]";
+
+  const pillClasses = dark
+    ? "absolute top-[3px] bottom-[3px] rounded bg-[#c4956a] transition-all duration-200 ease-in-out pointer-events-none"
+    : "absolute top-[3px] bottom-[3px] rounded bg-[#1a1a1a] transition-all duration-200 ease-in-out pointer-events-none";
+
+  const activeTextClasses = dark
+    ? "text-[#1a1a1a]"
+    : "text-white";
+
+  const inactiveTextClasses = dark
+    ? "text-[#7a756f] hover:text-[#b5b0a8]"
+    : "text-[#888880] hover:text-[#1a1a1a]";
+
   return (
     <div>
-      <p className="text-[10px] font-medium tracking-[0.14em] uppercase text-[#8B6F5A] mb-2">
+      <p className={labelClasses}>
         Currency
       </p>
       <div
         ref={containerRef}
-        className="relative flex border border-[#d6d1c8] rounded bg-[#f8f7f4] p-[3px]"
+        className={containerClasses}
       >
         {/* sliding pill */}
         <span
-          className="absolute top-[3px] bottom-[3px] rounded bg-[#1a1a1a] transition-all duration-200 ease-in-out pointer-events-none"
+          className={pillClasses}
           style={{ left: pillStyle.left, width: pillStyle.width }}
         />
         {CURRENCIES.map((c) => (
@@ -37,7 +58,7 @@ function CurrencySelector({ value, onChange, CURRENCIES }) {
             type="button"
             onClick={() => onChange(c)}
             className={`relative flex-1 py-[7px] text-[10px] font-medium tracking-[0.05em] uppercase z-10 transition-colors duration-150 cursor-pointer
-              ${value === c ? "text-white" : "text-[#888880] hover:text-[#1a1a1a]"}`}
+              ${value === c ? activeTextClasses : inactiveTextClasses}`}
           >
             {c}
           </button>

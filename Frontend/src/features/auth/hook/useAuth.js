@@ -6,6 +6,7 @@ import { toast } from "sonner";
 export const useAuth = () => {
 
     const dispatch = useDispatch();
+    
     const error = useSelector((state) => state.auth.error);
     const loading = useSelector((state) => state.auth.loading);
     const user = useSelector((state) => state.auth.user);
