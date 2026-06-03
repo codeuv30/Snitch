@@ -37,6 +37,35 @@ export const createProduct = async (formData, dispatch) => {
   }
 };
 
+export const addVariant = async (productId, formData, dispatch) => {
+  try {
+    dispatch(setLoading(true));
+
+    const response = await productApiInstance.post(
+      `/add-variant/${productId}`,
+      formData,
+    );
+
+    dispatch(setSuccessMessage(response.data.message));
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      dispatch(setError(error.response.data.message));
+      return null;
+    }
+
+    console.error(error);
+
+    dispatch(
+      setError(
+        `An unexpected error occurred. Please try again later. If the issue persists, please contact support through ${import.meta.env.VITE_FRONTEND_URL}`,
+      ),
+    );
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
 export const fetchSellerProducts = async (dispatch) => {
   try {
     dispatch(setLoading(true));
@@ -134,7 +163,7 @@ export const getProductDetails = async (productId, dispatch) => {
 export const createView = async (productId, dispatch) => {
   try {
     dispatch(setLoading(true));
-    
+
     const response = await productApiInstance.post(`/view/${productId}/`);
 
     return response.data;
@@ -152,4 +181,81 @@ export const createView = async (productId, dispatch) => {
   } finally {
     dispatch(setLoading(true));
   }
-}
+};
+
+export const editProduct = async (formData, productId, dispatch) => {
+  try {
+    dispatch(setLoading(true));
+
+    const response = await productApiInstance.post(`/${productId}`, formData);
+
+    dispatch(setSuccessMessage(response.data.message));
+
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      dispatch(setError(error.response.data.message));
+      return null;
+    }
+
+    dispatch(
+      setError(
+        `An unexpected error occurred. Please try again later. If the issue persists, please contact support through ${import.meta.env.VITE_FRONTEND_URL}`,
+      ),
+    );
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const getVariant = async (variantId, dispatch) => {
+  try {
+    dispatch(setLoading(true));
+
+    const response = await productApiInstance.get(`/variants/${variantId}`);
+
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      dispatch(setError(error.response.data.message));
+      return null;
+    }
+
+    dispatch(
+      setError(
+        `An unexpected error occurred. Please try again later. If the issue persists, please contact support through ${import.meta.env.VITE_FRONTEND_URL}`,
+      ),
+    );
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const editProductVariant = async (
+  productId,
+  variantId,
+  formData,
+  dispatch,
+) => {
+  try {
+    dispatch(setLoading(true));
+
+    const response = await productApiInstance.post(`${productId}/variants/${variantId}`, formData);
+
+    return response.data;
+
+  } catch (error) {
+    if (error.response && error.response.data) {
+      dispatch(setError(error.response.data.message));
+      return null;
+    }
+
+    dispatch(
+      setError(
+        `An unexpected error occurred. Please try again later. If the issue persists, please contact support through ${import.meta.env.VITE_FRONTEND_URL}`,
+      ),
+    );
+  } finally {
+    dispatch(setLoading(false));
+  }
+};

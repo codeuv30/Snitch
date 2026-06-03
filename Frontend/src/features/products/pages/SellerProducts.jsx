@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router";
 import {
+  Ban,
   Search,
   Image as ImageIcon,
   Package,
@@ -30,6 +31,8 @@ import {
   Copy,
   Settings,
   Tag,
+  Pencil,
+  AlertCircle,
 } from "lucide-react";
 import useProduct from "../hooks/useProduct";
 import Footer from "../components/Footer";
@@ -55,6 +58,10 @@ const PageStyles = () => (
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
     .animate-shimmer {
       background: linear-gradient(90deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
       background-size: 200% 100%;
@@ -65,6 +72,7 @@ const PageStyles = () => (
     .animate-fade-in-fast { animation: fade-in-fast 0.2s ease-out; }
     .animate-modal-in { animation: modal-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     .animate-slide-up { animation: slide-up 0.4s ease-out; }
+    .animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
     .line-clamp-2 {
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -118,7 +126,7 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
               <Trash2 className="w-6 h-6 text-[#f87171]" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-['Playfair_Display'] text-[20px] text-[#f0ede8] leading-tight font-semibold">
+              <h3 className="font-[\'Playfair_Display\'] text-[20px] text-[#f0ede8] leading-tight font-semibold">
                 Delete Product
               </h3>
               <p className="text-[13px] text-[#888] mt-1.5 leading-relaxed">
@@ -133,9 +141,9 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
         </div>
 
         <div className="mx-6 p-3 bg-[#141414] rounded-xl flex items-center gap-3 border border-[#1a1a1a]">
-          {product.images?.[0]?.url ? (
+          {product.thumbnail ? (
             <img
-              src={product.images[0].url}
+              src={product.thumbnail}
               alt=""
               className="w-12 h-12 rounded-lg object-cover"
             />
@@ -149,8 +157,8 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
               {product.title}
             </p>
             <p className="text-[12px] text-[#888]">
-              {product.price.currency}{" "}
-              {parseInt(product.price.amount).toLocaleString()}
+              {product.startingPrice?.currency || "INR"}{" "}
+              {parseInt(product.startingPrice?.amount || 0).toLocaleString()}
             </p>
           </div>
         </div>
@@ -232,9 +240,26 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
   );
 };
 
+// ─── Status Badge Component ─────────────────────────────────────────
+const StatusBadge = ({ status }) => {
+  const configs = {
+    "Live": { bg: "bg-emerald-500/15", text: "text-emerald-400", border: "border-emerald-500/25", icon: null },
+    "Under Review": { bg: "bg-amber-500/15", text: "text-amber-400", border: "border-amber-500/25", icon: Clock },
+    "Draft": { bg: "bg-[#555]/15", text: "text-[#888]", border: "border-[#555]/25", icon: null },
+    "Rejected": { bg: "bg-[#f87171]/15", text: "text-[#f87171]", border: "border-[#f87171]/25", icon: Ban },
+  };
+  const config = configs[status] || configs["Draft"];
+  const Icon = config.icon;
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${config.bg} ${config.text} ${config.border}`}>
+      {Icon && <Icon className="w-3 h-3" />}
+      {status}
+    </span>
+  );
+};
+
 // ─── Product Card ─────────────────────────────────────────────────
-// animatedIds tracks which product IDs have already played their entry animation.
-// It lives OUTSIDE the component so it persists across re-renders and filter changes.
 const animatedIds = new Set();
 
 const ProductCard = ({
@@ -246,12 +271,11 @@ const ProductCard = ({
   onContextMenu,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  // Only play entry animation if this card hasn't been seen before this session
   const shouldAnimate = !animatedIds.has(product._id);
+  const isUnderReview = product.status === "Under Review";
 
   useEffect(() => {
     if (shouldAnimate) {
-      // Mark as animated after the animation duration so future renders skip it
       const t = setTimeout(
         () => {
           animatedIds.add(product._id);
@@ -262,7 +286,7 @@ const ProductCard = ({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const hasImage = product.images && product.images.length > 0;
+  const hasImage = !!product.thumbnail;
   const isGrid = viewMode === "grid";
   const isNew = product.isNew;
   const isBestseller = product.isBestseller || product.autoIsBestseller;
@@ -275,13 +299,17 @@ const ProductCard = ({
   return (
     <div
       onContextMenu={(e) => {
+        if (isUnderReview) {
+          e.preventDefault();
+          return;
+        }
         e.preventDefault();
         e.stopPropagation();
         onContextMenu(e, product);
       }}
       className={`group bg-[#0f0f0f] border border-[#1a1a1a] rounded-xl overflow-hidden
-                 transition-all duration-300 ease-out cursor-context-menu
-                 hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] hover:border-[#2a2a2a] hover:translate-y-[-4px]
+                 transition-all duration-300 ease-out
+                 ${isUnderReview ? "cursor-not-allowed border-amber-500/20" : "cursor-context-menu hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] hover:border-[#2a2a2a] hover:translate-y-[-4px]"}
                  ${shouldAnimate ? "card-enter" : "card-visible"}
                  ${isGrid ? "flex flex-row" : "break-inside-avoid mb-5"}`}
       style={
@@ -292,24 +320,63 @@ const ProductCard = ({
           : {}
       }
     >
+      {/* Under Review Status Banner */}
+      {isUnderReview && (
+        <div className="bg-[#141414] border-y border-amber-500/10 py-2.5 px-3 flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold text-amber-400 leading-tight">Under Review</p>
+            <p className="text-[10px] text-[#777] leading-tight truncate">
+              Awaiting approval. 1–3 business days.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Image area */}
       <div
         className={`relative overflow-hidden bg-[#141414] flex-shrink-0
-                   ${isGrid ? "w-[140px] sm:w-[180px] aspect-square" : ""}`}
+                   ${isGrid ? "w-[140px] sm:w-[180px] aspect-square" : ""}
+                   ${isUnderReview ? "opacity-40" : ""}`}
         style={
           !isGrid
             ? { aspectRatio: `${1 / aspectRatio}`, minHeight: "180px" }
             : {}
         }
       >
+        {/* Top Right: Edit Button + Status Badge */}
+        <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+          <StatusBadge status={product.status} />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!isUnderReview) {
+                onEdit(product);
+              }
+            }}
+            disabled={isUnderReview}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                      ${isUnderReview 
+                        ? "bg-[#1a1a1a]/80 text-[#444] cursor-not-allowed border border-[#222]" 
+                        : "bg-[#0a0a0a]/80 backdrop-blur-sm text-[#aaa] hover:text-[#f0ede8] hover:bg-[#c4956a] border border-[#1a1a1a] hover:border-[#c4956a] shadow-lg"
+                      }`}
+            title={isUnderReview ? "Cannot edit while under review" : "Edit Product"}
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
         {hasImage ? (
           <>
             <img
-              src={product.images[0].url}
+              src={product.thumbnail}
               alt={product.title}
               onLoad={() => setImageLoaded(true)}
               className={`w-full h-full object-cover transition-all duration-500 ease-out
-                         group-hover:scale-[1.05] ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+                         ${isUnderReview ? "" : "group-hover:scale-[1.05]"} 
+                         ${imageLoaded ? "opacity-100" : "opacity-0"}`}
             />
             {!imageLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-[#141414]">
@@ -323,43 +390,45 @@ const ProductCard = ({
           </div>
         )}
 
-        {/* Hover overlay */}
-        <div
-          className={`absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent
-                       opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                       flex items-end justify-between p-4
-                       ${isGrid ? "hidden sm:flex" : ""}`}
-        >
-          <div className="flex gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(product);
-              }}
-              className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center
-                        text-[#f0ede8] hover:bg-white/20 transition-all duration-150 hover:scale-110 border border-white/10"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(product);
-              }}
-              className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center
-                        text-[#f87171] hover:bg-white/20 transition-all duration-150 hover:scale-110 border border-white/10"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+        {/* Hover overlay - only for non-under-review */}
+        {!isUnderReview && (
+          <div
+            className={`absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent
+                         opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                         flex items-end justify-between p-4
+                         ${isGrid ? "hidden sm:flex" : ""}`}
+          >
+            <div className="flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(product);
+                }}
+                className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center
+                          text-[#f0ede8] hover:bg-white/20 transition-all duration-150 hover:scale-110 border border-white/10"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(product);
+                }}
+                className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center
+                          text-[#f87171] hover:bg-white/20 transition-all duration-150 hover:scale-110 border border-white/10"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="text-white text-[11px] font-bold bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-md">
+              {product.startingPrice?.currency || "INR"}{" "}
+              {parseInt(product.startingPrice?.amount || 0).toLocaleString()}
+            </div>
           </div>
-          <div className="text-white text-[11px] font-bold bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-md">
-            {product.price.currency}{" "}
-            {parseInt(product.price.amount).toLocaleString()}
-          </div>
-        </div>
+        )}
 
-        {/* Status badges */}
-        <div className="absolute top-3 left-3 flex gap-1.5">
+        {/* Status badges (New/Hot) */}
+        <div className="absolute top-3 left-3 flex gap-1.5 z-10">
           {isNew && (
             <span className="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md font-bold bg-[#f0ede8] text-[#0a0a0a] shadow-md">
               New
@@ -375,14 +444,16 @@ const ProductCard = ({
 
       {/* Text content */}
       <div
-        className={`flex-1 flex flex-col ${isGrid ? "p-4 justify-between" : "px-4 pt-3.5 pb-3"}`}
+        className={`flex-1 flex flex-col ${isGrid ? "p-4 justify-between" : "px-4 pt-4 pb-3"} ${isUnderReview ? "opacity-40" : ""}`}
       >
         <div>
-          <h3 className="font-['Playfair_Display'] text-[15px] text-[#f0ede8] leading-snug line-clamp-2 font-semibold">
-            {product.title}
-          </h3>
+          <div className="flex items-start justify-between gap-2">
+            <h3 className={`font-[\'Playfair_Display\'] text-[15px] leading-snug line-clamp-2 font-semibold ${isUnderReview ? "text-[#555]" : "text-[#f0ede8]"}`}>
+              {product.title}
+            </h3>
+          </div>
           <p
-            className={`mt-1.5 text-[13px] text-[#888] leading-[1.6] line-clamp-2 font-medium ${isGrid ? "hidden sm:block" : ""}`}
+            className={`mt-1.5 text-[13px] leading-[1.6] line-clamp-2 font-medium ${isUnderReview ? "text-[#444]" : "text-[#888]"} ${isGrid ? "hidden sm:block" : ""}`}
           >
             {product.description}
           </p>
@@ -394,13 +465,13 @@ const ProductCard = ({
               {product.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="text-[11px] tracking-[0.05em] text-[#c4956a] bg-[#1a1108] px-2 py-0.5 rounded-md capitalize font-semibold border border-[#2a1f0a]"
+                  className={`text-[11px] tracking-[0.05em] px-2 py-0.5 rounded-md capitalize font-semibold border ${isUnderReview ? "text-[#444] bg-[#111] border-[#1a1a1a]" : "text-[#c4956a] bg-[#1a1108] border-[#2a1f0a]"}`}
                 >
                   {tag}
                 </span>
               ))}
               {product.tags.length > 3 && (
-                <span className="text-[11px] text-[#555] font-semibold">
+                <span className={`text-[11px] font-semibold ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}>
                   +{product.tags.length - 3}
                 </span>
               )}
@@ -408,44 +479,75 @@ const ProductCard = ({
           )}
         </div>
 
+        {/* Spacer to push stats to bottom */}
+        <div className="flex-1 min-h-[8px]" />
+
         <div
-          className={`mt-3 pt-3 border-t border-[#1a1a1a]
+          className={`mt-4 pt-3 border-t border-[#1a1a1a]
                        ${isGrid ? "flex flex-col sm:flex-row sm:items-center justify-between gap-2" : "flex items-center gap-3"}`}
         >
           {!isGrid && (
-            <>
-              <div className="flex items-center gap-1.5 text-[12px] text-[#555] font-medium">
+            <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-1.5 text-[12px] font-medium ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}>
                 <Eye className="w-3.5 h-3.5" />
                 <span>{product.views ?? 0}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[12px] text-[#555] font-medium">
+              <div className={`flex items-center gap-1.5 text-[12px] font-medium ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}>
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span>{product.sales ?? 0} sales</span>
               </div>
-            </>
+            </div>
           )}
           <div
-            className={`text-[14px] text-[#c4956a] font-bold ${isGrid ? "sm:ml-auto" : "ml-auto"}`}
+            className={`text-[14px] font-bold ${isGrid ? "sm:ml-auto" : "ml-auto"} ${isUnderReview ? "text-[#444]" : "text-[#c4956a]"}`}
           >
-            {product.price.currency}{" "}
-            {parseInt(product.price.amount).toLocaleString()}
+            {product.startingPrice?.currency || "INR"}{" "}
+            {parseInt(product.startingPrice?.amount || 0).toLocaleString()}
           </div>
         </div>
 
-        {isGrid && (
-          <div className="flex gap-2 mt-3 sm:hidden">
+        {/* Bottom action buttons */}
+        {isGrid ? (
+          <div className="flex gap-2 mt-4 pt-3 border-t border-[#1a1a1a] sm:hidden">
             <button
-              onClick={() => onEdit(product)}
-              className="flex-1 py-2 border border-[#1a1a1a] text-[#f0ede8] text-[11px] uppercase tracking-[0.1em]
-                        rounded-lg transition-all duration-150 hover:bg-[#f0ede8] hover:text-[#0a0a0a] hover:border-[#f0ede8]
-                        font-semibold flex items-center justify-center gap-1.5"
+              onClick={() => !isUnderReview && onEdit(product)}
+              disabled={isUnderReview}
+              className={`flex-1 py-2.5 text-[11px] uppercase tracking-[0.1em] rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-all duration-150
+                        ${isUnderReview 
+                          ? "border border-[#222] text-[#444] cursor-not-allowed bg-[#0a0a0a]" 
+                          : "border border-[#1a1a1a] text-[#f0ede8] hover:bg-[#f0ede8] hover:text-[#0a0a0a] hover:border-[#f0ede8]"
+                        }`}
             >
-              <Settings className="w-3.5 h-3.5" />
+              <Pencil className="w-3.5 h-3.5" />
               Edit
             </button>
             <button
               onClick={() => onDelete(product)}
-              className="flex-1 py-2 border border-[#1a1a1a] text-[#888] text-[11px] uppercase tracking-[0.1em]
+              className="flex-1 py-2.5 border border-[#1a1a1a] text-[#888] text-[11px] uppercase tracking-[0.1em]
+                        rounded-lg transition-all duration-150 hover:bg-[#f87171] hover:text-white hover:border-[#f87171]
+                        font-semibold flex items-center justify-center gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </button>
+          </div>
+        ) : (
+          <div className="px-4 pb-4 pt-3 flex gap-2 border-t border-[#1a1a1a]">
+            <button
+              onClick={() => !isUnderReview && onEdit(product)}
+              disabled={isUnderReview}
+              className={`flex-1 py-2.5 text-[11px] uppercase tracking-[0.1em] rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-all duration-150
+                        ${isUnderReview 
+                          ? "border border-[#222] text-[#444] cursor-not-allowed bg-[#0a0a0a]" 
+                          : "border border-[#1a1a1a] text-[#f0ede8] hover:bg-[#f0ede8] hover:text-[#0a0a0a] hover:border-[#f0ede8]"
+                        }`}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </button>
+            <button
+              onClick={() => onDelete(product)}
+              className="flex-1 py-2.5 border border-[#1a1a1a] text-[#888] text-[11px] uppercase tracking-[0.1em]
                         rounded-lg transition-all duration-150 hover:bg-[#f87171] hover:text-white hover:border-[#f87171]
                         font-semibold flex items-center justify-center gap-1.5"
             >
@@ -455,29 +557,6 @@ const ProductCard = ({
           </div>
         )}
       </div>
-
-      {!isGrid && (
-        <div className="px-4 pb-4 flex gap-2">
-          <button
-            onClick={() => onEdit(product)}
-            className="flex-1 py-2.5 border border-[#1a1a1a] text-[#f0ede8] text-[11px] uppercase tracking-[0.1em]
-                      rounded-lg transition-all duration-150 hover:bg-[#f0ede8] hover:text-[#0a0a0a] hover:border-[#f0ede8]
-                      font-semibold flex items-center justify-center gap-1.5"
-          >
-            <Settings className="w-3.5 h-3.5" />
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete(product)}
-            className="flex-1 py-2.5 border border-[#1a1a1a] text-[#888] text-[11px] uppercase tracking-[0.1em]
-                      rounded-lg transition-all duration-150 hover:bg-[#f87171] hover:text-white hover:border-[#f87171]
-                      font-semibold flex items-center justify-center gap-1.5"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            Delete
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -718,7 +797,10 @@ const SellerProducts = () => {
       setError(null);
       try {
         const data = await handleGetSellerProducts();
-        if (data && Array.isArray(data)) {
+        if (data?.success && Array.isArray(data.products)) {
+          setProducts(data.products);
+          hasFetched.current = true;
+        } else if (data && Array.isArray(data)) {
           setProducts(data);
           hasFetched.current = true;
         } else {
@@ -746,8 +828,13 @@ const SellerProducts = () => {
     setError(null);
     try {
       const data = await handleGetSellerProducts();
-      if (data && Array.isArray(data)) setProducts(data);
-      else setError(data?.message || "Failed to load products");
+      if (data?.success && Array.isArray(data.products)) {
+        setProducts(data.products);
+      } else if (data && Array.isArray(data)) {
+        setProducts(data);
+      } else {
+        setError(data?.message || "Failed to load products");
+      }
     } catch (err) {
       setError(err?.message || "Something went wrong. Please try again.");
     } finally {
@@ -792,12 +879,13 @@ const SellerProducts = () => {
         },
       ];
       if (product) {
+        const isUnderReview = product.status === "Under Review";
         openContextMenu(e.clientX, e.clientY, [
           ...baseItems,
           { divider: true },
           {
             label: "Edit Product",
-            icon: Settings,
+            icon: Pencil,
             shortcut: "E",
             onClick: () =>
               navigate(`/seller/dashboard/edit-product/${product._id}`, {
@@ -813,11 +901,11 @@ const SellerProducts = () => {
               Toast.success("Copied Product ID");
             },
           },
-          {
+          ...(isUnderReview ? [] : [{
             label: "View in Store",
             icon: ExternalLink,
-            onClick: () => window.open(`/product/${product._id}`, "_blank"),
-          },
+            onClick: () => window.open(`/store/product/${product._id}`, "_blank"),
+          }]),
           { divider: true },
           {
             label: "Delete Product",
@@ -838,7 +926,7 @@ const SellerProducts = () => {
     const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
     const totalSales = products.reduce((sum, p) => sum + (p.sales || 0), 0);
     const totalValue = products.reduce(
-      (sum, p) => sum + parseFloat(p.price?.amount || 0),
+      (sum, p) => sum + parseFloat(p.startingPrice?.amount || 0),
       0,
     );
     return { total, totalViews, totalSales, totalValue };
@@ -860,11 +948,11 @@ const SellerProducts = () => {
           );
         if (sort === "price-asc")
           return (
-            parseFloat(a.price?.amount || 0) - parseFloat(b.price?.amount || 0)
+            parseFloat(a.startingPrice?.amount || 0) - parseFloat(b.startingPrice?.amount || 0)
           );
         if (sort === "price-desc")
           return (
-            parseFloat(b.price?.amount || 0) - parseFloat(a.price?.amount || 0)
+            parseFloat(b.startingPrice?.amount || 0) - parseFloat(a.startingPrice?.amount || 0)
           );
         if (sort === "az") return (a.title || "").localeCompare(b.title || "");
         if (sort === "sales") return (b.sales || 0) - (a.sales || 0);
@@ -951,7 +1039,7 @@ const SellerProducts = () => {
               <span className="text-[11px] uppercase tracking-[0.2em] text-[#c4956a] font-bold block">
                 Seller Studio
               </span>
-              <h1 className="font-['Playfair_Display'] text-[24px] lg:text-[28px] text-[#f0ede8] leading-tight hidden sm:block font-semibold">
+              <h1 className="font-[\'Playfair_Display\'] text-[24px] lg:text-[28px] text-[#f0ede8] leading-tight hidden sm:block font-semibold">
                 Your Products
               </h1>
             </div>
@@ -1044,7 +1132,7 @@ const SellerProducts = () => {
                   </span>
                 </div>
                 <div
-                  className={`font-['Playfair_Display'] text-[28px] leading-none mb-1 font-bold ${isAccent ? "text-[#0a0a0a]" : "text-[#f0ede8]"}`}
+                  className={`font-[\'Playfair_Display\'] text-[28px] leading-none mb-1 font-bold ${isAccent ? "text-[#0a0a0a]" : "text-[#f0ede8]"}`}
                 >
                   {typeof stat.value === "number"
                     ? String(stat.value).padStart(2, "0")
@@ -1204,7 +1292,7 @@ const SellerProducts = () => {
               <div className="w-16 h-16 rounded-full bg-[#200f0f] flex items-center justify-center mb-4">
                 <Package className="w-8 h-8 text-[#f87171]" />
               </div>
-              <h3 className="font-['Playfair_Display'] text-[20px] text-[#f0ede8] mb-2 font-semibold">
+              <h3 className="font-[\'Playfair_Display\'] text-[20px] text-[#f0ede8] mb-2 font-semibold">
                 Unable to load products
               </h3>
               <p className="text-[14px] text-[#f87171] mb-6 font-medium">
@@ -1226,7 +1314,7 @@ const SellerProducts = () => {
                   <Package className="w-10 h-10 text-[#333]" />
                 )}
               </div>
-              <h3 className="font-['Playfair_Display'] text-[24px] text-[#f0ede8] mb-3 font-semibold">
+              <h3 className="font-[\'Playfair_Display\'] text-[24px] text-[#f0ede8] mb-3 font-semibold">
                 {search ? "No matches found" : "No products yet"}
               </h3>
               <p className="text-[15px] text-[#888] mb-8 text-center max-w-[360px] leading-relaxed font-medium">
@@ -1255,7 +1343,6 @@ const SellerProducts = () => {
               )}
             </div>
           ) : (
-            // ✅ Single grid div — no unmount on viewMode change
             <div
               className={
                 viewMode === "masonry" ? "masonry-grid" : "standard-grid"

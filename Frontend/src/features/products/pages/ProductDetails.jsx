@@ -1,8 +1,13 @@
 // ProductDetails.jsx
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { useParams, useNavigate } from "react-router";
 import useProduct from "../hooks/useProduct";
-import { useSelector } from "react-redux";
 import {
   ShoppingCart,
   Heart,
@@ -24,6 +29,12 @@ import {
   Copy,
   Check,
   Link2,
+  Layers,
+  AlertCircle,
+  CheckCircle2,
+  ChevronRight,
+  Package,
+  ImageIcon,
 } from "lucide-react";
 import {
   WhatsappShareButton,
@@ -54,21 +65,20 @@ const PageStyles = () => (
       from { opacity: 0; transform: translateY(100%); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .animate-fade-in-up { 
-      animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+    .animate-fade-in-up {
+      animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    .animate-fade-in { 
-      animation: fade-in 0.4s ease-out forwards; 
+    .animate-fade-in {
+      animation: fade-in 0.4s ease-out forwards;
     }
-    .animate-scale-in { 
-      animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+    .animate-scale-in {
+      animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .animate-slide-up {
       animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    
     .carousel-slide {
       position: absolute;
       inset: 0;
@@ -76,7 +86,6 @@ const PageStyles = () => (
     }
     .carousel-slide.active { opacity: 1; z-index: 10; }
     .carousel-slide.inactive { opacity: 0; z-index: 1; }
-    
     .magnifier-container { position: relative; overflow: hidden; cursor: none; }
     .magnifier-lens {
       position: absolute;
@@ -89,7 +98,6 @@ const PageStyles = () => (
       background-repeat: no-repeat;
     }
     .magnifier-container:hover .magnifier-lens { display: block; }
-    
     .zoom-control-panel {
       position: absolute;
       top: 80px;
@@ -108,7 +116,6 @@ const PageStyles = () => (
   `}</style>
 );
 
-// ─── Instagram Icon (Custom since react-share doesn't have it) ───
 const InstagramIcon = ({ size = 40, round = true }) => (
   <svg
     viewBox="0 0 64 64"
@@ -124,7 +131,6 @@ const InstagramIcon = ({ size = 40, round = true }) => (
   </svg>
 );
 
-// ─── Share Popup Component ───────────────────────────────────────
 const SharePopup = ({
   isOpen,
   onClose,
@@ -133,13 +139,8 @@ const SharePopup = ({
   productImage,
 }) => {
   const [copied, setCopied] = useState(false);
-
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -150,7 +151,7 @@ const SharePopup = ({
       await navigator.clipboard.writeText(productUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch {
       const textArea = document.createElement("textarea");
       textArea.value = productUrl;
       document.body.appendChild(textArea);
@@ -163,22 +164,16 @@ const SharePopup = ({
   };
 
   const shareTitle = `Check out ${productTitle} on Snitch!`;
-  const shareHashtags = ["Snitch", "Fashion", "Shopping"];
-
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] animate-fade-in">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
       />
-
-      {/* Popup */}
       <div className="absolute bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:bottom-auto sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-md animate-slide-up sm:animate-scale-in">
         <div className="bg-[#0a0a0a] sm:rounded-2xl rounded-t-2xl border border-[#1a1a1a] sm:border-[#222222] overflow-hidden">
-          {/* Header */}
           <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[#1a1a1a]">
             <h3 className="text-[#f0f0f0] font-semibold text-base sm:text-lg">
               Share Product
@@ -190,8 +185,6 @@ const SharePopup = ({
               <X className="w-5 h-5" />
             </button>
           </div>
-
-          {/* Copy Link Section */}
           <div className="p-4 sm:p-5 border-b border-[#1a1a1a]">
             <label className="text-[11px] sm:text-xs text-[#777777] uppercase tracking-wider font-medium mb-2 sm:mb-3 block">
               Page Link
@@ -217,14 +210,11 @@ const SharePopup = ({
               </button>
             </div>
           </div>
-
-          {/* Social Share Grid */}
           <div className="p-4 sm:p-5">
             <label className="text-[11px] sm:text-xs text-[#777777] uppercase tracking-wider font-medium mb-3 sm:mb-4 block">
               Share on Social
             </label>
             <div className="grid grid-cols-5 gap-2 sm:gap-3">
-              {/* WhatsApp */}
               <WhatsappShareButton
                 url={productUrl}
                 title={shareTitle}
@@ -239,8 +229,6 @@ const SharePopup = ({
                   WhatsApp
                 </span>
               </WhatsappShareButton>
-
-              {/* Facebook */}
               <FacebookShareButton
                 url={productUrl}
                 quote={shareTitle}
@@ -256,12 +244,10 @@ const SharePopup = ({
                   Facebook
                 </span>
               </FacebookShareButton>
-
-              {/* X (Twitter) */}
               <TwitterShareButton
                 url={productUrl}
                 title={shareTitle}
-                hashtags={shareHashtags}
+                hashtags={["Snitch", "Fashion", "Shopping"]}
                 className="flex flex-col items-center gap-1.5 sm:gap-2 transition-transform hover:scale-105"
               >
                 <TwitterIcon
@@ -273,8 +259,6 @@ const SharePopup = ({
                   X
                 </span>
               </TwitterShareButton>
-
-              {/* LinkedIn */}
               <LinkedinShareButton
                 url={productUrl}
                 title={shareTitle}
@@ -291,12 +275,10 @@ const SharePopup = ({
                   LinkedIn
                 </span>
               </LinkedinShareButton>
-
-              {/* Instagram - Custom (opens app) */}
               <button
-                onClick={() => {
-                  window.open("https://www.instagram.com/", "_blank");
-                }}
+                onClick={() =>
+                  window.open("https://www.instagram.com/", "_blank")
+                }
                 className="flex flex-col items-center gap-1.5 sm:gap-2 transition-transform hover:scale-105"
               >
                 <InstagramIcon size={40} round />
@@ -306,8 +288,6 @@ const SharePopup = ({
               </button>
             </div>
           </div>
-
-          {/* Native Share Button (Mobile) */}
           {typeof navigator !== "undefined" && navigator.share && (
             <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-0">
               <button
@@ -332,7 +312,6 @@ const SharePopup = ({
   );
 };
 
-// ─── Lightbox Component ──────────────────────────────────────────
 const ImageLightbox = ({
   images,
   currentIndex,
@@ -350,22 +329,16 @@ const ImageLightbox = ({
     bgY: 0,
   });
   const [zoomLevel, setZoomLevel] = useState(2.5);
-
   const imageRef = useRef(null);
   const containerRef = useRef(null);
-
   const magnifierSize = 150;
-  const minZoom = 1.5;
-  const maxZoom = 5;
-  const zoomStep = 0.5;
+  const minZoom = 1.5,
+    maxZoom = 5,
+    zoomStep = 0.5;
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      setZoomLevel(2.5);
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    if (isOpen) setZoomLevel(2.5);
     return () => {
       document.body.style.overflow = "";
     };
@@ -388,22 +361,33 @@ const ImageLightbox = ({
 
   useEffect(() => {
     if (!isOpen) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
     const handleWheel = (e) => {
       if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        if (e.deltaY < 0)
+        e.preventDefault(); // Prevents browser zoom
+        e.stopPropagation(); // Stops bubbling
+
+        if (e.deltaY < 0) {
           setZoomLevel((prev) => Math.min(prev + zoomStep, maxZoom));
-        else setZoomLevel((prev) => Math.max(prev - zoomStep, minZoom));
+        } else {
+          setZoomLevel((prev) => Math.max(prev - zoomStep, minZoom));
+        }
       }
     };
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, [isOpen]);
 
-  const handleZoomIn = () =>
-    setZoomLevel((prev) => Math.min(prev + zoomStep, maxZoom));
-  const handleZoomOut = () =>
-    setZoomLevel((prev) => Math.max(prev - zoomStep, minZoom));
+    // Must use native addEventListener with passive: false
+    container.addEventListener("wheel", handleWheel, {
+      passive: false,
+      capture: true,
+    });
+
+    return () => {
+      container.removeEventListener("wheel", handleWheel, { capture: true });
+    };
+  }, [isOpen]);
 
   const handleMouseMove = (e) => {
     if (!containerRef.current || !imageRef.current) return;
@@ -413,22 +397,16 @@ const ImageLightbox = ({
     const y = e.clientY - rect.top;
     const imgX = e.clientX - imgRect.left;
     const imgY = e.clientY - imgRect.top;
-    const bgX = (imgX / imgRect.width) * 100;
-    const bgY = (imgY / imgRect.height) * 100;
     setMagnifierPosition({
       x: x - magnifierSize / 2,
       y: y - magnifierSize / 2,
-      bgX,
-      bgY,
+      bgX: (imgX / imgRect.width) * 100,
+      bgY: (imgY / imgRect.height) * 100,
     });
   };
 
   if (!isOpen || !images.length) return null;
-
-  const currentImage = images[currentIndex];
-  const imageUrl = currentImage?.url || currentImage;
-  const canZoomIn = zoomLevel < maxZoom;
-  const canZoomOut = zoomLevel > minZoom;
+  const imageUrl = images[currentIndex]?.url || images[currentIndex];
 
   return (
     <div className="fixed inset-0 z-[100] animate-fade-in bg-black/95">
@@ -449,12 +427,11 @@ const ImageLightbox = ({
           </button>
         </div>
       </div>
-
       <div className="zoom-control-panel">
         <button
-          onClick={handleZoomIn}
-          disabled={!canZoomIn}
-          className={`p-1.5 sm:p-2 rounded-lg transition-all ${canZoomIn ? "text-[#d4a76a] hover:bg-[#333333]" : "text-[#555555] cursor-not-allowed"}`}
+          onClick={() => setZoomLevel((p) => Math.min(p + zoomStep, maxZoom))}
+          disabled={zoomLevel >= maxZoom}
+          className={`p-1.5 sm:p-2 rounded-lg transition-all ${zoomLevel < maxZoom ? "text-[#d4a76a] hover:bg-[#333333]" : "text-[#555555] cursor-not-allowed"}`}
         >
           <ZoomIn className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
@@ -462,14 +439,13 @@ const ImageLightbox = ({
           {zoomLevel.toFixed(1)}x
         </span>
         <button
-          onClick={handleZoomOut}
-          disabled={!canZoomOut}
-          className={`p-1.5 sm:p-2 rounded-lg transition-all ${canZoomOut ? "text-[#d4a76a] hover:bg-[#333333]" : "text-[#555555] cursor-not-allowed"}`}
+          onClick={() => setZoomLevel((p) => Math.max(p - zoomStep, minZoom))}
+          disabled={zoomLevel <= minZoom}
+          className={`p-1.5 sm:p-2 rounded-lg transition-all ${zoomLevel > minZoom ? "text-[#d4a76a] hover:bg-[#333333]" : "text-[#555555] cursor-not-allowed"}`}
         >
           <ZoomOut className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
-
       <div className="h-full w-full flex items-center justify-center p-12 sm:p-16 lg:p-24">
         <button
           onClick={(e) => {
@@ -480,7 +456,6 @@ const ImageLightbox = ({
         >
           <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
-
         <div
           ref={containerRef}
           className="relative magnifier-container max-w-[90vw] sm:max-w-[80vw] max-h-[70vh] sm:max-h-[75vh] w-auto h-auto"
@@ -511,7 +486,6 @@ const ImageLightbox = ({
             />
           )}
         </div>
-
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -522,7 +496,6 @@ const ImageLightbox = ({
           <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 rotate-180" />
         </button>
       </div>
-
       <div className="absolute bottom-0 left-0 right-0 z-30 p-3 sm:p-4 lg:p-6 bg-gradient-to-t from-black/80 to-transparent">
         <div className="flex justify-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide max-w-full">
           {images.map((img, idx) => (
@@ -548,112 +521,308 @@ const ImageLightbox = ({
   );
 };
 
+// All Variants List Component
+const VariantsList = ({
+  variants,
+  selectedVariant,
+  onSelectVariant,
+  formatPrice,
+}) => {
+  if (!variants || variants.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Package className="w-4 h-4 text-[#c4956a]" />
+        <span className="text-[13px] text-[#888] font-medium uppercase tracking-wider">
+          All Variants ({variants.length})
+        </span>
+      </div>
+
+      <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide pr-1">
+        {variants.map((variant) => {
+          const isSelected = selectedVariant?._id === variant._id;
+          const isAvailable = variant.isAvailable && variant.stock > 0;
+          const attributeEntries = Object.entries(variant.attributes || {});
+
+          return (
+            <button
+              key={variant._id}
+              onClick={() => onSelectVariant(variant)}
+              className={`w-full text-left p-3 rounded-xl border transition-all duration-200 ${
+                isSelected
+                  ? "bg-[#c4956a]/10 border-[#c4956a]/40 shadow-sm shadow-[#c4956a]/10"
+                  : "bg-[#111] border-[#1a1a1a] hover:border-[#333] hover:bg-[#141414]"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden border border-[#1a1a1a] flex-shrink-0 bg-[#0a0a0a]">
+                  {variant.images?.[0]?.url ? (
+                    <img
+                      src={variant.images[0].url}
+                      alt={variant.variantKey}
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="w-4 h-4 text-[#333]" />
+                    </div>
+                  )}
+                  {isSelected && (
+                    <div className="absolute inset-0 bg-[#c4956a]/20 flex items-center justify-center">
+                      <Check
+                        className="w-4 h-4 text-[#c4956a]"
+                        strokeWidth={3}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[12px] sm:text-[13px] font-medium text-[#f0f0f0] truncate">
+                      {variant.variantKey}
+                    </span>
+                    <span className="text-[12px] sm:text-sm font-bold text-[#d4a76a] flex-shrink-0">
+                      {formatPrice(
+                        variant.price?.amount,
+                        variant.price?.currency,
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-1">
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                        isAvailable
+                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          : "bg-[#f87171]/10 text-[#f87171] border border-[#f87171]/20"
+                      }`}
+                    >
+                      {isAvailable
+                        ? `${variant.stock} in stock`
+                        : "Out of stock"}
+                    </span>
+                    <span className="text-[10px] text-[#555] font-mono">
+                      SKU: {variant.sku}
+                    </span>
+                  </div>
+
+                  {attributeEntries.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {attributeEntries.map(([key, value]) => (
+                        <span
+                          key={key}
+                          className="text-[10px] text-[#777] bg-[#1a1a1a] px-1.5 py-0.5 rounded border border-[#222]"
+                        >
+                          {key}: <span className="text-[#aaa]">{value}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+const VariantSelector = ({
+  variantOptions,
+  variants,
+  selectedAttributes,
+  onAttributeChange,
+}) => {
+  if (!variantOptions || variantOptions.length === 0) return null;
+
+  const findMatchingVariant = (attrs) => {
+    return variants.find((v) => {
+      return Object.entries(attrs).every(
+        ([key, val]) => v.attributes[key] === val,
+      );
+    });
+  };
+
+  const matchedVariant = findMatchingVariant(selectedAttributes);
+
+  return (
+    <div className="space-y-5">
+      {variantOptions.map((option) => {
+        const selectedValue = selectedAttributes[option.name];
+        return (
+          <div key={option.name} className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="text-[13px] text-[#888] font-medium capitalize flex items-center gap-2">
+                <Layers className="w-3.5 h-3.5 text-[#c4956a]" />
+                {option.name}
+              </label>
+              {selectedValue && (
+                <span className="text-[11px] text-[#c4956a] bg-[#c4956a]/10 px-2 py-0.5 rounded border border-[#c4956a]/20 font-medium">
+                  Selected: {selectedValue}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {option.values.map((value) => {
+                const isSelected = selectedValue === value;
+                const testAttrs = {
+                  ...selectedAttributes,
+                  [option.name]: value,
+                };
+                const testVariant = findMatchingVariant(testAttrs);
+                const isAvailable =
+                  !!testVariant &&
+                  testVariant.isAvailable &&
+                  testVariant.stock > 0;
+
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() =>
+                      onAttributeChange(option.name, isSelected ? null : value)
+                    }
+                    disabled={!isAvailable && !isSelected}
+                    className={`px-3.5 py-2 rounded-lg text-[12px] font-medium border transition-all duration-200 ${
+                      isSelected
+                        ? "bg-[#c4956a] text-[#0a0a0a] border-[#c4956a] shadow-sm shadow-[#c4956a]/20"
+                        : isAvailable
+                          ? "bg-[#141414] text-[#888] border-[#1a1a1a] hover:border-[#c4956a]/50 hover:text-[#f0ede8]"
+                          : "bg-[#0a0a0a] text-[#333] border-[#1a1a1a] cursor-not-allowed opacity-50"
+                    }`}
+                  >
+                    {isSelected && (
+                      <Check
+                        className="w-3 h-3 inline mr-1 -mt-0.5"
+                        strokeWidth={3}
+                      />
+                    )}
+                    {value}
+                    {!isAvailable && !isSelected && (
+                      <span className="ml-1 text-[10px]">(OOS)</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {Object.keys(selectedAttributes).length > 0 && (
+        <div
+          className={`p-3 rounded-lg border ${
+            matchedVariant?.isAvailable && matchedVariant?.stock > 0
+              ? "bg-[#c4956a]/5 border-[#c4956a]/20"
+              : matchedVariant
+                ? "bg-[#f87171]/5 border-[#f87171]/20"
+                : "bg-[#1a1a1a] border-[#2a2a2a]"
+          }`}
+        >
+          {matchedVariant?.isAvailable && matchedVariant?.stock > 0 ? (
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#c4956a]" />
+              <span className="text-[12px] text-[#c4956a] font-medium">
+                In Stock — {matchedVariant.stock} units available
+              </span>
+            </div>
+          ) : matchedVariant ? (
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-[#f87171]" />
+              <span className="text-[12px] text-[#f87171] font-medium">
+                Out of Stock — SKU: {matchedVariant.sku}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-[#555]" />
+              <span className="text-[12px] text-[#555] font-medium">
+                Select all options to see availability
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ProductSkeleton = () => (
   <div className="min-h-screen bg-[#0a0a0a] text-[#f0f0f0]">
     <PageStyles />
-    
-    {/* Breadcrumb */}
     <div className="border-b border-[#1a1a1a]">
       <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-10 py-3 sm:py-4">
         <div className="h-4 w-28 bg-[#111111] rounded animate-pulse" />
       </div>
     </div>
-
     <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-10 py-4 sm:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
-        
-        {/* LEFT COLUMN — Image Area (exactly matches real layout) */}
         <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-4">
-          
-          {/* Desktop vertical thumbnails */}
           <div className="hidden lg:flex flex-col gap-2 lg:gap-3 overflow-y-auto scrollbar-hide max-h-[400px] lg:max-h-[600px] flex-shrink-0">
-            {[1,2,3,4].map((i) => (
-              <div 
-                key={i} 
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
                 className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg lg:rounded-xl overflow-hidden border border-[#1a1a1a] bg-[#111111] animate-pulse flex-shrink-0"
               />
             ))}
           </div>
-
-          {/* Main image container — matches aspect-square, rounded, badges overlay area */}
           <div className="relative flex-1 aspect-square bg-[#111111] rounded-xl sm:rounded-2xl overflow-hidden border border-[#1a1a1a]">
-            {/* Expand icon placeholder (top-right) */}
             <div className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 bg-[#050505]/60 backdrop-blur-sm rounded-md sm:rounded-lg border border-[#1a1a1a] z-20">
               <div className="w-3 h-3 sm:w-4 sm:h-4 bg-[#222222] rounded-sm animate-pulse" />
             </div>
-
-            {/* Badges area (top-left) */}
             <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 sm:gap-1.5 z-20">
               <div className="h-4 sm:h-5 w-10 bg-[#050505] rounded border border-[#1a1a1a] animate-pulse" />
               <div className="h-4 sm:h-5 w-12 bg-[#1a1a1a] rounded border border-[#222222] animate-pulse" />
             </div>
-
-            {/* Views counter (bottom-right) */}
             <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-[#050505]/80 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-[#1a1a1a] z-20 flex items-center gap-1 sm:gap-1.5">
               <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 bg-[#222222] rounded-full animate-pulse" />
               <div className="h-3 w-8 bg-[#222222] rounded animate-pulse" />
             </div>
-
-            {/* Image counter (bottom-left) */}
             <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-[#050505]/80 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-[#1a1a1a] z-20">
               <div className="h-3 w-10 bg-[#222222] rounded animate-pulse" />
             </div>
-
-            {/* Centered "image" placeholder */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-24 h-24 sm:w-32 sm:h-32 bg-[#0d0d0d] rounded-xl border border-[#1a1a1a] animate-pulse" />
             </div>
           </div>
-
-          {/* Mobile horizontal thumbnails */}
           <div className="flex lg:hidden gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-1">
-            {[1,2,3,4].map((i) => (
-              <div 
-                key={i} 
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
                 className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden border-2 border-[#1a1a1a] bg-[#111111] animate-pulse flex-shrink-0"
               />
             ))}
           </div>
         </div>
-
-        {/* RIGHT COLUMN — Product Info (exactly matches real layout) */}
         <div className="flex flex-col">
-          
-          {/* Category + Title + Heart/Share buttons */}
           <div className="mb-4 sm:mb-6">
             <div className="flex items-start justify-between gap-3 sm:gap-4 mb-2 sm:mb-3">
               <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
-                {/* Category tag */}
                 <div className="h-3 sm:h-3.5 w-20 bg-[#1a1a1a] rounded animate-pulse" />
-                {/* Title — two lines */}
                 <div className="h-6 sm:h-7 lg:h-8 w-3/4 bg-[#1a1a1a] rounded animate-pulse" />
                 <div className="h-6 sm:h-7 lg:h-8 w-1/2 bg-[#1a1a1a] rounded animate-pulse" />
               </div>
-              {/* Heart + Share buttons */}
               <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#111111] rounded-lg sm:rounded-xl border border-[#1a1a1a] animate-pulse" />
                 <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#111111] rounded-lg sm:rounded-xl border border-[#1a1a1a] animate-pulse" />
               </div>
             </div>
-            
-            {/* Tags row */}
             <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-3 sm:mb-4">
-              {[1,2,3].map((i) => (
-                <div 
-                  key={i} 
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
                   className="h-5 sm:h-6 w-16 bg-[#111111] rounded border border-[#1a1a1a] animate-pulse flex items-center gap-1 px-2"
                 >
                   <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#222222] rounded-sm" />
                 </div>
               ))}
             </div>
-
-            {/* Price */}
             <div className="flex items-baseline gap-2 sm:gap-3 mb-1 sm:mb-2">
               <div className="h-8 sm:h-10 lg:h-12 w-28 sm:w-32 bg-[#1a1a1a] rounded animate-pulse" />
             </div>
-
-            {/* Sales + Bestseller badges */}
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
               <div className="flex items-center gap-1 sm:gap-1.5 bg-[#111111] border border-[#1a1a1a] rounded-md sm:rounded-lg px-2 sm:px-3 py-1 sm:py-1.5">
                 <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-[#222222] rounded-sm animate-pulse" />
@@ -665,16 +834,12 @@ const ProductSkeleton = () => (
               </div>
             </div>
           </div>
-
-          {/* Description */}
           <div className="mb-4 sm:mb-6 space-y-1.5 sm:space-y-2">
             <div className="h-4 w-full bg-[#111111] rounded animate-pulse" />
             <div className="h-4 w-[92%] bg-[#111111] rounded animate-pulse" />
             <div className="h-4 w-[78%] bg-[#111111] rounded animate-pulse" />
             <div className="h-4 w-[85%] bg-[#111111] rounded animate-pulse hidden sm:block" />
           </div>
-
-          {/* Quantity selector */}
           <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
             <div className="h-4 w-6 bg-[#1a1a1a] rounded animate-pulse" />
             <div className="flex items-center border border-[#1a1a1a] rounded-lg sm:rounded-xl bg-[#111111] h-10 sm:h-11">
@@ -689,8 +854,6 @@ const ProductSkeleton = () => (
               </div>
             </div>
           </div>
-
-          {/* Buttons: Add to Cart + Buy Now */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-5 sm:mb-8">
             <div className="flex-1 h-12 sm:h-14 bg-[#222222] rounded-lg sm:rounded-xl animate-pulse flex items-center justify-center gap-1.5 sm:gap-2">
               <div className="w-4 h-4 sm:w-5 sm:h-5 bg-[#333333] rounded-sm animate-pulse" />
@@ -698,11 +861,12 @@ const ProductSkeleton = () => (
             </div>
             <div className="flex-1 h-12 sm:h-14 bg-[#1a1a1a] rounded-lg sm:rounded-xl animate-pulse" />
           </div>
-
-          {/* Trust badges: Free Shipping / Secure / Returns */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 py-4 sm:py-6 border-t border-[#1a1a1a]">
-            {[1,2,3].map((i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-1 sm:gap-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="flex flex-col items-center text-center gap-1 sm:gap-2"
+              >
                 <div className="p-1.5 sm:p-2.5 bg-[#111111] rounded-full border border-[#1a1a1a]">
                   <div className="w-3.5 h-3.5 sm:w-5 sm:h-5 bg-[#222222] rounded-sm animate-pulse" />
                 </div>
@@ -710,8 +874,6 @@ const ProductSkeleton = () => (
               </div>
             ))}
           </div>
-
-          {/* Meta rows: ID, Seller, Published, Updated */}
           <div className="mt-auto pt-4 sm:pt-6 border-t border-[#1a1a1a] space-y-1.5 sm:space-y-2">
             {[
               { label: 12, value: 24 },
@@ -719,8 +881,8 @@ const ProductSkeleton = () => (
               { label: 16, value: 18 },
               { label: 14, value: 18 },
             ].map((row, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="flex justify-between py-1 sm:py-1.5 border-b border-[#111111] last:border-b-0"
               >
                 <div className="h-3 sm:h-3.5 w-10 bg-[#1a1a1a] rounded animate-pulse" />
@@ -733,7 +895,6 @@ const ProductSkeleton = () => (
     </div>
   </div>
 );
-
 const ProductDetails = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -744,20 +905,42 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [selectedAttributes, setSelectedAttributes] = useState({});
+  const [productImages, setProductImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [product, setProduct] = useState(null);
+  const [variants, setVariants] = useState([]);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [thumbnail, setThumbnail] = useState(null);
   const viewTracked = useRef(false);
 
-  // Get base URL from env
   const baseUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin;
   const productUrl = `${baseUrl}/store/product/${productId}`;
 
+  // Fetch product details
   useEffect(() => {
     async function load() {
-      await handleGetProductDetails(productId);
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await handleGetProductDetails(productId);
+        if (data?.success && data.product) {
+          setProduct(data.product);
+          setVariants(data.variants || []);
+        } else {
+          setError(data?.message || "Failed to load product");
+        }
+      } catch (err) {
+        setError(err?.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [productId, handleGetProductDetails]);
 
-  // Track view when product loads - only once per visit
+  // Track view
   useEffect(() => {
     if (productId && !viewTracked.current) {
       viewTracked.current = true;
@@ -767,23 +950,71 @@ const ProductDetails = () => {
     }
   }, [productId, handleCreateView]);
 
-  const product = useSelector((state) => state.products.product);
   useEffect(() => {
-    setCurrentImage(0);
-  }, [productId]);
+    if (product) {
+      let thumbnail;
 
-  const images = product?.images || [];
-  const hasMultipleImages = images.length > 1;
+      if (product.thumbnail) {
+        thumbnail = { url: product.thumbnail, type: "product" };
+      }
+
+      setThumbnail(thumbnail.url);
+    }
+  }, [product]);
+
+  // Build image gallery from product thumbnail + variant images
+  useEffect(() => {
+    if (product) {
+      const images = [];
+
+      const activeVariant = selectedVariant;
+
+      if (activeVariant?.images && Array.isArray(activeVariant.images)) {
+        activeVariant.images.forEach((img, idx) => {
+          if (img.url) {
+            images.push({
+              url: img.url,
+              type: "variant",
+              variantId: activeVariant._id,
+            });
+          }
+        });
+
+        setThumbnail(activeVariant.images[0].url);
+      } else if (product.thumbnail) {
+        setThumbnail(product.thumbnail);
+      }
+
+      setProductImages(images);
+      setCurrentImage(0);
+    }
+  }, [product, selectedVariant]);
+
+  // Find matching variant based on selected attributes
+  const matchedVariant = useMemo(() => {
+    if (Object.keys(selectedAttributes).length === 0) return null;
+    return variants.find((v) =>
+      Object.entries(selectedAttributes).every(([key, val]) => {
+        const attrVal =
+          v.attributes instanceof Map
+            ? v.attributes.get(key)
+            : v.attributes?.[key];
+        return attrVal === val;
+      }),
+    );
+  }, [selectedAttributes, variants]);
+
+  const hasMultipleImages = productImages.length > 1;
 
   const goToSlide = useCallback(
     (index) => {
       if (!hasMultipleImages) return;
       let newIndex = index;
-      if (newIndex < 0) newIndex = images.length - 1;
-      if (newIndex >= images.length) newIndex = 0;
+      if (newIndex < 0) newIndex = productImages.length - 1;
+      if (newIndex >= productImages.length) newIndex = 0;
       setCurrentImage(newIndex);
     },
-    [hasMultipleImages, images.length],
+    [hasMultipleImages, productImages.length],
   );
 
   const nextImage = useCallback(
@@ -795,19 +1026,50 @@ const ProductDetails = () => {
     [currentImage, goToSlide],
   );
   const openLightbox = () => {
-    if (images.length > 0) setLightboxOpen(true);
+    if (productImages.length > 0) setLightboxOpen(true);
   };
 
-  if (!product) {
-    return (
-      <>
-        <PageStyles />
-        <ProductSkeleton />
-      </>
-    );
-  }
+  const handleAttributeChange = useCallback(
+    (optionName, value) => {
+      setSelectedAttributes((prev) => {
+        const next = { ...prev };
+        if (value === null) {
+          delete next[optionName];
+        } else {
+          next[optionName] = value;
+        }
+
+        // Find and set the matching variant RIGHT HERE, synchronously
+        const matched = variants.find((v) =>
+          Object.entries(next).every(([k, val]) => {
+            const attrVal =
+              v.attributes instanceof Map
+                ? v.attributes.get(k)
+                : v.attributes?.[k];
+            return attrVal === val;
+          }),
+        );
+        if (matched) setSelectedVariant(matched);
+
+        return next;
+      });
+    },
+    [variants],
+  );
+
+  const handleSelectVariant = useCallback((variant) => {
+    setSelectedVariant(variant);
+    if (variant?.attributes) {
+      const attrs =
+        variant.attributes instanceof Map
+          ? Object.fromEntries(variant.attributes)
+          : variant.attributes;
+      setSelectedAttributes(attrs);
+    }
+  }, []);
 
   const formatPrice = (amount, currency) => {
+    if (!amount || isNaN(Number(amount))) return "—";
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: currency || "INR",
@@ -816,6 +1078,7 @@ const ProductDetails = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "—";
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -823,24 +1086,68 @@ const ProductDetails = () => {
     });
   };
 
-  // Get product image for share
-  const productImage = product.images?.[0]?.url || "";
+  // Determine display price
+  const displayPrice = matchedVariant?.price || product?.startingPrice;
+  const isFullySelected =
+    product?.variantOptions?.length > 0
+      ? product.variantOptions.every((opt) => selectedAttributes[opt.name])
+      : true;
+  const canAddToCart =
+    product?.variantOptions?.length > 0
+      ? isFullySelected &&
+        matchedVariant?.isAvailable &&
+        matchedVariant?.stock > 0
+      : true;
 
+  // Show skeleton while loading
+  if (loading) {
+    return (
+      <>
+        <PageStyles />
+        <ProductSkeleton />
+      </>
+    );
+  }
+
+  // Show error if product failed to load or not found
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] text-[#f0f0f0]">
+        <PageStyles />
+        <div className="flex flex-col items-center justify-center py-24">
+          <div className="w-16 h-16 rounded-full bg-[#200f0f] flex items-center justify-center mb-4">
+            <Package className="w-8 h-8 text-[#f87171]" />
+          </div>
+          <h3 className="font-['Playfair_Display'] text-[20px] text-[#f0ede8] mb-2 font-semibold">
+            {error ? "Unable to load product" : "Product not found"}
+          </h3>
+          <p className="text-[14px] text-[#f87171] mb-6 font-medium">
+            {error ||
+              "The product you're looking for doesn't exist or has been removed."}
+          </p>
+          <button
+            onClick={() => navigate("/store")}
+            className="px-6 py-2.5 bg-[#c4956a] text-[#0a0a0a] text-[13px] uppercase tracking-wider rounded-lg hover:bg-[#d4a57a] font-bold"
+          >
+            Back to Store
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f0f0f0]">
       <PageStyles />
 
-      {/* Share Popup */}
       <SharePopup
         isOpen={shareOpen}
         onClose={() => setShareOpen(false)}
         productUrl={productUrl}
         productTitle={product.title}
-        productImage={productImage}
+        productImage={product.thumbnail || ""}
       />
-
       <ImageLightbox
-        images={images}
+        images={productImages}
         currentIndex={currentImage}
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
@@ -864,120 +1171,130 @@ const ProductDetails = () => {
 
       <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-10 py-4 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
-          {/* Left Column - Images */}
-          <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-4">
-            {/* DESKTOP ONLY: Vertical thumbnails on LEFT */}
-            {hasMultipleImages && (
-              <div className="hidden lg:flex flex-col gap-2 lg:gap-3 overflow-y-auto scrollbar-hide max-h-[400px] lg:max-h-[600px] flex-shrink-0">
-                {images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => goToSlide(idx)}
-                    className={`relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg lg:rounded-xl overflow-hidden border transition-all flex-shrink-0 ${currentImage === idx ? "border-[#d4a76a]" : "border-[#1a1a1a] hover:border-[#333333]"}`}
-                  >
-                    <img
-                      src={img?.url || img}
-                      alt={`Thumbnail ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                      draggable={false}
-                    />
-                    {currentImage === idx && (
-                      <div className="absolute inset-0 bg-[#d4a76a]/10" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Left Column - Images + Variant Image Gallery */}
+          <div className="flex flex-col gap-3 sm:gap-4">
+            {/* Main Image Gallery with thumbnails */}
+            <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-4">
+              {hasMultipleImages && (
+                <div className="hidden lg:flex flex-col gap-2 lg:gap-3 overflow-y-auto scrollbar-hide max-h-[400px] lg:max-h-[600px] flex-shrink-0">
+                  {productImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        goToSlide(idx);
+                      }}
+                      className={`relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-lg lg:rounded-xl overflow-hidden border transition-all flex-shrink-0 ${currentImage === idx ? "border-[#d4a76a]" : "border-[#1a1a1a] hover:border-[#333333]"}`}
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Thumbnail ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        draggable={false}
+                      />
+                      {currentImage === idx && (
+                        <div className="absolute inset-0 bg-[#d4a76a]/10" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-            {/* Main Image */}
-            <div
-              className="relative flex-1 aspect-square bg-[#111111] rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer"
-              onClick={openLightbox}
-            >
-              {images.length > 0 ? (
-                images.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className={`carousel-slide ${idx === currentImage ? "active" : "inactive"}`}
-                  >
+              <div
+                className="relative flex-1 aspect-square bg-[#111111] rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer"
+                style={{ position: "relative" }}
+                onClick={openLightbox}
+              >
+                {productImages.length > 0 ? (
+                  <div className="carousel-slide active">
                     <img
-                      src={img?.url || img}
-                      alt={`${product.title} - ${idx + 1}`}
+                      src={productImages[currentImage]?.url}
+                      alt={`${product.title}`}
                       className="w-full h-full object-cover"
                       draggable={false}
                     />
                   </div>
-                ))
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-[#333333] absolute inset-0">
-                  <span className="text-sm sm:text-lg font-['Playfair_Display']">
-                    No Image Available
-                  </span>
-                </div>
-              )}
-
-              {/* Expand icon */}
-              <div className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 bg-[#050505]/60 backdrop-blur-sm rounded-md sm:rounded-lg border border-[#1a1a1a] text-[#777777] z-20 pointer-events-none">
-                <Search className="w-3 h-3 sm:w-4 sm:h-4" />
-              </div>
-
-              {/* Badges */}
-              <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 sm:gap-1.5 z-20">
-                {product.isNew && (
-                  <span className="bg-[#050505] text-[#f0f0f0] text-[8px] sm:text-[9px] tracking-[0.1em] sm:tracking-[0.15em] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-medium border border-[#1a1a1a]">
-                    NEW
-                  </span>
-                )}
-                {product.isBestseller && (
-                  <span className="bg-[#c4956a] text-[#f0f0f0] text-[8px] sm:text-[9px] tracking-[0.1em] sm:tracking-[0.15em] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-medium flex items-center gap-0.5 sm:gap-1">
-                    <Star className="w-2 h-2 sm:w-3 sm:h-3 fill-current" />
-                    HOT
-                  </span>
-                )}
-              </div>
-
-              {/* Views */}
-              <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-[#050505]/80 backdrop-blur-sm text-[#f0f0f0] text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 border border-[#1a1a1a] z-20">
-                <Eye className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#d4a76a]" />
-                {product.views}
-              </div>
-
-              {/* Counter */}
-              {hasMultipleImages && (
-                <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-[#050505]/80 backdrop-blur-sm text-[#f0f0f0] text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-[#1a1a1a] z-20">
-                  {currentImage + 1} / {images.length}
-                </div>
-              )}
-            </div>
-
-            {/* MOBILE ONLY: Horizontal thumbnails at BOTTOM */}
-            {hasMultipleImages && (
-              <div className="flex lg:hidden gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-1">
-                {images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => goToSlide(idx)}
-                    className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${currentImage === idx ? "border-[#d4a76a]" : "border-[#1a1a1a] hover:border-[#333333]"}`}
-                  >
+                ) : thumbnail ? (
+                  <div className="carousel-slide active">
                     <img
-                      src={img?.url || img}
-                      alt={`Thumbnail ${idx + 1}`}
+                      src={thumbnail}
+                      alt={`${product.title}`}
                       className="w-full h-full object-cover"
                       draggable={false}
                     />
-                    {currentImage === idx && (
-                      <div className="absolute inset-0 bg-[#d4a76a]/10" />
-                    )}
-                  </button>
-                ))}
+                  </div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[#333333] absolute inset-0">
+                    <span className="text-sm sm:text-lg font-['Playfair_Display']">
+                      No Image Available
+                    </span>
+                  </div>
+                )}
+
+                <div className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 bg-[#050505]/60 backdrop-blur-sm rounded-md sm:rounded-lg border border-[#1a1a1a] text-[#777777] z-20 pointer-events-none">
+                  <Search className="w-3 h-3 sm:w-4 sm:h-4" />
+                </div>
+
+                <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 sm:gap-1.5 z-20">
+                  {product.isNew && (
+                    <span className="bg-[#050505] text-[#f0f0f0] text-[8px] sm:text-[9px] tracking-[0.1em] sm:tracking-[0.15em] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-medium border border-[#1a1a1a]">
+                      NEW
+                    </span>
+                  )}
+                  {product.isBestseller && (
+                    <span className="bg-[#c4956a] text-[#f0f0f0] text-[8px] sm:text-[9px] tracking-[0.1em] sm:tracking-[0.15em] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-medium flex items-center gap-0.5 sm:gap-1">
+                      <Star className="w-2 h-2 sm:w-3 sm:h-3 fill-current" />
+                      HOT
+                    </span>
+                  )}
+                </div>
+
+                <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-[#050505]/80 backdrop-blur-sm text-[#f0f0f0] text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 border border-[#1a1a1a] z-20">
+                  <Eye className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-[#d4a76a]" />
+                  {product.views}
+                </div>
+
+                {hasMultipleImages && (
+                  <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-[#050505]/80 backdrop-blur-sm text-[#f0f0f0] text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-[#1a1a1a] z-20">
+                    {currentImage + 1} / {productImages.length}
+                  </div>
+                )}
               </div>
-            )}
+
+              {hasMultipleImages && (
+                <div className="flex lg:hidden gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-1">
+                  {productImages.map((img, idx) => {
+                    {
+                      console.log(img);
+                    }
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          goToSlide(idx);
+                        }}
+                        className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${currentImage === idx ? "border-[#d4a76a]" : "border-[#1a1a1a] hover:border-[#333333]"}`}
+                      >
+                        <img
+                          src={img.url}
+                          alt={`Thumbnail ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          draggable={false}
+                        />
+                        {currentImage === idx && (
+                          <div className="absolute inset-0 bg-[#d4a76a]/10" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Column - Product Info */}
           <div className="flex flex-col">
             <div
-              className="mb-4 sm:mb-6 opacity-0 animate-fade-in-up"
+              className="mb-4 sm:mb-6 animate-fade-in-up"
               style={{ animationDelay: "0.1s", animationFillMode: "forwards" }}
             >
               <div className="flex items-start justify-between gap-3 sm:gap-4 mb-2 sm:mb-3">
@@ -1021,8 +1338,13 @@ const ProductDetails = () => {
 
               <div className="flex items-baseline gap-2 sm:gap-3 mb-1 sm:mb-2">
                 <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#f0f0f0]">
-                  {formatPrice(product.price?.amount, product.price?.currency)}
+                  {formatPrice(displayPrice?.amount, displayPrice?.currency)}
                 </span>
+                {matchedVariant && (
+                  <span className="text-[11px] sm:text-xs text-[#555] font-medium">
+                    SKU: {matchedVariant.sku}
+                  </span>
+                )}
               </div>
 
               {product.sales > 0 && (
@@ -1046,7 +1368,7 @@ const ProductDetails = () => {
             </div>
 
             <div
-              className="mb-4 sm:mb-6 opacity-0 animate-fade-in-up"
+              className="mb-4 sm:mb-6 animate-fade-in-up"
               style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}
             >
               <p className="text-[#aaaaaa] leading-relaxed text-sm sm:text-base lg:text-lg">
@@ -1055,9 +1377,56 @@ const ProductDetails = () => {
               </p>
             </div>
 
+            {/* Variant Selector */}
+            {product.variantOptions?.length > 0 && variants.length > 0 && (
+              <div
+                className="mb-4 sm:mb-6 animate-fade-in-up"
+                style={{
+                  animationDelay: "0.25s",
+                  animationFillMode: "forwards",
+                }}
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Layers className="w-4 h-4 text-[#c4956a]" />
+                  <span className="text-[13px] text-[#888] font-medium uppercase tracking-wider">
+                    Select Options
+                  </span>
+                  {matchedVariant?.isAvailable && matchedVariant?.stock > 0 && (
+                    <span className="text-[10px] text-[#c4956a] bg-[#c4956a]/10 px-2 py-0.5 rounded border border-[#c4956a]/20 font-medium ml-auto">
+                      {matchedVariant.stock} in stock
+                    </span>
+                  )}
+                </div>
+                <VariantSelector
+                  variantOptions={product.variantOptions}
+                  variants={variants}
+                  selectedAttributes={selectedAttributes}
+                  onAttributeChange={handleAttributeChange}
+                />
+              </div>
+            )}
+
+            {/* All Variants List - IN RIGHT COLUMN */}
+            {variants.length > 0 && (
+              <div
+                className="mb-4 sm:mb-6 animate-fade-in-up"
+                style={{
+                  animationDelay: "0.3s",
+                  animationFillMode: "forwards",
+                }}
+              >
+                <VariantsList
+                  variants={variants}
+                  selectedVariant={selectedVariant}
+                  onSelectVariant={handleSelectVariant}
+                  formatPrice={formatPrice}
+                />
+              </div>
+            )}
+
             <div
-              className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 opacity-0 animate-fade-in-up"
-              style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}
+              className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6 animate-fade-in-up"
+              style={{ animationDelay: "0.35s", animationFillMode: "forwards" }}
             >
               <span className="text-xs sm:text-sm font-medium text-[#777777]">
                 Qty:
@@ -1082,20 +1451,30 @@ const ProductDetails = () => {
             </div>
 
             <div
-              className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-5 sm:mb-8 opacity-0 animate-fade-in-up"
+              className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-5 sm:mb-8 animate-fade-in-up"
               style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
             >
-              <button className="flex-1 bg-[#f0f0f0] text-[#0a0a0a] px-4 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-lg hover:bg-[#d4a76a] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-black/20">
+              <button
+                disabled={!canAddToCart}
+                className={`flex-1 px-4 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-lg transition-all flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg ${canAddToCart ? "bg-[#f0f0f0] text-[#0a0a0a] hover:bg-[#d4a76a] active:scale-[0.98] shadow-black/20" : "bg-[#1a1a1a] text-[#555] cursor-not-allowed shadow-none"}`}
+              >
                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
-                Add to Cart
+                {canAddToCart
+                  ? "Add to Cart"
+                  : isFullySelected
+                    ? "Out of Stock"
+                    : "Select Options"}
               </button>
-              <button className="flex-1 bg-[#d4a76a] text-[#0a0a0a] px-4 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-lg hover:bg-[#c4956a] active:scale-[0.98] transition-all shadow-lg shadow-[#d4a76a]/20">
+              <button
+                disabled={!canAddToCart}
+                className={`flex-1 px-4 sm:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-lg transition-all shadow-lg ${canAddToCart ? "bg-[#d4a76a] text-[#0a0a0a] hover:bg-[#c4956a] active:scale-[0.98] shadow-[#d4a76a]/20" : "bg-[#1a1a1a] text-[#555] cursor-not-allowed shadow-none"}`}
+              >
                 Buy Now
               </button>
             </div>
 
             <div
-              className="grid grid-cols-3 gap-2 sm:gap-4 py-4 sm:py-6 border-t border-[#1a1a1a] opacity-0 animate-fade-in-up"
+              className="grid grid-cols-3 gap-2 sm:gap-4 py-4 sm:py-6 border-t border-[#1a1a1a] animate-fade-in-up"
               style={{ animationDelay: "0.5s", animationFillMode: "forwards" }}
             >
               <div className="flex flex-col items-center text-center gap-1 sm:gap-2">
@@ -1125,7 +1504,7 @@ const ProductDetails = () => {
             </div>
 
             <div
-              className="mt-auto pt-4 sm:pt-6 border-t border-[#1a1a1a] space-y-1.5 sm:space-y-2 opacity-0 animate-fade-in-up"
+              className="mt-auto pt-4 sm:pt-6 border-t border-[#1a1a1a] space-y-1.5 sm:space-y-2 animate-fade-in-up"
               style={{ animationDelay: "0.6s", animationFillMode: "forwards" }}
             >
               <div className="flex justify-between text-xs sm:text-sm py-1 sm:py-1.5 border-b border-[#111111]">
@@ -1137,7 +1516,7 @@ const ProductDetails = () => {
               <div className="flex justify-between text-xs sm:text-sm py-1 sm:py-1.5 border-b border-[#111111]">
                 <span className="text-[#555555]">Seller</span>
                 <span className="text-[#777777] font-mono text-[10px] sm:text-xs">
-                  {product.seller.fullName}
+                  {product.seller?.fullName || product.seller}
                 </span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm py-1 sm:py-1.5 border-b border-[#111111]">

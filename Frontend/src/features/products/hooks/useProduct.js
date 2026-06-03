@@ -12,7 +12,11 @@ import {
   getAllProducts,
   getProductDetails,
   createProduct,
-  createView
+  createView,
+  addVariant,
+  editProduct,
+  getVariant,
+  editProductVariant
 } from "../services/products.api";
 
 const useProduct = () => {
@@ -22,10 +26,18 @@ const useProduct = () => {
     async (formData) => {
       dispatch(setError(null));
       const data = await createProduct(formData, dispatch);
-      return data.product;
+      return data;
     },
     [dispatch],
   );
+
+  const handleAddVariant = useCallback(async (productId, formData) => {
+    dispatch(setError(null));
+
+    const data = await addVariant(productId, formData, dispatch);
+
+    return data;
+  }, [dispatch]);
 
   const handleGetSellerProducts = useCallback(async () => {
     dispatch(setError(null));
@@ -41,6 +53,7 @@ const useProduct = () => {
 
   const handleDeleteProduct = useCallback(
     async (productId) => {
+      dispatch(setError(null));
       const data = await deleteProduct(productId, dispatch);
       return data;
     },
@@ -56,28 +69,56 @@ const useProduct = () => {
 
   const handleGetProductDetails = useCallback(
     async (productId) => {
+      dispatch(setError(null));
       const data = await getProductDetails(productId, dispatch);
 
       dispatch(setProduct(data.product));
             
-      return data.product;
+      return data;
     },
     [dispatch],
   );
 
   const handleCreateView = useCallback(async (productId) => {
+    dispatch(setError(null));
     const data = await createView(productId, dispatch);
 
     return data;
   }, [dispatch]);
 
+  const handleEditProduct = useCallback(async (formData, productId) => {
+    dispatch(setError(null));
+    const data = await editProduct(formData, productId, dispatch);
+
+    return data;
+  }, [dispatch])
+
+  const handleGetVariant = useCallback(async (variantId) => {
+    dispatch(setError(null));
+    const data = await getVariant(variantId, dispatch);
+
+    return data;
+
+  }, [dispatch])
+
+  const handleEditProductVariant = useCallback(async (productId, variantId, formData) => {
+    dispatch(setError(null));
+    const data = editProductVariant(productId, variantId, formData, dispatch);
+
+    return data;
+  }, [dispatch])
+
   return {
     handleCreateProduct,
+    handleAddVariant,
     handleGetSellerProducts,
     handleDeleteProduct,
     handleGetAllProducts,
     handleGetProductDetails,
-    handleCreateView
+    handleCreateView,
+    handleEditProduct,
+    handleGetVariant,
+    handleEditProductVariant
   };
 };
 

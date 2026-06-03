@@ -13,6 +13,9 @@ import NotFound from "../features/products/components/Notfound";
 import NotLoggedInOnly from "../features/auth/components/NotLoggedInOnly";
 import Store from "../features/products/pages/Store";
 import ProductDetails from "../features/products/pages/ProductDetails";
+import CreateProductVariant from "../features/products/pages/CreateProductVariant";
+import EditProduct from "../features/products/pages/EditProduct";
+import EditProductVariant from "../features/products/pages/EditProductVariant";
 
 // ─── Routes ───────────────────────────────────────────────────────
 export const routes = createBrowserRouter([
@@ -66,16 +69,20 @@ export const routes = createBrowserRouter([
         path: "create-product",
         element: <CreateProduct />,
       },
+      {
+        path: "add-variant/:productId",
+        element: <CreateProductVariant />
+      },
 
       // Edit product  →  /seller/dashboard/edit-product/:id
       {
-        path: "edit-product/:id",
-        element: (
-          <Upcoming
-            title="Edit Product"
-            description="The product editor is being polished. You'll be able to update titles, images, pricing, and more very soon."
-          />
-        ),
+        path: "edit-product/:productId",
+        element: <EditProduct />,
+      },
+
+      {
+        path: "edit-product/:productId/variants/:variantId",
+        element: <EditProductVariant />
       },
 
       // Orders  →  /seller/dashboard/orders

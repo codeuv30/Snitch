@@ -33,15 +33,24 @@ async function sendTokenResponse(user, res, message) {
 }
 
 export const register = async (req, res) => {
+  if (!req.body) {
+    return res.status(400).json({
+      success: false,
+      message: "Request body is missing",
+    });
+  }
+
   const { email, contact, fullName, isSeller, provider } = req.body;
   const password = req.body.password;
 
-  if(!password && provider !== "google") {
+  if (!password && provider !== "google") {
     return res.status(400).json({ message: "Password is required" });
   }
 
-  if(password?.length < 6 && provider !== "google") {
-    return res.status(400).json({ message: "Password must be at least 6 characters long" });
+  if (password?.length < 6 && provider !== "google") {
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters long" });
   }
 
   try {
@@ -61,9 +70,9 @@ export const register = async (req, res) => {
       fullName,
       role: isSeller ? "seller" : "buyer",
       provider,
-    }
+    };
 
-    if(password) {
+    if (password) {
       userDetails.password = password;
     }
 
@@ -84,6 +93,13 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+  if (!req.body) {
+    return res.status(400).json({
+      success: false,
+      message: "Request body is missing",
+    });
+  }
+  
   const { email, password } = req.body;
 
   try {
@@ -119,8 +135,10 @@ export const logout = async (req, res) => {
     sameSite: config.NODE_ENV === "production" ? "none" : "lax",
   });
 
-  return res.status(200).json({ success: true, message: "User logged out successfully" });
-}
+  return res
+    .status(200)
+    .json({ success: true, message: "User logged out successfully" });
+};
 
 export const getMe = async (req, res) => {
   return res.status(200).json({
@@ -134,7 +152,7 @@ export const getMe = async (req, res) => {
       provider: req.user.provider,
     },
   });
-}
+};
 
 export const googleCallback = async (req, res) => {
   if (!req.user.isNewUser) {

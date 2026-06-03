@@ -405,9 +405,9 @@ const Store = () => {
                     onClick={() => navigate(`/store/product/${product._id}`)}
                   >
                     <div className={`relative overflow-hidden bg-[#111111] ${viewMode === 'list' ? 'sm:w-80 flex-shrink-0' : 'aspect-[3/4]'}`}>
-                      {product.images && product.images.length > 0 ? (
+                      {product.thumbnail && product.thumbnail.length > 0 ? (
                         <img
-                          src={product.images[0]?.url || product.images[0]}
+                          src={product.thumbnail}
                           alt={product.title}
                           className="product-image w-full h-full object-cover transition-transform duration-700"
                           loading="lazy"
@@ -489,7 +489,7 @@ const Store = () => {
                       <div className="flex items-end justify-between pt-2 sm:pt-4 border-t border-[#1a1a1a]">
                         <div>
                           <span className="text-sm sm:text-xl font-bold text-[#f0f0f0]">
-                            {formatPrice(product.price?.amount, product.price?.currency)}
+                            {formatPrice(product.startingPrice?.amount, product.startingPrice?.currency)}
                           </span>
                           {product.sales > 0 && (
                             <p className="text-[10px] sm:text-[11px] text-[#555555] mt-0.5 sm:mt-1">{product.sales} sold</p>
