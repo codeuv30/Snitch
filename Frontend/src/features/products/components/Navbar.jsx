@@ -35,7 +35,7 @@ const Navbar = ({ isLoggedIn, user, onSearchOpen }) => {
     { label: "MEN", href: "/store/category/men" },
     { label: "WOMEN", href: "/store/category/women" },
     { label: "NEW ARRIVALS", href: "/store/new-arrivals" },
-    { label: "COLLECTIONS", href: "/store/collections" },
+    { label: "STORE", href: "/store" },
     ...(user?.role === "seller"
       ? [{ label: "DASHBOARD", href: "/seller/dashboard" }]
       : []),

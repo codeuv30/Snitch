@@ -57,7 +57,7 @@ export const WishlistProvider = ({ children }) => {
         if (result?.success) {
           const wishlistResult = await handleGetWishlist();
           if (wishlistResult?.success) {
-            setWishlist(wishlistResult.wishlist?.items || []);
+            setWishlist(wishlistResult.wishlist?.products || []);
           }
 
           setAddedToWishlist(true);
@@ -83,7 +83,7 @@ export const WishlistProvider = ({ children }) => {
       try {
         await handleRemoveItem(productId, variantId);
         const result = await handleGetWishlist();
-        if (result?.success) setWishlist(result.wishlist?.items || []);
+        if (result?.success) setWishlist(result.wishlist?.products || []);
       } catch (err) {
         Toast.error("Something went wrong");
         console.error(err);
@@ -130,7 +130,7 @@ export const WishlistProvider = ({ children }) => {
         }
 
         const result = await handleGetWishlist();
-        if (result?.success) setWishlist(result.wishlist?.items || []);
+        if (result?.success) setWishlist(result.wishlist?.products || []);
       } catch (err) {
         Toast.error("Something went wrong");
         console.error(err);

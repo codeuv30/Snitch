@@ -41,7 +41,7 @@ export const CartProvider = ({ children }) => {
   }, [handleGetCart, user]);
 
   const addToCart = useCallback(
-    async (product, variant = null, quantity = 1) => {
+    async (product, variant = null) => {
       if (!user) {
         Toast.error("Please login to add items in cart");
         return;
@@ -108,9 +108,11 @@ export const CartProvider = ({ children }) => {
 
   const cartTotal = useMemo(() => {
     return cart.reduce((sum, item) => {
-      const price =
-        item.variant?.price?.amount || item.product?.startingPrice?.amount || 0;
-      return sum + Number(price) * (item.quantity || 1);
+      const price = Number(
+        item.variant?.price?.amount ?? item.product?.startingPrice?.amount ?? 0,
+      );
+      const quantity = typeof item.quantity === "number" ? item.quantity : 1;
+      return sum + price * quantity;
     }, 0);
   }, [cart]);
 
@@ -162,7 +164,7 @@ export const CartProvider = ({ children }) => {
 export const useCartUI = () => {
   const context = React.useContext(CartContext);
 
-  if(!context) {
+  if (!context) {
     throw new Error("useCartUI must be used within CartProvider");
   }
 

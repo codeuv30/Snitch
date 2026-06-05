@@ -70,8 +70,8 @@ export const CartButton = ({ className = "" }) => {
 };
 
 // ─── Product Thumbnail Helper ──────────────────────────────
-const ProductThumbnail = ({ product }) => {
-  const imageUrl = product?.thumbnail || product?.images?.[0]?.url;
+const ProductThumbnail = ({ product, variant }) => {
+  const imageUrl = variant?.images?.[0]?.url || product?.thumbnail;
 
   if (imageUrl) {
     return (
@@ -163,7 +163,10 @@ export const CartSidebar = () => {
                 >
                   {/* Thumbnail */}
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-[#1a1a1a] flex-shrink-0 bg-[#0a0a0a]">
-                    <ProductThumbnail product={item.product} />
+                    <ProductThumbnail
+                      product={item.product}
+                      variant={item.variant}
+                    />
                   </div>
 
                   {/* Details */}
@@ -176,16 +179,42 @@ export const CartSidebar = () => {
                         {item.variant.variantKey}
                       </p>
                     )}
-                    <p className="text-[11px] sm:text-xs text-[#d4a76a] font-medium mt-1">
-                      {formatPrice(item.price?.amount, item.price?.currency)}
-                    </p>
+                    {item.price.amount > item.variant.price.amount ? (
+                      <div className="flex gap-2">
+                        <p className="text-[11px] sm:text-xs text-[#b6b6b6] font-medium mt-1 line-through">
+                          {formatPrice(
+                            item.price?.amount,
+                            item.price?.currency,
+                          )}
+                        </p>
+                        <p className="text-[11px] sm:text-xs text-[#d4a76a] font-medium mt-1">
+                          {formatPrice(
+                            item.variant.price?.amount,
+                            item.variant.price?.currency,
+                          )}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] sm:text-xs text-[#d4a76a] font-medium mt-1">
+                        {formatPrice(item.price?.amount, item.price?.currency)}
+                      </p>
+                    )}
+
+                    {item.price.amount > item.variant.price.amount && (
+                      <>
+                        <p className="text-[11px] sm:text-xs text-green-400 font-medium mt-0.5">You are saving {formatPrice((item.price?.amount - item.variant.price?.amount), item.variant.price?.currency)} on this item.</p>
+                      </>
+                    )}
 
                     {/* Quantity + Remove */}
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center border border-[#1a1a1a] rounded-lg bg-[#0a0a0a]">
                         <button
                           onClick={() =>
-                            decrementQuantity(item.product._id, item.variant?._id)
+                            decrementQuantity(
+                              item.product._id,
+                              item.variant?._id,
+                            )
                           }
                           className="px-2 sm:px-3 py-1 text-[#777777] hover:text-[#f0f0f0] transition-colors"
                         >
@@ -196,7 +225,10 @@ export const CartSidebar = () => {
                         </span>
                         <button
                           onClick={() =>
-                            incrementQuantity(item.product._id, item.variant?._id)
+                            incrementQuantity(
+                              item.product._id,
+                              item.variant?._id,
+                            )
                           }
                           className="px-2 sm:px-3 py-1 text-[#777777] hover:text-[#f0f0f0] transition-colors"
                         >
@@ -204,7 +236,9 @@ export const CartSidebar = () => {
                         </button>
                       </div>
                       <button
-                        onClick={() => removeItem(item.product._id, item.variant?._id)}
+                        onClick={() =>
+                          removeItem(item.product._id, item.variant?._id)
+                        }
                         className="p-1.5 text-[#555555] hover:text-[#ff5555] transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -229,7 +263,7 @@ export const CartSidebar = () => {
               </div>
               <button className="w-full py-3 sm:py-4 bg-[#f0f0f0] text-[#0a0a0a] rounded-xl font-semibold text-sm sm:text-base hover:bg-[#d4a76a] transition-colors flex items-center justify-center gap-2">
                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
-                Checkout
+                Proceed to Checkout
               </button>
               <button
                 onClick={() => {

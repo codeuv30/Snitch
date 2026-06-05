@@ -1095,7 +1095,7 @@ const ProductDetails = () => {
     });
   };
 
-  const { toggleWishlist, isInWishlist, setWishlistOpen } = useWishlistUI();
+  const { addToWishlist, isInWishlist, setWishlistOpen } = useWishlistUI();
 
   const productIsWishlisted = isInWishlist(product?._id, matchedVariant?._id);
 
@@ -1331,7 +1331,7 @@ const ProductDetails = () => {
                   </div>
                   <div className="flex gap-1.5 sm:gap-2 flex-shrink-0">
                     <button
-                      onClick={() => toggleWishlist(product, matchedVariant)}
+                      onClick={() => addToWishlist(product, matchedVariant)}
                       className={`p-2 rounded-lg sm:rounded-xl border transition-all ${
                         productIsWishlisted
                           ? "bg-[#ff5555]/10 border-[#ff5555]/30 text-[#ff5555]"

@@ -69,8 +69,8 @@ export const WishlistButton = ({ className = "" }) => {
 };
 
 // ─── Product Thumbnail Helper ──────────────────────────────
-const ProductThumbnail = ({ product }) => {
-  const imageUrl = product?.thumbnail || product?.images?.[0]?.url;
+const ProductThumbnail = ({ product, variant }) => {
+  const imageUrl = variant?.images?.[0]?.url || product?.thumbnail;
 
   if (imageUrl) {
     return (
@@ -100,7 +100,7 @@ export const WishlistSidebar = () => {
   } = React.useContext(WishlistContext);
 
   if (!wishlistOpen) return null;
-
+  
   return (
     <div className="fixed inset-0 z-[100] animate-fade-in">
       <WishlistStyles />
@@ -159,7 +159,7 @@ export const WishlistSidebar = () => {
                 >
                   {/* Thumbnail */}
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-[#1a1a1a] flex-shrink-0 bg-[#0a0a0a]">
-                    <ProductThumbnail product={item.product} />
+                    <ProductThumbnail product={item.product} variant={item.variant} />
                   </div>
 
                   {/* Details */}

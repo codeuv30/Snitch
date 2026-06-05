@@ -564,7 +564,7 @@ const Store = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleWishlist(product);
+                            navigate(`/store/product/${product._id}`)
                           }}
                           className={`absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full transition-all ${
                             isInWishlist(product._id)
@@ -659,21 +659,6 @@ const Store = () => {
                             >
                               <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
                               ADD TO CART
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleWishlist(product);
-                              }}
-                              className={`p-2 sm:p-3 rounded-lg sm:rounded-xl border transition-all ${
-                                isInWishlist(product._id)
-                                  ? "bg-[#ff5555]/10 border-[#ff5555]/30 text-[#ff5555]"
-                                  : "border-[#1a1a1a] text-[#555555] hover:text-[#ff5555]"
-                              }`}
-                            >
-                              <Heart
-                                className={`w-4 h-4 sm:w-5 sm:h-5 ${isInWishlist(product._id) ? "fill-current" : ""}`}
-                              />
                             </button>
                           </div>
                         )}

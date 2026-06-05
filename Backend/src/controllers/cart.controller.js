@@ -9,12 +9,14 @@ export const addToCart = async (req, res) => {
     const user = req.user;
 
     const product = await productModel.findOne({ _id: productId, status: "Live" });
+
     if (!product) {
       return res.status(400).json({
         success: false,
         message: "Product does not exists",
       });
     }
+    
     const variant = await variantModel.findOne({
       _id: variantId,
       product: product._id,
