@@ -240,10 +240,12 @@ export const editProductVariant = async (
   try {
     dispatch(setLoading(true));
 
-    const response = await productApiInstance.post(`${productId}/variants/${variantId}`, formData);
+    const response = await productApiInstance.post(
+      `${productId}/variants/${variantId}`,
+      formData,
+    );
 
     return response.data;
-
   } catch (error) {
     if (error.response && error.response.data) {
       dispatch(setError(error.response.data.message));

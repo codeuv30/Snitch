@@ -1,36 +1,55 @@
 import { setError, setLoading, setUser } from "../state/auth.slice.js";
-import { login, register } from "../service/auth.api.js";
+import { getCurrentUser, login, logout, register } from "../service/auth.api.js";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import { useCallback } from "react";
+
 export const useAuth = () => {
+  const dispatch = useDispatch();
 
-    const dispatch = useDispatch();
-    
-    const error = useSelector((state) => state.auth.error);
-    const loading = useSelector((state) => state.auth.loading);
-    const user = useSelector((state) => state.auth.user);
+  const error = useSelector((state) => state.auth.error);
+  const loading = useSelector((state) => state.auth.loading);
+  const user = useSelector((state) => state.auth.user);
 
-    async function handleRegister(user) {
-        dispatch(setError(null));
-        
-        const data = await register(user, dispatch);
+  const handleRegister = useCallback(
+    async (user) => {
+      dispatch(setError(null));
 
-        if(data?.user) {
-            dispatch(setUser(data.user));
-            return data.user
-        }
-    }
+      const data = await register(user, dispatch);
 
-    async function handleLogin({ email, password }) {
-        dispatch(setError(null));
-        const data = await login({ email, password }, dispatch);
+      if (data?.user) {
+        dispatch(setUser(data.user));
+        return data.user;
+      }
+    },
+    [dispatch],
+  );
 
-        if(data?.user) {
-            dispatch(setUser(data.user));
+  const handleLogin = useCallback(
+    async ({ email, password }) => {
+      dispatch(setError(null));
+      const data = await login({ email, password }, dispatch);
 
-            return data.user;
-        }
-    }
+      if (data?.user) {
+        dispatch(setUser(data.user));
 
-    return { handleRegister, handleLogin };
-}
+        return data.user;
+      }
+    },
+    [dispatch],
+  );
+
+  const handleLogout = useCallback(() => {
+    const data = logout(dispatch);
+
+    return data;
+  }, [dispatch]);
+
+  const handleGetUser = useCallback(() => {
+    const data = getCurrentUser(dispatch);
+
+    return data;
+  }, [dispatch])
+
+  return { handleRegister, handleLogin, handleLogout, handleGetUser };
+};

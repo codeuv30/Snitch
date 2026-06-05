@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import {
   ContextMenuProvider,
@@ -9,10 +9,28 @@ import Sidebar from "../components/DashboardSidebar";
 
 const LayoutInner = () => {
   const { menu, closeContextMenu } = useContextMenu();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarCollapsed(true);
+      } else {
+        setSidebarCollapsed(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="min-h-screen flex bg-[#F5EFE6]">
-      <Sidebar />
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
 
       {menu && (
         <ContextMenu
@@ -24,7 +42,11 @@ const LayoutInner = () => {
         />
       )}
 
-      <div className="flex-1 flex flex-col lg:ml-[220px] min-h-screen">
+      <div
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? "lg:ml-[64px]" : "lg:ml-[220px]"
+        }`}
+      >
         <Outlet />
       </div>
     </div>

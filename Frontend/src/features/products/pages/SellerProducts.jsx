@@ -79,14 +79,14 @@ const PageStyles = () => (
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .masonry-grid { column-count: 1; column-gap: 20px; }
-    @media (min-width: 640px)  { .masonry-grid { column-count: 2; } }
-    @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
-    @media (min-width: 1280px) { .masonry-grid { column-count: 4; } }
+    .masonry-grid { column-count: 2; column-gap: 8px; }
+    @media (min-width: 640px)  { .masonry-grid { column-count: 2; column-gap: 12px; } }
+    @media (min-width: 1024px) { .masonry-grid { column-count: 3; column-gap: 16px; } }
+    @media (min-width: 1280px) { .masonry-grid { column-count: 4; column-gap: 20px; } }
     .masonry-grid > * { break-inside: avoid; page-break-inside: avoid; }
-    .standard-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    @media (min-width: 768px)  { .standard-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (min-width: 1280px) { .standard-grid { grid-template-columns: repeat(3, 1fr); } }
+    .standard-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    @media (min-width: 640px)  { .standard-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+    @media (min-width: 1024px) { .standard-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
   `}</style>
 );
 
@@ -119,11 +119,11 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in-fast"
         onClick={onCancel}
       />
-      <div className="relative bg-[#0f0f0f] rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.4)] w-full max-w-[420px] overflow-hidden animate-modal-in border border-[#1a1a1a]">
-        <div className="px-6 pt-6 pb-4">
+      <div className="relative bg-[#0f0f0f] rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.4)] w-full max-w-[360px] sm:max-w-[420px] overflow-hidden animate-modal-in border border-[#1a1a1a]">
+        <div className="px-3 sm:px-6 pt-3 sm:pt-6 pb-2.5 sm:pb-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#200f0f] border border-[#3a1a1a] flex items-center justify-center flex-shrink-0">
-              <Trash2 className="w-6 h-6 text-[#f87171]" />
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#200f0f] border border-[#3a1a1a] flex items-center justify-center flex-shrink-0">
+              <Trash2 className="w-4 h-4 sm:w-6 sm:h-6 text-[#f87171]" />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-[\'Playfair_Display\'] text-[20px] text-[#f0ede8] leading-tight font-semibold">
@@ -140,7 +140,7 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
           </div>
         </div>
 
-        <div className="mx-6 p-3 bg-[#141414] rounded-xl flex items-center gap-3 border border-[#1a1a1a]">
+        <div className="mx-3 sm:mx-6 p-2 sm:p-3 bg-[#141414] rounded-xl flex items-center gap-2 sm:gap-3 border border-[#1a1a1a]">
           {product.thumbnail ? (
             <img
               src={product.thumbnail}
@@ -163,7 +163,7 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
           </div>
         </div>
 
-        <div className="px-6 pt-4 pb-2">
+        <div className="px-3 sm:px-6 pt-2.5 sm:pt-4 pb-2">
           <label className="block text-[13px] text-[#888] mb-2 font-medium">
             To confirm, type{" "}
             <span className="font-bold text-[#f0ede8]">"{product.title}"</span>{" "}
@@ -193,7 +193,7 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
           )}
         </div>
 
-        <div className="px-6 py-5 flex gap-3">
+        <div className="px-3 sm:px-6 py-3 sm:py-5 flex gap-2 sm:gap-3">
           <button
             onClick={onCancel}
             disabled={isDeleting}
@@ -243,16 +243,38 @@ const DeleteConfirmModal = ({ product, onConfirm, onCancel, isDeleting }) => {
 // ─── Status Badge Component ─────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const configs = {
-    "Live": { bg: "bg-emerald-500/15", text: "text-emerald-400", border: "border-emerald-500/25", icon: null },
-    "Under Review": { bg: "bg-amber-500/15", text: "text-amber-400", border: "border-amber-500/25", icon: Clock },
-    "Draft": { bg: "bg-[#555]/15", text: "text-[#888]", border: "border-[#555]/25", icon: null },
-    "Rejected": { bg: "bg-[#f87171]/15", text: "text-[#f87171]", border: "border-[#f87171]/25", icon: Ban },
+    Live: {
+      bg: "bg-emerald-500/15",
+      text: "text-emerald-400",
+      border: "border-emerald-500/25",
+      icon: null,
+    },
+    "Under Review": {
+      bg: "bg-amber-500/15",
+      text: "text-amber-400",
+      border: "border-amber-500/25",
+      icon: Clock,
+    },
+    Draft: {
+      bg: "bg-[#555]/15",
+      text: "text-[#888]",
+      border: "border-[#555]/25",
+      icon: null,
+    },
+    Rejected: {
+      bg: "bg-[#f87171]/15",
+      text: "text-[#f87171]",
+      border: "border-[#f87171]/25",
+      icon: Ban,
+    },
   };
   const config = configs[status] || configs["Draft"];
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${config.bg} ${config.text} ${config.border}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[7px] sm:text-[8px] lg:text-[10px] font-bold uppercase tracking-wider border ${config.bg} ${config.text} ${config.border}`}
+    >
       {Icon && <Icon className="w-3 h-3" />}
       {status}
     </span>
@@ -311,7 +333,7 @@ const ProductCard = ({
                  transition-all duration-300 ease-out
                  ${isUnderReview ? "cursor-not-allowed border-amber-500/20" : "cursor-context-menu hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] hover:border-[#2a2a2a] hover:translate-y-[-4px]"}
                  ${shouldAnimate ? "card-enter" : "card-visible"}
-                 ${isGrid ? "flex flex-row" : "break-inside-avoid mb-5"}`}
+                 ${isGrid ? "flex flex-row" : "break-inside-avoid mb-2 sm:mb-4"}`}
       style={
         shouldAnimate
           ? {
@@ -322,13 +344,15 @@ const ProductCard = ({
     >
       {/* Under Review Status Banner */}
       {isUnderReview && (
-        <div className="bg-[#141414] border-y border-amber-500/10 py-2.5 px-3 flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
+        <div className="bg-[#141414] border-y border-amber-500/10 py-1 px-1.5 sm:py-2 sm:px-3 flex items-center gap-1.5 sm:gap-2.5">
+          <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+            <Clock className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-amber-400" />
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] font-bold text-amber-400 leading-tight">Under Review</p>
-            <p className="text-[10px] text-[#777] leading-tight truncate">
+            <p className="text-[9px] sm:text-[11px] font-bold text-amber-400 leading-tight">
+              Under Review
+            </p>
+            <p className="text-[8px] sm:text-[10px] text-[#777] leading-tight truncate">
               Awaiting approval. 1–3 business days.
             </p>
           </div>
@@ -338,16 +362,16 @@ const ProductCard = ({
       {/* Image area */}
       <div
         className={`relative overflow-hidden bg-[#141414] flex-shrink-0
-                   ${isGrid ? "w-[140px] sm:w-[180px] aspect-square" : ""}
+                   ${isGrid ? "w-[72px] sm:w-[100px] md:w-[140px] lg:w-[180px] aspect-square" : ""}
                    ${isUnderReview ? "opacity-40" : ""}`}
         style={
           !isGrid
-            ? { aspectRatio: `${1 / aspectRatio}`, minHeight: "180px" }
+            ? { aspectRatio: "3/4", minHeight: "120px" }
             : {}
         }
       >
         {/* Top Right: Edit Button + Status Badge */}
-        <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+        <div className="absolute top-1.5 sm:top-2 lg:top-3 right-1.5 sm:right-2 lg:right-3 z-20 flex items-center gap-1 sm:gap-1.5 lg:gap-2">
           <StatusBadge status={product.status} />
           <button
             onClick={(e) => {
@@ -357,12 +381,15 @@ const ProductCard = ({
               }
             }}
             disabled={isUnderReview}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200
-                      ${isUnderReview 
-                        ? "bg-[#1a1a1a]/80 text-[#444] cursor-not-allowed border border-[#222]" 
-                        : "bg-[#0a0a0a]/80 backdrop-blur-sm text-[#aaa] hover:text-[#f0ede8] hover:bg-[#c4956a] border border-[#1a1a1a] hover:border-[#c4956a] shadow-lg"
+            className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all duration-200
+                      ${
+                        isUnderReview
+                          ? "bg-[#1a1a1a]/80 text-[#444] cursor-not-allowed border border-[#222]"
+                          : "bg-[#0a0a0a]/80 backdrop-blur-sm text-[#aaa] hover:text-[#f0ede8] hover:bg-[#c4956a] border border-[#1a1a1a] hover:border-[#c4956a] shadow-lg"
                       }`}
-            title={isUnderReview ? "Cannot edit while under review" : "Edit Product"}
+            title={
+              isUnderReview ? "Cannot edit while under review" : "Edit Product"
+            }
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
@@ -395,8 +422,8 @@ const ProductCard = ({
           <div
             className={`absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent
                          opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                         flex items-end justify-between p-4
-                         ${isGrid ? "hidden sm:flex" : ""}`}
+                         flex items-end justify-between p-2 sm:p-4
+                         ${isGrid ? "hidden md:flex" : ""}`}
           >
             <div className="flex gap-2">
               <button
@@ -404,7 +431,7 @@ const ProductCard = ({
                   e.stopPropagation();
                   onEdit(product);
                 }}
-                className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center
+                className="w-6 h-6 sm:w-9 sm:h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center
                           text-[#f0ede8] hover:bg-white/20 transition-all duration-150 hover:scale-110 border border-white/10"
               >
                 <Pencil className="w-4 h-4" />
@@ -414,13 +441,13 @@ const ProductCard = ({
                   e.stopPropagation();
                   onDelete(product);
                 }}
-                className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center
+                className="w-6 h-6 sm:w-9 sm:h-9 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center
                           text-[#f87171] hover:bg-white/20 transition-all duration-150 hover:scale-110 border border-white/10"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-            <div className="text-white text-[11px] font-bold bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-md">
+            <div className="text-white text-[9px] sm:text-[11px] font-bold bg-black/50 backdrop-blur-sm px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md">
               {product.startingPrice?.currency || "INR"}{" "}
               {parseInt(product.startingPrice?.amount || 0).toLocaleString()}
             </div>
@@ -428,14 +455,14 @@ const ProductCard = ({
         )}
 
         {/* Status badges (New/Hot) */}
-        <div className="absolute top-3 left-3 flex gap-1.5 z-10">
+        <div className="absolute top-1.5 sm:top-2 lg:top-3 left-1.5 sm:left-2 lg:left-3 flex gap-1 sm:gap-1.5 z-10">
           {isNew && (
-            <span className="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md font-bold bg-[#f0ede8] text-[#0a0a0a] shadow-md">
+            <span className="text-[7px] sm:text-[8px] lg:text-[10px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md font-bold bg-[#f0ede8] text-[#0a0a0a] shadow-md">
               New
             </span>
           )}
           {isBestseller && (
-            <span className="text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md font-bold bg-[#c4956a] text-white shadow-md">
+            <span className="text-[7px] sm:text-[8px] lg:text-[10px] uppercase tracking-wider px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md font-bold bg-[#c4956a] text-white shadow-md">
               Hot
             </span>
           )}
@@ -444,34 +471,38 @@ const ProductCard = ({
 
       {/* Text content */}
       <div
-        className={`flex-1 flex flex-col ${isGrid ? "p-4 justify-between" : "px-4 pt-4 pb-3"} ${isUnderReview ? "opacity-40" : ""}`}
+        className={`flex-1 flex flex-col ${isGrid ? "p-2 sm:p-3 lg:p-4 justify-between" : "px-2.5 sm:px-4 pt-2.5 sm:pt-4 pb-2 sm:pb-3"} ${isUnderReview ? "opacity-40" : ""}`}
       >
         <div>
           <div className="flex items-start justify-between gap-2">
-            <h3 className={`font-[\'Playfair_Display\'] text-[15px] leading-snug line-clamp-2 font-semibold ${isUnderReview ? "text-[#555]" : "text-[#f0ede8]"}`}>
+            <h3
+              className={`font-['Playfair_Display'] text-[11px] sm:text-[13px] lg:text-[15px] leading-snug line-clamp-2 font-semibold ${isUnderReview ? "text-[#555]" : "text-[#f0ede8]"}`}
+            >
               {product.title}
             </h3>
           </div>
           <p
-            className={`mt-1.5 text-[13px] leading-[1.6] line-clamp-2 font-medium ${isUnderReview ? "text-[#444]" : "text-[#888]"} ${isGrid ? "hidden sm:block" : ""}`}
+            className={`mt-1 text-[11px] sm:text-[13px] leading-[1.5] sm:leading-[1.6] line-clamp-2 font-medium ${isUnderReview ? "text-[#444]" : "text-[#888]"} ${isGrid ? "hidden md:block" : "hidden md:block"}`}
           >
             {product.description}
           </p>
 
           {product.tags?.length > 0 && (
             <div
-              className={`flex flex-wrap gap-1.5 mt-2 ${isGrid ? "hidden sm:flex" : ""}`}
+              className={`flex flex-wrap gap-1 sm:gap-1.5 mt-1.5 sm:mt-2 ${isGrid ? "hidden md:flex" : "hidden md:flex"}`}
             >
-              {product.tags.slice(0, 3).map((tag) => (
+              {product.tags.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className={`text-[11px] tracking-[0.05em] px-2 py-0.5 rounded-md capitalize font-semibold border ${isUnderReview ? "text-[#444] bg-[#111] border-[#1a1a1a]" : "text-[#c4956a] bg-[#1a1108] border-[#2a1f0a]"}`}
+                  className={`text-[9px] sm:text-[10px] lg:text-[11px] tracking-[0.05em] px-1.5 sm:px-2 py-0.5 rounded-md capitalize font-semibold border ${isUnderReview ? "text-[#444] bg-[#111] border-[#1a1a1a]" : "text-[#c4956a] bg-[#1a1108] border-[#2a1f0a]"}`}
                 >
                   {tag}
                 </span>
               ))}
-              {product.tags.length > 3 && (
-                <span className={`text-[11px] font-semibold ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}>
+              {product.tags.length > 2 && (
+                <span
+                  className={`text-[8px] sm:text-[10px] lg:text-[11px] font-semibold ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}
+                >
                   +{product.tags.length - 3}
                 </span>
               )}
@@ -480,26 +511,30 @@ const ProductCard = ({
         </div>
 
         {/* Spacer to push stats to bottom */}
-        <div className="flex-1 min-h-[8px]" />
+        <div className="flex-1 min-h-[2px] sm:min-h-[6px] lg:min-h-[8px]" />
 
         <div
-          className={`mt-4 pt-3 border-t border-[#1a1a1a]
-                       ${isGrid ? "flex flex-col sm:flex-row sm:items-center justify-between gap-2" : "flex items-center gap-3"}`}
+          className={`mt-1.5 sm:mt-3 pt-1.5 sm:pt-3 border-t border-[#1a1a1a]
+                       ${isGrid ? "flex flex-row items-center justify-between gap-1 sm:gap-2" : "flex items-center gap-2 sm:gap-3"}`}
         >
           {!isGrid && (
-            <div className="flex items-center gap-3">
-              <div className={`flex items-center gap-1.5 text-[12px] font-medium ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}>
-                <Eye className="w-3.5 h-3.5" />
+            <div className="hidden md:flex items-center gap-2 sm:gap-3">
+              <div
+                className={`flex items-center gap-1 text-[10px] sm:text-[12px] font-medium ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}
+              >
+                <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span>{product.views ?? 0}</span>
               </div>
-              <div className={`flex items-center gap-1.5 text-[12px] font-medium ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}>
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span>{product.sales ?? 0} sales</span>
+              <div
+                className={`flex items-center gap-1 text-[10px] sm:text-[12px] font-medium ${isUnderReview ? "text-[#333]" : "text-[#555]"}`}
+              >
+                <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span>{product.sales ?? 0}</span>
               </div>
             </div>
           )}
           <div
-            className={`text-[14px] font-bold ${isGrid ? "sm:ml-auto" : "ml-auto"} ${isUnderReview ? "text-[#444]" : "text-[#c4956a]"}`}
+            className={`text-[11px] sm:text-[12px] lg:text-[14px] font-bold ${isGrid ? "ml-auto" : "ml-auto"} ${isUnderReview ? "text-[#444]" : "text-[#c4956a]"}`}
           >
             {product.startingPrice?.currency || "INR"}{" "}
             {parseInt(product.startingPrice?.amount || 0).toLocaleString()}
@@ -508,51 +543,53 @@ const ProductCard = ({
 
         {/* Bottom action buttons */}
         {isGrid ? (
-          <div className="flex gap-2 mt-4 pt-3 border-t border-[#1a1a1a] sm:hidden">
+          <div className="flex gap-1 mt-1.5 pt-1.5 border-t border-[#1a1a1a] lg:hidden">
             <button
               onClick={() => !isUnderReview && onEdit(product)}
               disabled={isUnderReview}
-              className={`flex-1 py-2.5 text-[11px] uppercase tracking-[0.1em] rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-all duration-150
-                        ${isUnderReview 
-                          ? "border border-[#222] text-[#444] cursor-not-allowed bg-[#0a0a0a]" 
-                          : "border border-[#1a1a1a] text-[#f0ede8] hover:bg-[#f0ede8] hover:text-[#0a0a0a] hover:border-[#f0ede8]"
+              className={`flex-1 py-1 text-[8px] sm:text-[10px] uppercase tracking-[0.08em] rounded-lg font-semibold flex items-center justify-center gap-0.5 transition-all duration-150
+                        ${
+                          isUnderReview
+                            ? "border border-[#222] text-[#444] cursor-not-allowed bg-[#0a0a0a]"
+                            : "border border-[#1a1a1a] text-[#f0ede8] hover:bg-[#f0ede8] hover:text-[#0a0a0a] hover:border-[#f0ede8]"
                         }`}
             >
-              <Pencil className="w-3.5 h-3.5" />
-              Edit
+              <Pencil className="w-3 h-3" />
+              <span className="hidden sm:inline">Edit</span>
             </button>
             <button
               onClick={() => onDelete(product)}
-              className="flex-1 py-2.5 border border-[#1a1a1a] text-[#888] text-[11px] uppercase tracking-[0.1em]
+              className="flex-1 py-1 border border-[#1a1a1a] text-[#888] text-[8px] sm:text-[10px] uppercase tracking-[0.08em]
                         rounded-lg transition-all duration-150 hover:bg-[#f87171] hover:text-white hover:border-[#f87171]
-                        font-semibold flex items-center justify-center gap-1.5"
+                        font-semibold flex items-center justify-center gap-0.5"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              Delete
+              <Trash2 className="w-3 h-3" />
+              <span className="hidden sm:inline">Delete</span>
             </button>
           </div>
         ) : (
-          <div className="px-4 pb-4 pt-3 flex gap-2 border-t border-[#1a1a1a]">
+          <div className="px-2 sm:px-4 pb-2 sm:pb-4 pt-1.5 sm:pt-3 flex gap-1 sm:gap-2 border-t border-[#1a1a1a]">
             <button
               onClick={() => !isUnderReview && onEdit(product)}
               disabled={isUnderReview}
-              className={`flex-1 py-2.5 text-[11px] uppercase tracking-[0.1em] rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-all duration-150
-                        ${isUnderReview 
-                          ? "border border-[#222] text-[#444] cursor-not-allowed bg-[#0a0a0a]" 
-                          : "border border-[#1a1a1a] text-[#f0ede8] hover:bg-[#f0ede8] hover:text-[#0a0a0a] hover:border-[#f0ede8]"
+              className={`flex-1 py-1 sm:py-2 text-[8px] sm:text-[10px] uppercase tracking-[0.08em] rounded-lg font-semibold flex items-center justify-center gap-0.5 sm:gap-1 transition-all duration-150
+                        ${
+                          isUnderReview
+                            ? "border border-[#222] text-[#444] cursor-not-allowed bg-[#0a0a0a]"
+                            : "border border-[#1a1a1a] text-[#f0ede8] hover:bg-[#f0ede8] hover:text-[#0a0a0a] hover:border-[#f0ede8]"
                         }`}
             >
-              <Pencil className="w-3.5 h-3.5" />
-              Edit
+              <Pencil className="w-3 h-3" />
+              <span className="hidden sm:inline">Edit</span>
             </button>
             <button
               onClick={() => onDelete(product)}
-              className="flex-1 py-2.5 border border-[#1a1a1a] text-[#888] text-[11px] uppercase tracking-[0.1em]
+              className="flex-1 py-1 sm:py-2 border border-[#1a1a1a] text-[#888] text-[8px] sm:text-[10px] uppercase tracking-[0.08em]
                         rounded-lg transition-all duration-150 hover:bg-[#f87171] hover:text-white hover:border-[#f87171]
-                        font-semibold flex items-center justify-center gap-1.5"
+                        font-semibold flex items-center justify-center gap-0.5 sm:gap-1"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              Delete
+              <Trash2 className="w-3 h-3" />
+              <span className="hidden sm:inline">Delete</span>
             </button>
           </div>
         )}
@@ -564,21 +601,21 @@ const ProductCard = ({
 // ─── Skeletons ────────────────────────────────────────────────────
 const SkeletonMasonryCard = ({ index }) => (
   <div
-    className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-xl overflow-hidden mb-5 break-inside-avoid card-enter"
+    className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-xl overflow-hidden mb-2 sm:mb-4 break-inside-avoid card-enter"
     style={{ animationDelay: `${Math.min(index * 0.06, 1.0)}s` }}
   >
     <div
       className="bg-[#141414] relative overflow-hidden"
-      style={{ height: `${200 + (index % 3) * 60}px` }}
+      style={{ height: `${100 + (index % 3) * 30}px` }}
     >
       <div className="absolute inset-0 animate-shimmer" />
     </div>
-    <div className="p-4 space-y-3">
-      <div className="h-4 bg-[#1a1a1a] rounded w-3/4 animate-shimmer" />
-      <div className="h-3 bg-[#1a1a1a] rounded w-1/2 animate-shimmer" />
-      <div className="flex gap-2 pt-2">
-        <div className="h-9 bg-[#1a1a1a] rounded-lg flex-1 animate-shimmer" />
-        <div className="h-9 bg-[#1a1a1a] rounded-lg flex-1 animate-shimmer" />
+    <div className="p-2.5 sm:p-4 space-y-1.5 sm:space-y-3">
+      <div className="h-2.5 sm:h-4 bg-[#1a1a1a] rounded w-3/4 animate-shimmer" />
+      <div className="h-2 sm:h-3 bg-[#1a1a1a] rounded w-1/2 animate-shimmer" />
+      <div className="flex gap-1.5 sm:gap-2 pt-1 sm:pt-2">
+        <div className="h-6 sm:h-9 bg-[#1a1a1a] rounded-lg flex-1 animate-shimmer" />
+        <div className="h-6 sm:h-9 bg-[#1a1a1a] rounded-lg flex-1 animate-shimmer" />
       </div>
     </div>
   </div>
@@ -589,13 +626,13 @@ const SkeletonGridCard = ({ index }) => (
     className="bg-[#0f0f0f] border border-[#1a1a1a] rounded-xl overflow-hidden flex flex-row card-enter"
     style={{ animationDelay: `${Math.min(index * 0.06, 1.0)}s` }}
   >
-    <div className="w-[140px] sm:w-[180px] aspect-square bg-[#141414] relative overflow-hidden flex-shrink-0">
+    <div className="w-[72px] sm:w-[100px] md:w-[140px] lg:w-[180px] aspect-square bg-[#141414] relative overflow-hidden flex-shrink-0">
       <div className="absolute inset-0 animate-shimmer" />
     </div>
-    <div className="flex-1 p-4 space-y-3 flex flex-col justify-center">
-      <div className="h-4 bg-[#1a1a1a] rounded w-3/4 animate-shimmer" />
-      <div className="h-3 bg-[#1a1a1a] rounded w-1/2 animate-shimmer" />
-      <div className="h-3 bg-[#1a1a1a] rounded w-1/3 animate-shimmer" />
+    <div className="flex-1 p-2 sm:p-3 lg:p-4 space-y-1.5 sm:space-y-2 lg:space-y-3 flex flex-col justify-center">
+      <div className="h-2 sm:h-3 bg-[#1a1a1a] rounded w-3/4 animate-shimmer" />
+      <div className="h-1.5 sm:h-2 bg-[#1a1a1a] rounded w-1/2 animate-shimmer" />
+      <div className="h-1.5 sm:h-2 bg-[#1a1a1a] rounded w-1/3 animate-shimmer" />
     </div>
   </div>
 );
@@ -893,6 +930,15 @@ const SellerProducts = () => {
               }),
           },
           {
+            label: "Add Variant",
+            icon: Plus,
+            shortcut: "A",
+            onClick: () =>
+              navigate(`/seller/dashboard/add-variant/${product._id}`, {
+                state: { product },
+              }),
+          },
+          {
             label: "Copy Product ID",
             icon: Copy,
             shortcut: "C",
@@ -901,11 +947,16 @@ const SellerProducts = () => {
               Toast.success("Copied Product ID");
             },
           },
-          ...(isUnderReview ? [] : [{
-            label: "View in Store",
-            icon: ExternalLink,
-            onClick: () => window.open(`/store/product/${product._id}`, "_blank"),
-          }]),
+          ...(isUnderReview
+            ? []
+            : [
+                {
+                  label: "View in Store",
+                  icon: ExternalLink,
+                  onClick: () =>
+                    window.open(`/store/product/${product._id}`, "_blank"),
+                },
+              ]),
           { divider: true },
           {
             label: "Delete Product",
@@ -948,11 +999,13 @@ const SellerProducts = () => {
           );
         if (sort === "price-asc")
           return (
-            parseFloat(a.startingPrice?.amount || 0) - parseFloat(b.startingPrice?.amount || 0)
+            parseFloat(a.startingPrice?.amount || 0) -
+            parseFloat(b.startingPrice?.amount || 0)
           );
         if (sort === "price-desc")
           return (
-            parseFloat(b.startingPrice?.amount || 0) - parseFloat(a.startingPrice?.amount || 0)
+            parseFloat(b.startingPrice?.amount || 0) -
+            parseFloat(a.startingPrice?.amount || 0)
           );
         if (sort === "az") return (a.title || "").localeCompare(b.title || "");
         if (sort === "sales") return (b.sales || 0) - (a.sales || 0);
@@ -1024,7 +1077,7 @@ const SellerProducts = () => {
 
       {/* ── Top Bar ──────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-[#1a1a1a]">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/store")}
@@ -1034,12 +1087,12 @@ const SellerProducts = () => {
               <Tag className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Back to Store</span>
             </button>
-            <div className="h-6 w-px bg-[#1a1a1a] hidden sm:block" />
+            <div className="h-6 w-px bg-[#1a1a1a] hidden md:block" />
             <div>
               <span className="text-[11px] uppercase tracking-[0.2em] text-[#c4956a] font-bold block">
                 Seller Studio
               </span>
-              <h1 className="font-[\'Playfair_Display\'] text-[24px] lg:text-[28px] text-[#f0ede8] leading-tight hidden sm:block font-semibold">
+              <h1 className="font-[\'Playfair_Display\'] text-[20px] sm:text-[24px] lg:text-[28px] text-[#f0ede8] leading-tight hidden md:block font-semibold">
                 Your Products
               </h1>
             </div>
@@ -1050,7 +1103,7 @@ const SellerProducts = () => {
               onClick={refreshProducts}
               disabled={isFetching}
               className="w-10 h-10 rounded-full bg-[#0f0f0f] border border-[#1a1a1a] flex items-center justify-center
-                       text-[#555] hover:text-[#f0ede8] hover:border-[#2a2a2a] transition-all duration-200 hidden lg:flex
+                       text-[#555] hover:text-[#f0ede8] hover:border-[#2a2a2a] transition-all duration-200 hidden md:flex
                        disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RotateCw
@@ -1059,7 +1112,7 @@ const SellerProducts = () => {
             </button>
             <button
               className="w-10 h-10 rounded-full bg-[#0f0f0f] border border-[#1a1a1a] flex items-center justify-center
-                             text-[#555] hover:text-[#f0ede8] hover:border-[#2a2a2a] transition-all duration-200 hidden lg:flex"
+                             text-[#555] hover:text-[#f0ede8] hover:border-[#2a2a2a] transition-all duration-200 hidden md:flex"
             >
               <Bell className="w-4 h-4" />
             </button>
@@ -1077,9 +1130,9 @@ const SellerProducts = () => {
       </header>
 
       {/* ── Main Content ─────────────────────────────────────────── */}
-      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-[1400px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-slide-up">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-5 lg:mb-8 animate-slide-up">
           {[
             {
               label: "Total Products",
@@ -1115,31 +1168,31 @@ const SellerProducts = () => {
             return (
               <div
                 key={stat.label}
-                className={`${stat.color} rounded-xl p-5 transition-all duration-200 hover:shadow-md hover:translate-y-[-2px] shadow-sm`}
+                className={`${stat.color} rounded-xl p-2 sm:p-3 lg:p-5 transition-all duration-200 hover:shadow-md hover:translate-y-[-2px] shadow-sm`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${isAccent ? "bg-[#0a0a0a]/20" : "bg-[#141414] border border-[#1a1a1a]"}`}
+                    className={`w-7 h-7 sm:w-9 lg:w-10 sm:h-9 lg:h-10 rounded-lg flex items-center justify-center ${isAccent ? "bg-[#0a0a0a]/20" : "bg-[#141414] border border-[#1a1a1a]"}`}
                   >
                     <Icon
-                      className={`w-5 h-5 ${isAccent ? "text-[#0a0a0a]" : "text-[#c4956a]"}`}
+                      className={`w-3.5 h-3.5 sm:w-4 lg:w-5 sm:h-4 lg:h-5 ${isAccent ? "text-[#0a0a0a]" : "text-[#c4956a]"}`}
                     />
                   </div>
                   <span
-                    className={`text-[11px] font-semibold ${isAccent ? "text-[#0a0a0a]/60" : "text-[#555]"}`}
+                    className={`text-[9px] sm:text-[10px] lg:text-[11px] font-semibold ${isAccent ? "text-[#0a0a0a]/60" : "text-[#555]"}`}
                   >
                     {stat.trend}
                   </span>
                 </div>
                 <div
-                  className={`font-[\'Playfair_Display\'] text-[28px] leading-none mb-1 font-bold ${isAccent ? "text-[#0a0a0a]" : "text-[#f0ede8]"}`}
+                  className={`font-[\'Playfair_Display\'] text-[22px] sm:text-[26px] lg:text-[28px] leading-none mb-1 font-bold ${isAccent ? "text-[#0a0a0a]" : "text-[#f0ede8]"}`}
                 >
                   {typeof stat.value === "number"
                     ? String(stat.value).padStart(2, "0")
                     : stat.value}
                 </div>
                 <div
-                  className={`text-[12px] uppercase tracking-[0.1em] font-semibold ${isAccent ? "text-[#0a0a0a]/50" : "text-[#555]"}`}
+                  className={`text-[9px] sm:text-[11px] lg:text-[12px] uppercase tracking-[0.1em] font-semibold ${isAccent ? "text-[#0a0a0a]/50" : "text-[#555]"}`}
                 >
                   {stat.label}
                 </div>
@@ -1150,7 +1203,7 @@ const SellerProducts = () => {
 
         {/* Toolbar */}
         <div
-          className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 animate-slide-up"
+          className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4 lg:mb-6 animate-slide-up"
           style={{ animationDelay: "0.2s" }}
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
@@ -1237,7 +1290,7 @@ const SellerProducts = () => {
 
         {/* Results bar */}
         <div
-          className="flex items-center justify-between mb-4 animate-slide-up"
+          className="flex items-center justify-between mb-2 sm:mb-3 lg:mb-4 animate-slide-up"
           style={{ animationDelay: "0.25s" }}
         >
           <div className="flex items-center gap-3">
@@ -1289,10 +1342,10 @@ const SellerProducts = () => {
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-24 animate-fade-in-fast">
-              <div className="w-16 h-16 rounded-full bg-[#200f0f] flex items-center justify-center mb-4">
+              <div className="w-12 h-12 sm:w-14 lg:w-16 sm:h-14 lg:h-16 rounded-full bg-[#200f0f] flex items-center justify-center mb-2 sm:mb-3 lg:mb-4">
                 <Package className="w-8 h-8 text-[#f87171]" />
               </div>
-              <h3 className="font-[\'Playfair_Display\'] text-[20px] text-[#f0ede8] mb-2 font-semibold">
+              <h3 className="font-[\'Playfair_Display\'] text-[16px] sm:text-[18px] lg:text-[20px] text-[#f0ede8] mb-2 font-semibold">
                 Unable to load products
               </h3>
               <p className="text-[14px] text-[#f87171] mb-6 font-medium">
@@ -1307,17 +1360,17 @@ const SellerProducts = () => {
             </div>
           ) : displayed.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 animate-fade-in-fast">
-              <div className="w-20 h-20 rounded-full bg-[#141414] flex items-center justify-center mb-6">
+              <div className="w-14 h-14 sm:w-18 sm:h-18 lg:w-20 lg:h-20 rounded-full bg-[#141414] flex items-center justify-center mb-3 sm:mb-4 lg:mb-6">
                 {search ? (
                   <SearchX className="w-10 h-10 text-[#333]" />
                 ) : (
                   <Package className="w-10 h-10 text-[#333]" />
                 )}
               </div>
-              <h3 className="font-[\'Playfair_Display\'] text-[24px] text-[#f0ede8] mb-3 font-semibold">
+              <h3 className="font-[\'Playfair_Display\'] text-[18px] sm:text-[22px] lg:text-[24px] text-[#f0ede8] mb-2 sm:mb-3 font-semibold">
                 {search ? "No matches found" : "No products yet"}
               </h3>
-              <p className="text-[15px] text-[#888] mb-8 text-center max-w-[360px] leading-relaxed font-medium">
+              <p className="text-[12px] sm:text-[14px] lg:text-[15px] text-[#888] mb-5 sm:mb-6 lg:mb-8 text-center max-w-[360px] leading-relaxed font-medium">
                 {search
                   ? `No products match "${search}". Try a different search term or clear filters.`
                   : "Your store is empty. Start building your catalog by adding your first product."}

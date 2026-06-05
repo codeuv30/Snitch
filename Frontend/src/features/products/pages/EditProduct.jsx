@@ -26,6 +26,7 @@ import {
   ArrowRight,
   FolderOpen,
   ChevronDown,
+  MoreVertical,
 } from "lucide-react";
 
 const FontLoader = () => (
@@ -721,19 +722,78 @@ const ThumbnailUploader = ({ thumbnail, onChange, previewUrl, existingUrl }) => 
 
 // --- Variant Card (Bottom Section) ---
 
-const VariantCard = ({ variant }) => {
+const VariantCard = ({ variant, product }) => {
+  const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleEditVariant = () => {
+    navigate(`/seller/dashboard/edit-product/${variant.product}/variants/${variant._id}`);
+  };
+
+  const handleAddVariant = () => {
+    navigate(`/seller/dashboard/add-variant/${variant.product}/`, {
+      state: { product }
+    });
+  };
 
   return (
-    <div className="group bg-[#0f0f0f] rounded-xl border border-[#1a1a1a] p-4 hover:border-[#c4956a]/30 hover:shadow-lg hover:shadow-[#c4956a]/5 transition-all cursor-pointer relative">
-      {/* Edit Icon - Appears on Hover */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-        <div className="p-2 bg-[#c4956a]/10 text-[#c4956a] rounded-lg border border-[#c4956a]/20 backdrop-blur-sm">
-          <Pencil className="w-4 h-4" />
-        </div>
+    <div className="group bg-[#0f0f0f] rounded-xl border border-[#1a1a1a] p-4 hover:border-[#c4956a]/30 hover:shadow-lg hover:shadow-[#c4956a]/5 transition-all relative">
+
+      {/* Dropdown Menu - Top Right */}
+      <div className="absolute top-3 right-3 z-20" ref={dropdownRef}>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setDropdownOpen(!dropdownOpen);
+          }}
+          className="p-2 bg-[#141414] border border-[#1a1a1a] rounded-lg text-[#555] hover:text-[#c4956a] hover:border-[#c4956a]/30 transition-all"
+        >
+          <MoreVertical className="w-4 h-4" />
+        </button>
+
+        {dropdownOpen && (
+          <div className="absolute right-0 mt-2 w-44 bg-[#141414] border border-[#1a1a1a] rounded-lg shadow-xl overflow-hidden animate-fade-in">
+            <button
+              type="button"
+              onClick={() => {
+                setDropdownOpen(false);
+                handleEditVariant();
+              }}
+              className="w-full text-left px-4 py-3 text-[13px] text-[#f0ede8] hover:bg-[#c4956a]/10 hover:text-[#c4956a] transition-colors flex items-center gap-2.5"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit Variant
+            </button>
+            <div className="h-px bg-[#1a1a1a]" />
+            <button
+              type="button"
+              onClick={() => {
+                setDropdownOpen(false);
+                handleAddVariant();
+              }}
+              className="w-full text-left px-4 py-3 text-[13px] text-[#f0ede8] hover:bg-[#c4956a]/10 hover:text-[#c4956a] transition-colors flex items-center gap-2.5"
+            >
+              <Plus className="w-4 h-4" />
+              Add Variant
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-4 pr-8">
         {/* Variant Image */}
         <div className="w-16 h-16 rounded-lg bg-[#141414] flex-shrink-0 overflow-hidden border border-[#1a1a1a] group-hover:border-[#2a2a2a] transition-colors">
           {!imageError && variant.images && variant.images.length > 0 ? (
@@ -794,12 +854,6 @@ const VariantCard = ({ variant }) => {
           </div>
         </div>
       </div>
-
-      {/* Click to edit hint */}
-      <div className="mt-3 pt-3 border-t border-[#1a1a1a] flex items-center justify-center gap-1.5 text-[12px] text-[#c4956a] font-medium opacity-0 group-hover:opacity-100 transition-all duration-300">
-        <Pencil className="w-3.5 h-3.5" />
-        Click to edit variant
-      </div>
     </div>
   );
 };
@@ -833,6 +887,7 @@ export default function EditProduct() {
   const [error, setError] = useState(null);
   const [categoryError, setCategoryError] = useState("");
   const [variantError, setVariantError] = useState("");
+  const [product, setProduct] = useState(null)
 
   const { handleGetProductDetails, handleEditProduct } = useProduct();
   const authLoading = useSelector((state) => state.auth.loading);
@@ -877,6 +932,7 @@ export default function EditProduct() {
           const { product, variants } = response;
 
           // Pre-fill form
+          setProduct(product);
           setTitle(product.title || "");
           setDescription(product.description || "");
           setCategory(product.category || "");
@@ -997,12 +1053,15 @@ export default function EditProduct() {
       }
 
       const response = await handleEditProduct(formData, productId);
+
+      if (response.success) {
+        navigate(`/seller/dashboard/products`);
+      } else {
+        setError(response.message || "Failed to update product");
+      }
     } catch (err) {
       console.error("Edit product error:", err);
       setError("Error updating product. Please check your connection.");
-      Toast.error("Something went wrong", {
-        description: err?.message || "Please try again",
-      });
     } finally {
       setIsSubmitting(false);
     }
@@ -1410,7 +1469,7 @@ export default function EditProduct() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {productVariants.map((variant) => (
-              <VariantCard key={variant._id} variant={variant} />
+              <VariantCard key={variant._id} variant={variant} product={product} />
             ))}
           </div>
 

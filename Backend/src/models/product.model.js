@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import priceSchema from "./price.schema.js";
 
 const productSchema = new mongoose.Schema(
   {
@@ -80,15 +81,8 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     startingPrice: {
-      amount: {
-        type: Number,
-        required: true,
-      },
-      currency: {
-        type: String,
-        enum: ["INR", "USD", "EUR", "GBP", "JPY"],
-        default: "INR",
-      },
+      type: priceSchema,
+      required: true
     },
   },
   {
@@ -114,6 +108,6 @@ productSchema.index({ tags: 1 });
 productSchema.index({ sales: -1 });
 productSchema.index({ publishedAt: -1 });
 
-const Product = mongoose.model("products", productSchema);
+const productModel = mongoose.model("products", productSchema);
 
-export default Product;
+export default productModel;

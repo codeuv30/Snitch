@@ -2,15 +2,19 @@ import { useEffect } from "react";
 import { RouterProvider } from "react-router";
 import { routes } from "./app.routes";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setSuccessMessage as setAuthSuccessMessage,
-} from "../features/auth/state/auth.slice.js";
+import { setSuccessMessage as setAuthSuccessMessage } from "../features/auth/state/auth.slice.js";
 import { setSuccessMessage as setProductSuccessMessage } from "../features/products/state/product.slice.js";
+import { setSuccessMessage as setCartSuccessMessage } from "../features/cart/state/cart.slice.js";
+import { setSuccessMessage as setWishlistSuccessMessage } from "../features/wishlist/state/wishlist.slice.js";
 import Toast from "@/components/ui/Toast.js";
 import { getCurrentUser } from "../features/auth/service/auth.api";
+import useCart from "../features/cart/hooks/useCart";
+import WishlistUI from "../features/wishlist/components/Wishlist";
 
 const App = () => {
   const dispatch = useDispatch();
+
+  const { handleGetCart } = useCart();
 
   // Fetch current user on app mount.
   // getCurrentUser handles setUser internally — do NOT dispatch setUser here.
@@ -22,7 +26,7 @@ const App = () => {
   }, [dispatch]);
 
   /* Auth toast notifications */
-  const authSuccessMessage = useSelector(state => state.auth.successMessage);
+  const authSuccessMessage = useSelector((state) => state.auth.successMessage);
 
   useEffect(() => {
     if (authSuccessMessage) {
@@ -32,8 +36,10 @@ const App = () => {
   }, [authSuccessMessage, dispatch]);
 
   /* Product toast notifications */
-    const productError = useSelector((state) => state.products.error);
-    const productSuccessMessage = useSelector((state) => state.products.successMessage)
+  const productError = useSelector((state) => state.products.error);
+  const productSuccessMessage = useSelector(
+    (state) => state.products.successMessage,
+  );
 
   useEffect(() => {
     if (productError) {
@@ -48,7 +54,43 @@ const App = () => {
     }
   }, [productSuccessMessage, dispatch]);
 
-  return <RouterProvider router={routes} />;
+  const cartError = useSelector((state) => state.cart.error);
+  const cartSuccessMessage = useSelector((state) => state.cart.successMessage);
+
+  useEffect(() => {
+    if (cartError) {
+      Toast.error(cartError);
+    }
+  }, [cartError]);
+
+  useEffect(() => {
+    if (cartSuccessMessage) {
+      Toast.success(cartSuccessMessage);
+      dispatch(setCartSuccessMessage(null));
+    }
+  }, [cartSuccessMessage, dispatch]);
+
+  const wishlistError = useSelector((state) => state.wishlist.error);
+  const wishlistSuccessMessage = useSelector((state) => state.wishlist.successMessage);
+
+  useEffect(() => {
+    if (wishlistError) {
+      Toast.error(wishlistError);
+    }
+  }, [wishlistError]);
+
+  useEffect(() => {
+    if (wishlistSuccessMessage) {
+      Toast.success(wishlistSuccessMessage);
+      dispatch(setWishlistSuccessMessage(null));
+    }
+  }, [wishlistSuccessMessage, dispatch]);
+
+  return (
+    <>
+      <RouterProvider router={routes} />
+    </>
+  );
 };
 
 export default App;

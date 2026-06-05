@@ -1,11 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { Menu, Search, Heart, ShoppingBag, User } from "lucide-react";
+import {
+  Menu,
+  Search,
+  Heart,
+  ShoppingBag,
+  User,
+  X,
+  ChevronRight,
+} from "lucide-react";
+import { useCartUI } from "../../cart/context/CartContext";
+import { CartSidebar } from "../../cart/components/Cart";
+import { WishlistSidebar } from "../../wishlist/components/Wishlist";
+import { useWishlistUI } from "../../wishlist/context/WishlistContext";
+import UserDetailsModal from "../../auth/components/UserDetailsModal";
 
 const Navbar = ({ isLoggedIn, user, onSearchOpen }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const { setCartOpen, cartItemCount } = useCartUI();
+  const { setWishlistOpen } = useWishlistUI();
+
+  const [showUserDetails, setShowUserDetails] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -18,7 +36,9 @@ const Navbar = ({ isLoggedIn, user, onSearchOpen }) => {
     { label: "WOMEN", href: "/store/category/women" },
     { label: "NEW ARRIVALS", href: "/store/new-arrivals" },
     { label: "COLLECTIONS", href: "/store/collections" },
-    user?.role === "seller" && { label: "DASHBOARD", href: "/seller/dashboard" },
+    ...(user?.role === "seller"
+      ? [{ label: "DASHBOARD", href: "/seller/dashboard" }]
+      : []),
   ];
 
   return (
@@ -37,7 +57,11 @@ const Navbar = ({ isLoggedIn, user, onSearchOpen }) => {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 -ml-2 text-[#f0f0f0] hover:bg-[#1a1a1a] rounded-lg transition-colors"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
             </button>
 
             {/* Logo */}
@@ -54,7 +78,7 @@ const Navbar = ({ isLoggedIn, user, onSearchOpen }) => {
             <div className="hidden lg:flex items-center gap-8 flex-1">
               {navLinks.map((link) => (
                 <Link
-                  key={link.label}
+                  key={link.href}
                   to={link.href}
                   className="text-[11px] tracking-[0.15em] text-[#f0f0f0] hover:text-[#d4a76a] transition-colors font-medium relative group"
                 >
@@ -74,28 +98,30 @@ const Navbar = ({ isLoggedIn, user, onSearchOpen }) => {
               </button>
 
               <button
-                onClick={() => navigate("/wishlist")}
+                onClick={() => setWishlistOpen(true)}
                 className="w-9 h-9 hidden sm:flex items-center justify-center text-[#f0f0f0] hover:bg-[#1a1a1a] rounded-full transition-all duration-200"
               >
                 <Heart className="w-[18px] h-[18px]" />
               </button>
 
               <button
-                onClick={() => navigate("/cart")}
+                onClick={() => setCartOpen(true)}
                 className="w-9 h-9 flex items-center justify-center text-[#f0f0f0] hover:bg-[#1a1a1a] rounded-full transition-all duration-200 relative"
               >
                 <ShoppingBag className="w-[18px] h-[18px]" />
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#050505] text-[#f0f0f0] text-[9px] rounded-full flex items-center justify-center font-medium">
-                  0
-                </span>
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#050505] text-[#f0f0f0] text-[9px] rounded-full flex items-center justify-center font-medium">
+                    {cartItemCount > 99 ? "99+" : cartItemCount}
+                  </span>
+                )}
               </button>
 
-              {isLoggedIn ? (
+              {isLoggedIn && user ? (
                 <button
-                  onClick={() => navigate("/profile")}
+                  onClick={() => setShowUserDetails(true)}
                   className="w-9 h-9 hidden sm:flex items-center justify-center text-[#f0f0f0] hover:bg-[#1a1a1a] rounded-full transition-all duration-200"
                 >
-            <User className="w-[18px] h-[18px]" />
+                  <User className="w-[18px] h-[18px]" />
                 </button>
               ) : (
                 <div className="hidden sm:flex items-center gap-2">
@@ -142,13 +168,19 @@ const Navbar = ({ isLoggedIn, user, onSearchOpen }) => {
               {!isLoggedIn && (
                 <div className="flex gap-3 mt-4 pt-2">
                   <button
-                    onClick={() => { navigate("/login"); setMobileMenuOpen(false); }}
+                    onClick={() => {
+                      navigate("/login");
+                      setMobileMenuOpen(false);
+                    }}
                     className="flex-1 py-3 border border-[#1a1a1a] text-[#f0f0f0] text-[12px] tracking-[0.1em] rounded-lg font-medium"
                   >
                     LOGIN
                   </button>
                   <button
-                    onClick={() => { navigate("/register"); setMobileMenuOpen(false); }}
+                    onClick={() => {
+                      navigate("/register");
+                      setMobileMenuOpen(false);
+                    }}
                     className="flex-1 py-3 bg-[#050505] text-[#f0f0f0] text-[12px] tracking-[0.1em] rounded-lg font-medium"
                   >
                     REGISTER
@@ -159,6 +191,16 @@ const Navbar = ({ isLoggedIn, user, onSearchOpen }) => {
           </div>
         </div>
       )}
+
+      {/* User Details Modal */}
+      {showUserDetails && user && (
+        <UserDetailsModal
+          user={user}
+          onClose={() => setShowUserDetails(false)}
+        />
+      )}
+      <CartSidebar />
+      <WishlistSidebar />
     </>
   );
 };

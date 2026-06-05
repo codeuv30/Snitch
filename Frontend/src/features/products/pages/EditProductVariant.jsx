@@ -209,7 +209,7 @@ const ToggleSwitch = ({ label, checked, onChange }) => (
 
 // --- Image Gallery Uploader ---
 
-const ImageGalleryUploader = ({ images, onChange, existingImages = [] }) => {
+const ImageGalleryUploader = ({ images, onChange, existingImages = [], onExistingChange  }) => {
   const [previews, setPreviews] = useState([]);
   const [existingPreviews, setExistingPreviews] = useState(existingImages);
   const inputRef = useRef(null);
@@ -255,6 +255,7 @@ const ImageGalleryUploader = ({ images, onChange, existingImages = [] }) => {
     const newExisting = [...existingPreviews];
     newExisting.splice(index, 1);
     setExistingPreviews(newExisting);
+    onExistingChange?.(newExisting);
   };
 
   const totalImages = existingPreviews.length + images.length;
@@ -469,6 +470,7 @@ export default function EditProductVariant() {
   const [newImages, setNewImages] = useState([]); // File[] for new uploads
   const [existingImages, setExistingImages] = useState([]); // {url, _id}[] from API
   const [variantKey, setVariantKey] = useState(""); // Display only
+  const [remainingExistingImages, setRemainingExistingImages] = useState([]);
 
   // UI State
   const [loading, setLoading] = useState(true);
@@ -526,6 +528,7 @@ export default function EditProductVariant() {
           setIsAvailable(variant.isAvailable !== false); // default true
           setAttributes(variant.attributes || {});
           setExistingImages(variant.images || []);
+          setRemainingExistingImages(variant.images || [])
           setVariantKey(variant.variantKey || "");
 
           // Reset react-hook-form
@@ -601,7 +604,7 @@ export default function EditProductVariant() {
 
       formData.append(
         "existingImages",
-        JSON.stringify(existingImages.map((img) => img.url)),
+        JSON.stringify(remainingExistingImages.map((img) => img.url)),
       );
       newImages.forEach((file) => {
         formData.append("images", file);
@@ -614,9 +617,6 @@ export default function EditProductVariant() {
       );
 
       if (response.success) {
-        Toast.success("Variant updated successfully", {
-          description: "Your changes have been saved.",
-        });
         navigate(`/seller/dashboard/products`);
       } else {
         setError(response.message || "Failed to update variant");
@@ -842,6 +842,7 @@ export default function EditProductVariant() {
                 images={newImages}
                 onChange={setNewImages}
                 existingImages={existingImages}
+                onExistingChange={setRemainingExistingImages}
               />
             </SectionCard>
 

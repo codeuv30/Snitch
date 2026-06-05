@@ -5,6 +5,10 @@ import App from "./app/App.jsx";
 import { Provider } from "react-redux";
 import { store } from "./app/app.store.js";
 import { Toaster } from "sonner";
+import { CartProvider } from "./features/cart/context/CartContext";
+import { WishlistProvider } from "./features/wishlist/context/WishlistContext";
+import Cart from "./features/cart/components/Cart";
+import Wishlist from "./features/wishlist/components/Wishlist";
 
 createRoot(document.getElementById("root")).render(
   <>
@@ -22,7 +26,13 @@ createRoot(document.getElementById("root")).render(
       }}
     />
     <Provider store={store}>
-      <App />
+      <WishlistProvider>
+        <CartProvider>
+          <App />
+          <Cart />
+          <Wishlist />
+        </CartProvider>
+      </WishlistProvider>
     </Provider>
   </>,
 );

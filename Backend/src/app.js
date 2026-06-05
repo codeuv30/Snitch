@@ -6,6 +6,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import config from "./config/config.js";
 import userModel from "./models/user.model.js";
+import { setVisitorId } from "./middlewares/auth.middleware.js";
 
 const app = express();
 
@@ -27,11 +28,14 @@ app.use(setVisitorId);
 /* Importing Routers */
 import authRouter from "./routes/auth.routes.js";
 import productRouter from "./routes/product.routes.js";
-import { setVisitorId } from "./middlewares/auth.middleware.js";
+import cartRouter from "./routes/cart.routes.js";
+import wishlistRouter from "./routes/wishlist.routes.js";
 
 /* Using Routers */
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/products", productRouter);
+app.use("/api/v1/cart", cartRouter);
+app.use("/api/v1/wishlist", wishlistRouter);
 
 /* Passport Middleware */
 app.use(passport.initialize());

@@ -269,7 +269,6 @@ const DynamicAttributeSelector = ({ variantOptions, attributes, onChange }) => {
 
 export default function CreateProductVariant() {
   const { productId } = useParams();
-  console.log(productId)
   const location = useLocation();
   const navigate = useNavigate();
   const { handleAddVariant } = useProduct();
@@ -296,6 +295,7 @@ export default function CreateProductVariant() {
 
   // Redirect if no product data
   useEffect(() => {
+    console.log(productId);
     if (!product && productId) {
       Toast.error("Product data not found. Please create a product first.");
       navigate("/seller/dashboard/products");
@@ -388,10 +388,6 @@ export default function CreateProductVariant() {
       const response = await handleAddVariant(productId, formData);
 
       if (response?.success && response?.variant) {
-        Toast.success("Variant created successfully!", {
-          description: `SKU: ${response.variant.sku}`
-        });
-
         setCreatedVariants(prev => [...prev, response.variant]);
 
         // Reset form for next variant

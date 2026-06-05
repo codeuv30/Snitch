@@ -3,8 +3,17 @@ import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router";
 import useProduct from "../hooks/useProduct";
 import {
-  Search, Heart, ShoppingBag, User, Menu, X, ChevronRight,
-  ArrowRight, Star, TrendingUp, Eye
+  Search,
+  Heart,
+  ShoppingBag,
+  User,
+  Menu,
+  X,
+  ChevronRight,
+  ArrowRight,
+  Star,
+  TrendingUp,
+  Eye,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
@@ -93,7 +102,10 @@ const SearchOverlay = ({ isOpen, onClose, products }) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!query.trim()) { setResults([]); return; }
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
     const filtered = products
       .filter((p) => p.title?.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 6);
@@ -104,7 +116,10 @@ const SearchOverlay = ({ isOpen, onClose, products }) => {
 
   return (
     <div className="fixed inset-0 z-[60] animate-fade-in">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="absolute top-0 left-0 right-0 bg-[#111111] shadow-xl border-b border-[#151515] animate-fade-in-up">
         <div className="max-w-[800px] mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
@@ -117,7 +132,10 @@ const SearchOverlay = ({ isOpen, onClose, products }) => {
               placeholder="Search products, categories, collections..."
               className="flex-1 bg-transparent text-[18px] text-[#f0f0f0] placeholder:text-[#555555] outline-none font-['Playfair_Display'] text-[#f0f0f0]"
             />
-            <button onClick={onClose} className="p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors">
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-[#1a1a1a] rounded-lg transition-colors"
+            >
               <X className="w-5 h-5 text-[#f0f0f0]" />
             </button>
           </div>
@@ -127,12 +145,19 @@ const SearchOverlay = ({ isOpen, onClose, products }) => {
               {results.map((product) => (
                 <button
                   key={product._id}
-                  onClick={() => { navigate(`/store/product/${product._id}`); onClose(); }}
+                  onClick={() => {
+                    navigate(`/store/product/${product._id}`);
+                    onClose();
+                  }}
                   className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#050505] transition-colors text-left"
                 >
                   <div className="w-12 h-12 rounded-lg bg-[#1a1a1a] overflow-hidden flex-shrink-0">
                     {product.images?.[0]?.url ? (
-                      <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
+                      <img
+                        src={product.images[0].url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Search className="w-4 h-4 text-[#555555]" />
@@ -140,9 +165,12 @@ const SearchOverlay = ({ isOpen, onClose, products }) => {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[13px] text-[#f0f0f0] font-medium truncate">{product.title}</p>
+                    <p className="text-[13px] text-[#f0f0f0] font-medium truncate">
+                      {product.title}
+                    </p>
                     <p className="text-[11px] text-[#777777]">
-                      {product.price?.currency} {parseInt(product.price?.amount || 0).toLocaleString()}
+                      {product.startingPrice?.currency}{" "}
+                      {parseInt(product.startingPrice?.amount || 0).toLocaleString()}
                     </p>
                   </div>
                 </button>
@@ -168,10 +196,13 @@ const HeroSection = () => {
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
       <div className="absolute inset-0 opacity-[0.06]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, #1a1a1a 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, #1a1a1a 1px, transparent 0)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
       </div>
 
       <div className="absolute inset-0 grid grid-cols-3 gap-4 p-8 opacity-10 pointer-events-none">
@@ -179,7 +210,10 @@ const HeroSection = () => {
           <div
             key={i}
             className="rounded-2xl bg-gradient-to-br from-[#2d2d2d] to-[#0a0a0a] animate-float"
-            style={{ animationDelay: `${i * 0.5}s`, height: `${200 + (i % 3) * 100}px` }}
+            style={{
+              animationDelay: `${i * 0.5}s`,
+              height: `${200 + (i % 3) * 100}px`,
+            }}
           />
         ))}
       </div>
@@ -188,13 +222,23 @@ const HeroSection = () => {
         <p className="text-[11px] tracking-[0.3em] text-[#d4a76a] uppercase mb-6 animate-fade-in-up">
           Premium Fashion Destination
         </p>
-        <h1 className="font-['Playfair_Display'] text-[60px] sm:text-[80px] md:text-[120px] lg:text-[140px] leading-[0.9] tracking-[0.05em] text-[#f0f0f0] mb-8 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+        <h1
+          className="font-['Playfair_Display'] text-[60px] sm:text-[80px] md:text-[120px] lg:text-[140px] leading-[0.9] tracking-[0.05em] text-[#f0f0f0] mb-8 animate-fade-in-up"
+          style={{ animationDelay: "0.1s" }}
+        >
           SNITCH
         </h1>
-        <p className="text-[14px] sm:text-[16px] text-[#aaaaaa] max-w-md mx-auto mb-10 leading-relaxed animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-          Discover curated collections of premium menswear and womenswear. Crafted for the modern individual.
+        <p
+          className="text-[14px] sm:text-[16px] text-[#aaaaaa] max-w-md mx-auto mb-10 leading-relaxed animate-fade-in-up"
+          style={{ animationDelay: "0.2s" }}
+        >
+          Discover curated collections of premium menswear and womenswear.
+          Crafted for the modern individual.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+        <div
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
+          style={{ animationDelay: "0.3s" }}
+        >
           <button
             onClick={() => navigate("/category/men")}
             className="group px-8 py-4 bg-[#050505] text-[#f0f0f0] text-[12px] tracking-[0.15em] rounded-xl hover:bg-[#1a1a1a] transition-all duration-300 flex items-center gap-3 font-medium"
@@ -234,7 +278,10 @@ const MarqueeBanner = () => {
     <div className="bg-[#050505] py-3 overflow-hidden">
       <div className="flex animate-marquee whitespace-nowrap">
         {[...items, ...items, ...items, ...items].map((item, i) => (
-          <span key={i} className="text-[11px] tracking-[0.2em] text-[#f0f0f0]/80 mx-8 flex items-center gap-2">
+          <span
+            key={i}
+            className="text-[11px] tracking-[0.2em] text-[#f0f0f0]/80 mx-8 flex items-center gap-2"
+          >
             <Star className="w-3 h-3 text-[#d4a76a]" />
             {item}
           </span>
@@ -250,14 +297,54 @@ const CategoryStrip = () => {
 
   // Categories aligned with the model's tag/category enum values
   const categories = [
-    { name: "Shirts", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=500&fit=crop", tag: "shirts" },
-    { name: "T-Shirts", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop", tag: "t-shirts" },
-    { name: "Jeans", image: "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=400&h=500&fit=crop", tag: "jeans" },
-    { name: "Trousers", image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=500&fit=crop", tag: "trousers" },
-    { name: "Blazers", image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=500&fit=crop", tag: "blazers" },
-    { name: "Footwear", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=500&fit=crop", tag: "footwear" },
-    { name: "Accessories", image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=500&fit=crop", tag: "accessories" },
-    { name: "Ethnic", image: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=400&h=500&fit=crop", tag: "ethnic" },
+    {
+      name: "Shirts",
+      image:
+        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=500&fit=crop",
+      tag: "shirts",
+    },
+    {
+      name: "T-Shirts",
+      image:
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop",
+      tag: "t-shirts",
+    },
+    {
+      name: "Jeans",
+      image:
+        "https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?w=400&h=500&fit=crop",
+      tag: "jeans",
+    },
+    {
+      name: "Trousers",
+      image:
+        "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=500&fit=crop",
+      tag: "trousers",
+    },
+    {
+      name: "Blazers",
+      image:
+        "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&h=500&fit=crop",
+      tag: "blazers",
+    },
+    {
+      name: "Footwear",
+      image:
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=500&fit=crop",
+      tag: "footwear",
+    },
+    {
+      name: "Accessories",
+      image:
+        "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=500&fit=crop",
+      tag: "accessories",
+    },
+    {
+      name: "Ethnic",
+      image:
+        "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=400&h=500&fit=crop",
+      tag: "ethnic",
+    },
   ];
 
   return (
@@ -291,7 +378,9 @@ const CategoryStrip = () => {
                 />
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
               </div>
-              <p className="text-[12px] tracking-[0.1em] text-[#f0f0f0] font-medium">{cat.name}</p>
+              <p className="text-[12px] tracking-[0.1em] text-[#f0f0f0] font-medium">
+                {cat.name}
+              </p>
             </button>
           ))}
         </div>
@@ -305,10 +394,11 @@ const ProductCard = ({ product, index }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const navigate = useNavigate();
 
-  const hasImage = product.images && product.images.length > 0;
+  const hasImage = product.thumbnail;
 
   // Fixed aspect ratios since width/height are no longer in the image schema
-  const aspectRatio = [1.2, 0.85, 1.5, 1.0, 1.3, 0.9, 1.4, 1.1][index % 8] || 1.2;
+  const aspectRatio =
+    [1.2, 0.85, 1.5, 1.0, 1.3, 0.9, 1.4, 1.1][index % 8] || 1.2;
 
   // isNew and isBestseller come from virtuals / model field
   const isNew = product.isNew;
@@ -317,7 +407,10 @@ const ProductCard = ({ product, index }) => {
   return (
     <div
       className="group product-card-hover cursor-pointer opacity-0 animate-fade-in-up"
-      style={{ animationDelay: `${Math.min(index * 0.08, 1.5)}s`, animationFillMode: "forwards" }}
+      style={{
+        animationDelay: `${Math.min(index * 0.08, 1.5)}s`,
+        animationFillMode: "forwards",
+      }}
       onClick={() => navigate(`/store/product/${product._id}`)}
     >
       <div
@@ -327,14 +420,16 @@ const ProductCard = ({ product, index }) => {
         {hasImage ? (
           <>
             <img
-              src={product.images[0].url}
+              src={product.thumbnail}
               alt={product.title}
               onLoad={() => setImageLoaded(true)}
               className={`product-image w-full h-full object-cover transition-all duration-700 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
               }`}
             />
-            {!imageLoaded && <div className="absolute inset-0 animate-shimmer" />}
+            {!imageLoaded && (
+              <div className="absolute inset-0 animate-shimmer" />
+            )}
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -343,15 +438,21 @@ const ProductCard = ({ product, index }) => {
         )}
 
         {/* Quick Actions */}
-        <div className="quick-actions absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 translate-y-4 transition-all duration-300">
+        <div className="quick-actions absolute bottom-7 left-4 right-4 flex gap-2 opacity-0 translate-y-4 transition-all duration-300">
           <button
-            onClick={(e) => { e.stopPropagation(); /* Add to cart logic */ }}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/store/product/${product._id}`);
+            }}
             className="flex-1 py-2.5 bg-[#1a1a1a]/90 backdrop-blur-sm text-[#f0f0f0] text-[11px] tracking-[0.1em] rounded-lg font-medium hover:bg-[#333333] transition-colors"
           >
             ADD TO CART
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); /* Add to wishlist */ }}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/store/product/${product._id}`);
+            }}
             className="w-10 h-10 bg-[#1a1a1a]/90 backdrop-blur-sm rounded-lg flex items-center justify-center text-[#f0f0f0] hover:text-[#ff5555] transition-colors"
           >
             <Heart className="w-4 h-4" />
@@ -359,16 +460,18 @@ const ProductCard = ({ product, index }) => {
         </div>
 
         {/* Badges — driven by real model fields */}
-        {isNew && (
-          <span className="absolute top-3 left-3 bg-[#050505] text-[#f0f0f0] text-[9px] tracking-[0.15em] px-2.5 py-1 rounded-md font-medium">
-            NEW
-          </span>
-        )}
-        {isBestseller && !isNew && (
-          <span className="absolute top-3 left-3 bg-[#c4956a] text-[#f0f0f0] text-[9px] tracking-[0.15em] px-2.5 py-1 rounded-md font-medium">
-            BESTSELLER
-          </span>
-        )}
+        <div className="absolute top-3 left-3 flex flex-col gap-1">
+          {isNew && (
+            <span className="absolute top-3 left-3 bg-[#050505] text-[#f0f0f0] text-[9px] tracking-[0.15em] px-2.5 py-1 rounded-md font-medium">
+              NEW
+            </span>
+          )}
+          {isBestseller && (
+            <span className="absolute top-3 left-3 bg-[#c4956a] text-[#f0f0f0] text-[9px] tracking-[0.15em] px-2.5 py-1 rounded-md font-medium">
+              BESTSELLER
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="px-1">
@@ -377,7 +480,8 @@ const ProductCard = ({ product, index }) => {
         </h3>
         <div className="flex items-center justify-between">
           <span className="text-[13px] text-[#f0f0f0] font-semibold">
-            {product.price?.currency} {parseInt(product.price?.amount || 0).toLocaleString()}
+            {product.startingPrice?.currency}{" "}
+            {parseInt(product.startingPrice?.amount || 0).toLocaleString()}
           </span>
           {/* Real stats from model */}
           {product.views > 0 && (
@@ -390,15 +494,22 @@ const ProductCard = ({ product, index }) => {
         {product.sales > 0 && (
           <div className="flex items-center gap-1 mt-1">
             <TrendingUp className="w-3 h-3 text-[#d4a76a]" />
-            <span className="text-[11px] text-[#777777]">{product.sales} sold</span>
+            <span className="text-[11px] text-[#777777]">
+              {product.sales} sold
+            </span>
           </div>
         )}
         {/* Tags pill (first tag only) */}
-        {product.tags?.length > 0 && (
-          <span className="inline-block mt-1.5 text-[10px] tracking-[0.08em] text-[#d4a76a] bg-[#222222] px-2 py-0.5 rounded-md capitalize">
-            {product.tags[0]}
-          </span>
-        )}
+        <div className="flex gap-2">
+          {product.tags?.length > 0 &&
+            product.tags.map((tag) => {
+              return (
+                <span className="inline-block mt-1.5 text-[10px] tracking-[0.08em] text-[#d4a76a] bg-[#222222] px-2 py-0.5 rounded-sm capitalize">
+                  {tag}
+                </span>
+              );
+            })}
+        </div>
       </div>
     </div>
   );
@@ -408,8 +519,17 @@ const ProductCard = ({ product, index }) => {
 const ProductSkeleton = ({ index }) => {
   const heights = [280, 340, 260, 300, 320, 240, 360, 290];
   return (
-    <div className="break-inside-avoid mb-5 opacity-0 animate-fade-in" style={{ animationDelay: `${index * 0.06}s`, animationFillMode: "forwards" }}>
-      <div className="rounded-2xl bg-[#151515] overflow-hidden mb-3" style={{ height: `${heights[index % heights.length]}px` }}>
+    <div
+      className="break-inside-avoid mb-5 opacity-0 animate-fade-in"
+      style={{
+        animationDelay: `${index * 0.06}s`,
+        animationFillMode: "forwards",
+      }}
+    >
+      <div
+        className="rounded-2xl bg-[#151515] overflow-hidden mb-3"
+        style={{ height: `${heights[index % heights.length]}px` }}
+      >
         <div className="w-full h-full animate-shimmer" />
       </div>
       <div className="space-y-2 px-1">
@@ -427,18 +547,20 @@ const ProductsSection = ({ products, loading }) => {
 
   // Filters now map to real model fields: tags, category, isNew (virtual), isBestseller
   const filters = [
-    { value: "all",        label: "All Products" },
-    { value: "new",        label: "New Arrivals" },
-    { value: "men",        label: "Men" },
-    { value: "women",      label: "Women" },
+    { value: "all", label: "All Products" },
+    { value: "new", label: "New Arrivals" },
+    { value: "men", label: "Men" },
+    { value: "women", label: "Women" },
     { value: "bestseller", label: "Bestsellers" },
   ];
 
   const filteredProducts = products.filter((p) => {
-    if (filter === "all")        return true;
-    if (filter === "new")        return p.isNew;
-    if (filter === "men")        return p.category === "men" || p.tags?.includes("men");
-    if (filter === "women")      return p.category === "women" || p.tags?.includes("women");
+    if (filter === "all") return true;
+    if (filter === "new") return p.isNew;
+    if (filter === "men")
+      return p.category === "men" || p.tags?.includes("men");
+    if (filter === "women")
+      return p.category === "women" || p.tags?.includes("women");
     if (filter === "bestseller") return p.isBestseller || p.autoIsBestseller;
     return true;
   });
@@ -448,7 +570,9 @@ const ProductsSection = ({ products, loading }) => {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
           <div>
-            <p className="text-[11px] tracking-[0.3em] text-[#d4a76a] uppercase mb-2">Curated For You</p>
+            <p className="text-[11px] tracking-[0.3em] text-[#d4a76a] uppercase mb-2">
+              Curated For You
+            </p>
             <h2 className="font-['Playfair_Display'] text-[28px] sm:text-[36px] text-[#f0f0f0] leading-tight">
               Trending Now
             </h2>
@@ -488,8 +612,12 @@ const ProductsSection = ({ products, loading }) => {
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20">
             <ShoppingBag className="w-12 h-12 text-[#333333] mx-auto mb-4" />
-            <h3 className="font-['Playfair_Display'] text-[20px] text-[#f0f0f0] mb-2">No products found</h3>
-            <p className="text-[13px] text-[#777777]">Check back soon for new arrivals</p>
+            <h3 className="font-['Playfair_Display'] text-[20px] text-[#f0f0f0] mb-2">
+              No products found
+            </h3>
+            <p className="text-[13px] text-[#777777]">
+              Check back soon for new arrivals
+            </p>
           </div>
         ) : (
           <div className="masonry-grid">
@@ -512,13 +640,18 @@ const FeaturedBanner = () => {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="order-2 lg:order-1">
-            <p className="text-[11px] tracking-[0.3em] text-[#d4a76a] uppercase mb-4">Limited Edition</p>
+            <p className="text-[11px] tracking-[0.3em] text-[#d4a76a] uppercase mb-4">
+              Limited Edition
+            </p>
             <h2 className="font-['Playfair_Display'] text-[32px] sm:text-[42px] text-[#f0f0f0] leading-tight mb-4">
-              Summer Collection<br />2026
+              Summer Collection
+              <br />
+              2026
             </h2>
             <p className="text-[14px] text-[#aaaaaa] leading-relaxed mb-8 max-w-md">
-              Embrace the warmth with our carefully curated summer essentials. Lightweight fabrics,
-              breathable designs, and timeless style for the season ahead.
+              Embrace the warmth with our carefully curated summer essentials.
+              Lightweight fabrics, breathable designs, and timeless style for
+              the season ahead.
             </p>
             <button
               onClick={() => navigate("/collections/summer-2026")}
@@ -585,10 +718,14 @@ const Newsletter = () => {
           Join the Inner Circle
         </h2>
         <p className="text-[14px] text-[#999999] mb-8 leading-relaxed">
-          Subscribe for exclusive early access to new collections, special offers, and style inspiration.
+          Subscribe for exclusive early access to new collections, special
+          offers, and style inspiration.
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-3"
+        >
           <input
             type="email"
             value={email}
@@ -618,10 +755,15 @@ const Footer = () => {
   const navigate = useNavigate();
 
   const footerLinks = {
-    "Shop": ["New Arrivals", "Men", "Women", "Accessories", "Sale"],
-    "Help": ["Track Order", "Returns", "Shipping Info", "Size Guide", "FAQ"],
-    "Company": ["About Us", "Careers", "Press", "Sustainability", "Affiliates"],
-    "Legal": ["Privacy Policy", "Terms of Service", "Cookie Policy", "Accessibility"],
+    Shop: ["New Arrivals", "Men", "Women", "Accessories", "Sale"],
+    Help: ["Track Order", "Returns", "Shipping Info", "Size Guide", "FAQ"],
+    Company: ["About Us", "Careers", "Press", "Sustainability", "Affiliates"],
+    Legal: [
+      "Privacy Policy",
+      "Terms of Service",
+      "Cookie Policy",
+      "Accessibility",
+    ],
   };
 
   return (
@@ -637,7 +779,9 @@ const Footer = () => {
                 {links.map((link) => (
                   <li key={link}>
                     <button
-                      onClick={() => navigate(`/${link.toLowerCase().replace(/\s+/g, '-')}`)}
+                      onClick={() =>
+                        navigate(`/${link.toLowerCase().replace(/\s+/g, "-")}`)
+                      }
                       className="text-[13px] text-[#777777] hover:text-[#f0f0f0] transition-colors"
                     >
                       {link}
@@ -701,7 +845,11 @@ const Home = () => {
     <div className="min-h-screen bg-[#0a0a0a]">
       <PageStyles />
 
-      <Navbar isLoggedIn={isLoggedIn} user={user} onSearchOpen={() => setSearchOpen(true)} />
+      <Navbar
+        isLoggedIn={isLoggedIn}
+        user={user}
+        onSearchOpen={() => setSearchOpen(true)}
+      />
 
       <SearchOverlay
         isOpen={searchOpen}

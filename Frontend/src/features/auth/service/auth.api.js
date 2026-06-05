@@ -33,7 +33,9 @@ export const getCurrentUser = async (dispatch) => {
     }
 
     // Real errors (500, network down, CORS, etc.)
-    const message = error.response?.data?.message || "Failed to fetch current user. Please try again.";
+    const message =
+      error.response?.data?.message ||
+      "Failed to fetch current user. Please try again.";
     dispatch(setError(message));
     return null;
   } finally {
@@ -59,7 +61,11 @@ export const register = async (user, dispatch) => {
       return null;
     }
 
-    dispatch(setError("An unexpected error occurred. Please try again."));
+    dispatch(
+      setError(
+        `An unexpected error occurred. Please try again later. If the issue persists, please contact support through ${import.meta.env.VITE_FRONTEND_URL}`,
+      ),
+    );
   } finally {
     dispatch(setLoading(false));
   }
@@ -77,6 +83,32 @@ export const login = async ({ email, password }, dispatch) => {
     dispatch(setSuccessMessage(response.data.message));
 
     return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      dispatch(setError(error.response.data.message));
+      return null;
+    }
+
+    dispatch(
+      setError(
+        `An unexpected error occurred. Please try again later. If the issue persists, please contact support through ${import.meta.env.VITE_FRONTEND_URL}`,
+      ),
+    );
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+export const logout = async (dispatch) => {
+  try {
+    dispatch(setLoading(true));
+
+    const response = await authApiInstance.get("/logout");
+
+    dispatch(setSuccessMessage(response.data.message));
+
+    return response.data;
+
   } catch (error) {
     if (error.response && error.response.data) {
       dispatch(setError(error.response.data.message));

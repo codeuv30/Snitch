@@ -1,11 +1,12 @@
 import config from "../config/config.js";
 import productModel from "../models/product.model.js";
-import wishlistModel from "../models/wishlist.model.js";
 import { uploadImage } from "../services/storage.services.js";
 import viewModel from "../models/views.model.js";
 import variantsModel from "../models/variants.model.js";
 import { createVariantKey } from "../utility/product.utility.js";
 import mongoose from "mongoose";
+import cartModel from "../models/cart.model.js";
+import wishlistModel from "../models/wishlist.model.js";
 
 export const createProduct = async (req, res) => {
   if (!req.body) {
@@ -243,7 +244,7 @@ export const createProductVariant = async (req, res) => {
       product.startingPrice.amount = amount;
     }
 
-    product.status = "Live";
+    product.status = "Under Review";
     await product.save();
 
     return res.status(201).json({
@@ -318,6 +319,14 @@ export const deleteProduct = async (req, res) => {
 
     await productModel.findOneAndDelete({ _id: productId, seller });
     await variantsModel.deleteMany({ product: productId });
+    await wishlistModel.updateMany(
+      {},
+      { $pull: { products: { product: productId } } },
+    );
+    await cartModel.updateMany(
+      {},
+      { $pull: { items: { product: productId } } },
+    );
 
     return res.status(200).json({
       success: true,
@@ -336,386 +345,450 @@ export const deleteProduct = async (req, res) => {
 };
 
 export const getAllProducts = async (req, res) => {
-  const products = await productModel.find({ status: "Live" });
+  try {
+    const products = await productModel.find({ status: "Live" });
 
-  return res.status(200).json({
-    message: "Products fetched successfully",
-    success: true,
-    products,
-  });
+    return res.status(200).json({
+      message: "Products fetched successfully",
+      success: true,
+      products,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `We were unable to fetch products at this time. Please try again later. If the problem persists, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
+    });
+  }
 };
 
 export const getProductDetails = async (req, res) => {
-  const productId = req.params?.productId;
+  try {
+    const productId = req.params?.productId;
 
-  if (!productId) {
-    return res.status(400).json({
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: "ProductId is required",
+      });
+    }
+
+    const product = await productModel
+      .findOne({ _id: productId, status: "Live" })
+      .populate("seller");
+
+    if (!product) {
+      return res.status(400).json({
+        success: false,
+        message: "Product does not exists",
+        show: "404",
+      });
+    }
+
+    const variants = await variantsModel.find({ product: product._id });
+
+    return res.status(200).json({
+      success: true,
+      message: "Product fetched successfully",
+      product,
+      variants,
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      message: "ProductId is required",
+      message: `We were unable to fetch product details at this time. Please try again later. If the problem persists, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
     });
   }
-
-  const product = await productModel
-    .findOne({ _id: productId, status: "Live" })
-    .populate("seller");
-
-  if (!product) {
-    return res.status(400).json({
-      success: false,
-      message: "Product does not exists",
-      show: "404",
-    });
-  }
-
-  const variants = await variantsModel.find({ product: product._id });
-
-  return res.status(200).json({
-    success: true,
-    message: "Product fetched successfully",
-    product,
-    variants,
-  });
 };
 
 export const addView = async (req, res) => {
-  const productId = req.params?.productId;
+  try {
+    const productId = req.params?.productId;
 
-  if (!productId) {
-    return res.status(400).json({
-      success: false,
-      message: "ProductId is required",
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: "ProductId is required",
+      });
+    }
+
+    const product = await productModel.findById(productId);
+
+    if (!product) {
+      return res.status(400).json({
+        success: false,
+        message: "Product does not exists",
+        show: "404",
+      });
+    }
+
+    const existingView = await viewModel.findOne({
+      product: product._id,
+      viewedBy: req.user?._id,
     });
-  }
 
-  const product = await productModel.findById(productId);
+    if (existingView) {
+      return res.status(200).json({
+        success: true,
+        message: "View added successfully",
+      });
+    }
 
-  if (!product) {
-    return res.status(400).json({
-      success: false,
-      message: "Product does not exists",
-      show: "404",
-    });
-  }
+    const viewData = {
+      product: product._id,
+    };
 
-  const existingView = await viewModel.findOne({
-    product: product._id,
-    viewedBy: req.user?._id,
-  });
+    if (req.user) {
+      viewData.viewedBy = req.user._id;
+    } else {
+      viewData.sessionId = req.visitorId;
+    }
 
-  if (existingView) {
+    const view = await viewModel.create(viewData);
+
+    await productModel.findByIdAndUpdate(product._id, { $inc: { views: 1 } });
+
     return res.status(200).json({
       success: true,
       message: "View added successfully",
     });
+  } catch (error) {
+    const products = await productModel.find({ status: "Live" });
+
+    return res.status(500).json({
+      success: false,
+      message: `We were unable to add view for the product at this time. Please try again later. If the problem persists, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
+    });
   }
-
-  const viewData = {
-    product: product._id,
-  };
-
-  if (req.user) {
-    viewData.viewedBy = req.user._id;
-  } else {
-    viewData.sessionId = req.visitorId;
-  }
-
-  const view = await viewModel.create(viewData);
-
-  await productModel.findByIdAndUpdate(product._id, { $inc: { views: 1 } });
-
-  return res.status(200).json({
-    success: true,
-    message: "View added successfully",
-  });
 };
 
 export const editSellerProduct = async (req, res) => {
-  if (!req.body) {
-    return res.status(400).json({
-      success: false,
-      message: "Request body is missing",
-    });
-  }
-
-  const productId = req.params?.productId;
-  const seller = req.user._id;
-
-  const title = req.body.title;
-  const description = req.body.description;
-  const tags = req.body.tags;
-  const category = req.body.category;
-
-  let variantOptions;
-
   try {
-    variantOptions = req.body.variantOptions
-      ? JSON.parse(req.body.variantOptions)
-      : undefined;
-  } catch {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid variantOptions format",
-    });
-  }
+    if (!req.body) {
+      return res.status(400).json({
+        success: false,
+        message: "Request body is missing",
+      });
+    }
 
-  const thumbnail = req.files[0];
+    const productId = req.params?.productId;
+    const seller = req.user._id;
 
-  const newProductData = {
-    status: "Under Review",
-  };
+    const title = req.body.title;
+    const description = req.body.description;
+    const tags = req.body.tags;
+    const category = req.body.category;
 
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid ProductId",
-    });
-  }
+    let variantOptions;
 
-  if (title) {
-    newProductData.title = title;
-  }
-
-  if (description) {
-    newProductData.description = description;
-  }
-
-  if (tags) {
-    newProductData.tags = tags;
-  }
-
-  if (category) {
-    newProductData.category = category;
-  }
-
-  if (variantOptions) {
-    newProductData.variantOptions = variantOptions;
-  }
-
-  if (thumbnail) {
-    const image = await uploadImage({
-      fileName: thumbnail.originalname,
-      buffer: thumbnail.buffer,
-      folder: "snitch/products/thumbnails",
-    });
-    newProductData.thumbnail = image.url;
-  }
-
-  const existingProduct = await productModel.findOne({
-    _id: productId,
-    seller,
-  });
-
-  if (!existingProduct) {
-    return res.status(404).json({
-      success: false,
-      message: "Product not found",
-    });
-  }
-
-  if (existingProduct.status === "Under Review") {
-    return res.status(403).json({
-      success: false,
-      message: "Products under review cannot be edited",
-    });
-  }
-
-  if (existingProduct.seller.toString() !== seller.toString()) {
-    return res.status(403).json({
-      success: false,
-      message: "You do not have permission to perform this action.",
-    });
-  }
-
-  const product = await productModel.findByIdAndUpdate(
-    productId,
-    { $set: newProductData },
-    {
-      returnDocument: "after",
-    },
-  );
-
-  if (!product) {
-    return res.status(404).json({
-      success: false,
-      message: "Product not found or you do not own it",
-    });
-  }
-
-  return res.status(200).json({
-    success: true,
-    message: "Product updated successfully, now going under review",
-  });
-};
-
-export const editProductVariant = async (req, res) => {
-  const { productId, variantId } = req.params;
-  const seller = req.user._id;
-
-  const images = req.files;
-
-  let existingImages;
-
-  if (req.body.existingImages) {
     try {
-      existingImages = req.body.existingImages
-        ? JSON.parse(req.body.existingImages)
+      variantOptions = req.body.variantOptions
+        ? JSON.parse(req.body.variantOptions)
         : undefined;
     } catch {
       return res.status(400).json({
         success: false,
-        message: "Invalid existingImages format",
+        message: "Invalid variantOptions format",
       });
     }
-  }
 
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid productId",
-    });
-  }
+    const thumbnail = req.files[0];
 
-  if (!mongoose.Types.ObjectId.isValid(variantId)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid variantId",
-    });
-  }
+    const newProductData = {
+      status: "Under Review",
+    };
 
-  const product = await productModel.findOne({
-    _id: productId,
-    seller,
-  });
-
-  if (!product) {
-    return res.status(404).json({
-      success: false,
-      message: "Product not found",
-    });
-  }
-
-  if (product.status === "Under Review") {
-    return res.status(403).json({
-      success: false,
-      message: "Variants of products under review cannot be edited",
-    });
-  }
-
-  const updateData = {};
-
-  if (req.body.sku) {
-    updateData.sku = req.body.sku.toUpperCase();
-  }
-
-  if (req.body.attributes) {
-    updateData.attributes =
-      typeof req.body.attributes === "string"
-        ? JSON.parse(req.body.attributes)
-        : req.body.attributes;
-  }
-
-  if (req.body.amount) {
-    updateData["price.amount"] = Number(req.body.amount);
-  }
-
-  if (req.body.currency) {
-    updateData["price.currency"] = req.body.currency;
-  }
-
-  if (req.body.stock !== undefined) {
-    updateData.stock = Number(req.body.stock);
-  }
-
-  if (req.body.isAvailable !== undefined) {
-    updateData.isAvailable =
-      req.body.isAvailable === true || req.body.isAvailable === "true";
-  }
-
-  if (images && existingImages) {
-    const uploadImages = await Promise.all(
-      images.map((image) => {
-        return uploadImage({
-          fileName: image.originalname,
-          buffer: image.buffer,
-          folder: "/snitch/products/variants",
-        });
-      }),
-    );
-
-    const imageUrls = uploadImages.map((img) => img.url);
-
-    const newImageData = imageUrls.map((url) => ({
-      url,
-    }));
-
-    const oldImageData = existingImages.map((url) => ({
-      url,
-    }));
-
-    const finalImages = [...oldImageData, ...newImageData]
-
-    if(finalImages.length > 7) {
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({
         success: false,
-        message: "You can only upload 7 images"
-      })
+        message: "Invalid ProductId",
+      });
     }
 
-    updateData.images = finalImages;
-  }
+    if (title) {
+      newProductData.title = title;
+    }
 
-  const variant = await variantsModel.findOneAndUpdate(
-    {
-      _id: variantId,
-      product: productId,
-    },
-    {
-      $set: updateData,
-    },
-    {
-      returnDocument: "after",
-    },
-  );
+    if (description) {
+      newProductData.description = description;
+    }
 
-  if (!variant) {
-    return res.status(404).json({
+    if (tags) {
+      newProductData.tags = tags;
+    }
+
+    if (category) {
+      newProductData.category = category;
+    }
+
+    if (variantOptions) {
+      newProductData.variantOptions = variantOptions;
+    }
+
+    const existingProduct = await productModel.findOne({
+      _id: productId,
+      seller,
+    });
+
+    if (!existingProduct) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    if (thumbnail) {
+      const image = await uploadImage({
+        fileName: thumbnail.originalname,
+        buffer: thumbnail.buffer,
+        folder: "snitch/products/thumbnails",
+      });
+      newProductData.thumbnail = image.url;
+    }
+
+    if (existingProduct.status === "Under Review") {
+      return res.status(403).json({
+        success: false,
+        message: "Products under review cannot be edited",
+      });
+    }
+
+    if (existingProduct.seller.toString() !== seller.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to perform this action.",
+      });
+    }
+
+    const product = await productModel.findByIdAndUpdate(
+      productId,
+      { $set: newProductData },
+      {
+        returnDocument: "after",
+      },
+    );
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found or you do not own it",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully, now going under review",
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      message: "Variant not found",
+      message: `We were unable to edit the product at this time. Please try again later. If the problem persists, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
     });
   }
+};
 
-  // Product goes back for review after variant change
-  product.status = "Under Review";
-  await product.save();
+export const editProductVariant = async (req, res) => {
+  try {
+    const { productId, variantId } = req.params;
+    const seller = req.user._id;
 
-  return res.status(200).json({
-    success: true,
-    message: "Variant updated successfully, now going under review",
-  });
+    const images = req.files;
+
+    let existingImages;
+
+    if (req.body.existingImages) {
+      try {
+        existingImages = req.body.existingImages
+          ? JSON.parse(req.body.existingImages)
+          : undefined;
+      } catch {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid existingImages format",
+        });
+      }
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid productId",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(variantId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid variantId",
+      });
+    }
+
+    const product = await productModel.findOne({
+      _id: productId,
+      seller,
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    if (product.status === "Under Review") {
+      return res.status(403).json({
+        success: false,
+        message: "Variants of products under review cannot be edited",
+      });
+    }
+
+    const updateData = {};
+
+    if (req.body.sku) {
+      updateData.sku = req.body.sku.toUpperCase();
+    }
+
+    if (req.body.attributes) {
+      updateData.attributes =
+        typeof req.body.attributes === "string"
+          ? JSON.parse(req.body.attributes)
+          : req.body.attributes;
+    }
+
+    if (req.body.amount) {
+      updateData["price.amount"] = Number(req.body.amount);
+    }
+
+    if (req.body.currency) {
+      updateData["price.currency"] = req.body.currency;
+    }
+
+    if (req.body.stock !== undefined) {
+      updateData.stock = Number(req.body.stock);
+    }
+
+    if (req.body.isAvailable !== undefined) {
+      updateData.isAvailable =
+        req.body.isAvailable === true || req.body.isAvailable === "true";
+    }
+
+    const existingImageData = (existingImages || []).map((url) => ({ url }));
+    const newImageData = [];
+
+    if (images && images.length > 0) {
+      if (existingImageData.length + images.length > 7) {
+        return res.status(400).json({
+          success: false,
+          message: "You can only have 7 images total",
+        });
+      }
+
+      const uploadedImages = await Promise.all(
+        images.map((image) =>
+          uploadImage({
+            fileName: image.originalname,
+            buffer: image.buffer,
+            folder: "/snitch/products/variants",
+          }),
+        ),
+      );
+
+      newImageData.push(...uploadedImages.map((img) => ({ url: img.url })));
+    }
+
+    const finalImages = [...existingImageData, ...newImageData];
+    if (finalImages.length > 0) {
+      updateData.images = finalImages;
+    }
+
+    const variant = await variantsModel.findOneAndUpdate(
+      {
+        _id: variantId,
+        product: productId,
+      },
+      {
+        $set: updateData,
+      },
+      {
+        returnDocument: "after",
+      },
+    );
+
+    if (!variant) {
+      return res.status(404).json({
+        success: false,
+        message: "Variant not found",
+      });
+    }
+
+    // Product goes back for review after variant change
+    product.status = "Under Review";
+    await product.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Variant updated successfully, now going under review",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `We were unable to edit the variant at this time. Please try again later. If the problem persists, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
+    });
+  }
 };
 
 export const getVariant = async (req, res) => {
-  const { variantId } = req.params;
+  try {
+    const { variantId } = req.params;
 
-  if (!variantId) {
-    return res.status(400).json({
+    if (!variantId) {
+      return res.status(400).json({
+        success: false,
+        message: "Variant ID is required",
+      });
+    }
+
+    const variant = await variantsModel.findOne({ _id: variantId });
+
+    if (!variant) {
+      return res.status(400).json({
+        success: false,
+        message: "Variant does not exists",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Variant fetched successfully",
+      variant,
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      message: "Variant ID is required",
+      message: `We were unable to fetch the variant details at this time. Please try again later. If the problem persists, please contact support through ${
+        config.NODE_ENV === "production"
+          ? config.FRONTEND_PRODUCTION_URL
+          : config.FRONTEND_DEVELOPMENT_URL
+      }/report-issue.`,
     });
   }
-
-  const variant = await variantsModel.findOne({ _id: variantId });
-
-  if (!variant) {
-    return res.status(400).json({
-      success: false,
-      message: "Variant does not exists",
-    });
-  }
-
-  return res.status(200).json({
-    success: true,
-    message: "Variant fetched successfully",
-    variant,
-  });
 };
