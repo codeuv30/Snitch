@@ -1509,12 +1509,6 @@ const ProductDetails = () => {
                       ? "Out of Stock"
                       : "Select Options"}
                 </button>
-                <button
-                  disabled={!canAddToCart}
-                  className={`flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all shadow-lg ${canAddToCart ? "bg-[#d4a76a] text-[#0a0a0a] hover:bg-[#c4956a] active:scale-[0.98] shadow-[#d4a76a]/20" : "bg-[#1a1a1a] text-[#555] cursor-not-allowed shadow-none"}`}
-                >
-                  Buy Now
-                </button>
               </div>
 
               <div
