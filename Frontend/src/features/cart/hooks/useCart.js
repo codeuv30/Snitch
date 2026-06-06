@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { setError, setItems } from "../state/cart.slice";
-import { addItem } from "../service/cart.api";
+import { addItem, createCartOrder, verifyPayment } from "../service/cart.api";
 import {
   decrementCartItem,
   getCart,
@@ -51,12 +51,25 @@ const useCart = () => {
     return data;
   }, [dispatch]);
 
+  const handleCreateCartOrder = useCallback(async () => {
+    const data = await createCartOrder(dispatch);
+    return data;
+  }, [dispatch]);
+
+  const handleVerifyCartOrder = useCallback(async ({ razorpay_order_id, razorpay_payment_id, razorpay_signature }) => {
+    const data = await verifyPayment({ razorpay_order_id, razorpay_payment_id, razorpay_signature, dispatch });
+
+    return data;
+  }, [dispatch]);
+
   return {
     handleAddItem,
     handleGetCart,
     handleIncrementItem,
     handleDecrementItem,
     handleRemoveItem,
+    handleCreateCartOrder,
+    handleVerifyCartOrder
   };
 };
 

@@ -99,7 +99,7 @@ export const login = async (req, res) => {
       message: "Request body is missing",
     });
   }
-  
+
   const { email, password } = req.body;
 
   try {
@@ -107,6 +107,15 @@ export const login = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    if (user.provider === "google") {
+      return res
+        .status(400)
+        .json({
+          message:
+            "This account uses Google sign-in. Please continue with Google.",
+        });
     }
 
     const isMatch = await user.comparePassword(password);
@@ -117,6 +126,7 @@ export const login = async (req, res) => {
 
     await sendTokenResponse(user, res, "User logged in successfully");
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: `We were unable to log you in at this time. Please try again later. If the problem persists, please contact support through ${

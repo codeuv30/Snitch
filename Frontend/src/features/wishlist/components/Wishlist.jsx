@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   ImageIcon,
 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 // ─── Wishlist Styles ───────────────────────────────────────────
 const WishlistStyles = () => (
@@ -99,8 +100,10 @@ export const WishlistSidebar = () => {
     wishlistItemCount,
   } = React.useContext(WishlistContext);
 
+  const navigate = useNavigate();
+
   if (!wishlistOpen) return null;
-  
+
   return (
     <div className="fixed inset-0 z-[100] animate-fade-in">
       <WishlistStyles />
@@ -141,7 +144,7 @@ export const WishlistSidebar = () => {
             <button
               onClick={() => {
                 setWishlistOpen(false);
-                window.location.href = "/store";
+                navigate("/store");
               }}
               className="text-[#d4a76a] font-medium hover:text-[#f0f0f0] transition-colors text-xs sm:text-sm flex items-center gap-1"
             >
@@ -159,7 +162,10 @@ export const WishlistSidebar = () => {
                 >
                   {/* Thumbnail */}
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-[#1a1a1a] flex-shrink-0 bg-[#0a0a0a]">
-                    <ProductThumbnail product={item.product} variant={item.variant} />
+                    <ProductThumbnail
+                      product={item.product}
+                      variant={item.variant}
+                    />
                   </div>
 
                   {/* Details */}
@@ -180,7 +186,7 @@ export const WishlistSidebar = () => {
                     <p className="text-[11px] sm:text-xs text-[#d4a76a] font-medium mt-1">
                       {formatPrice(
                         item.product?.startingPrice?.amount,
-                        item.product?.startingPrice?.currency
+                        item.product?.startingPrice?.currency,
                       )}
                     </p>
 
@@ -189,7 +195,7 @@ export const WishlistSidebar = () => {
                       <button
                         onClick={() => {
                           setWishlistOpen(false);
-                          window.location.href = `/store/product/${item.product?._id}`;
+                          navigate(`/store/product/${item.product?._id}`);
                         }}
                         className="flex items-center gap-1.5 text-[11px] sm:text-xs text-[#d4a76a] hover:text-[#f0f0f0] transition-colors font-medium"
                       >
@@ -219,7 +225,7 @@ export const WishlistSidebar = () => {
               <button
                 onClick={() => {
                   setWishlistOpen(false);
-                  window.location.href = "/store";
+                  navigate("/store");
                 }}
                 className="w-full py-2.5 sm:py-3 border border-[#1a1a1a] text-[#777777] rounded-xl font-medium text-xs sm:text-sm hover:text-[#f0f0f0] hover:border-[#333333] transition-colors"
               >

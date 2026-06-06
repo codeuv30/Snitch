@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 
 const NotFound = () => {
   const navigate = useNavigate();
+  
   const cardRef = useRef(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,7 +35,7 @@ const NotFound = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       // You can customize this to search your app or redirect to Google
-      window.location.href = `/?search=${encodeURIComponent(searchQuery)}`;
+      navigate("/store")
     }
   };
 

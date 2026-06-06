@@ -1,38 +1,14 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./app/App.css";
-import App from "./app/App.jsx";
 import { Provider } from "react-redux";
 import { store } from "./app/app.store.js";
 import { Toaster } from "sonner";
-import { CartProvider } from "./features/cart/context/CartContext";
-import { WishlistProvider } from "./features/wishlist/context/WishlistContext";
-import Cart from "./features/cart/components/Cart";
-import Wishlist from "./features/wishlist/components/Wishlist";
+import { routes } from "./app/app.routes";
+import { RouterProvider } from "react-router";
 
 createRoot(document.getElementById("root")).render(
-  <>
-    <Toaster
-      richColors={false}
-      theme="light"
-      position="top-right"
-      toastOptions={{
-        className: "rounded-xl border text-sm shadow-md font-medium",
-        style: {
-          background: "#f8f5f1",
-          border: "1px solid #ded3c6",
-          color: "#1f1f1f",
-        },
-      }}
-    />
-    <Provider store={store}>
-      <WishlistProvider>
-        <CartProvider>
-          <App />
-          <Cart />
-          <Wishlist />
-        </CartProvider>
-      </WishlistProvider>
-    </Provider>
-  </>,
+  <Provider store={store}>
+    <Toaster position="top-right" />
+    <RouterProvider router={routes} />
+  </Provider>,
 );

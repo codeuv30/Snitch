@@ -1,9 +1,10 @@
-// src/context/CartContext.js
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import useCart from "../hooks/useCart";
 import { useDispatch, useSelector } from "react-redux";
 import Toast from "@/components/ui/Toast";
 import { setTotalCount, setTotalPrice } from "../state/cart.slice";
+import { useRazorpay } from "react-razorpay";
+import { useNavigate } from "react-router";
 
 export const CartContext = React.createContext();
 
@@ -14,9 +15,12 @@ export const CartProvider = ({ children }) => {
     handleDecrementItem,
     handleGetCart,
     handleRemoveItem,
+    handleCreateCartOrder,
+    handleVerifyCartOrder
   } = useCart();
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const user = useSelector((state) => state.auth.user);
 
@@ -27,15 +31,17 @@ export const CartProvider = ({ children }) => {
   const [cartTotalPrice, setCartTotalPrice] = useState(null);
   const [cartTotalCount, setCartTotalCount] = useState(null);
 
-  const totalPrice = useSelector(state => state.cart.totalPrice);
-  const totalCount = useSelector(state => state.cart.totalCount);
+  const totalPrice = useSelector((state) => state.cart.totalPrice);
+  const totalCount = useSelector((state) => state.cart.totalCount);
 
   const loading = useSelector((state) => state.cart.loading);
+
+  const { error, isLoading, Razorpay } = useRazorpay();
 
   const loadCart = async () => {
     try {
       const result = await handleGetCart();
-      
+
       dispatch(setTotalPrice(result.cart[0].totalPrice));
       dispatch(setTotalCount(result.cart[0].items.length));
 
@@ -54,7 +60,14 @@ export const CartProvider = ({ children }) => {
     if (!user) return;
 
     loadCart();
-  }, [handleGetCart, user, totalPrice, totalCount, cartTotalCount, cartTotalPrice]);
+  }, [
+    handleGetCart,
+    user,
+    totalPrice,
+    totalCount,
+    cartTotalCount,
+    cartTotalPrice,
+  ]);
 
   const addToCart = useCallback(
     async (product, variant = null) => {
@@ -62,7 +75,6 @@ export const CartProvider = ({ children }) => {
         Toast.error("Please login to add items in cart");
         return;
       }
-
       try {
         const result = await handleAddItem(product._id, variant?._id);
 
@@ -143,6 +155,43 @@ export const CartProvider = ({ children }) => {
     [cart],
   );
 
+  const proceedToCheckout = useCallback(async () => {
+    if (!user) return;
+
+    const order = await handleCreateCartOrder();
+
+    const orderObject = order.order;
+
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: orderObject.amount,
+      currency: orderObject.currency,
+      name: "Snitch",
+      description: "Test Transaction",
+      order_id: orderObject.id,
+      handler: async (response) => {
+        const isValid = await handleVerifyCartOrder(response);
+
+        if(isValid.success) {
+          navigate(`/order-success?order_id=${response.razorpay_order_id}`);
+        }
+      },
+      prefill: {
+        name: user.fullName,
+        email: user.email,
+        contact: user.contact,
+      },
+      theme: {
+        color: "#d4a853",
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+
+    return orderObject;
+  });
+
   return (
     <CartContext.Provider
       value={{
@@ -154,10 +203,11 @@ export const CartProvider = ({ children }) => {
         decrementQuantity,
         cartTotal,
         cartItemCount,
-        addedToCart,
         loading,
         removeItem,
+        proceedToCheckout,
         isLoggedIn: !!user,
+        addedToCart
       }}
     >
       {children}

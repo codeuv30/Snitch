@@ -1,4 +1,3 @@
-// Cart.jsx - Standalone Cart Component (No Login Required)
 import React, { useEffect } from "react";
 import { CartContext } from "../context/CartContext";
 import {
@@ -10,6 +9,7 @@ import {
   ArrowRight,
   ImageIcon,
 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 // ─── Cart Styles ───────────────────────────────────────────
 const CartStyles = () => (
@@ -101,7 +101,10 @@ export const CartSidebar = () => {
     decrementQuantity,
     cartTotal,
     cartItemCount,
+    proceedToCheckout,
   } = React.useContext(CartContext);
+
+  const navigate = useNavigate();
 
   if (!cartOpen) return null;
 
@@ -145,7 +148,7 @@ export const CartSidebar = () => {
             <button
               onClick={() => {
                 setCartOpen(false);
-                window.location.href = "/store";
+                navigate("/store");
               }}
               className="text-[#d4a76a] font-medium hover:text-[#f0f0f0] transition-colors text-xs sm:text-sm flex items-center gap-1"
             >
@@ -202,7 +205,14 @@ export const CartSidebar = () => {
 
                     {item.price.amount > item.variant.price.amount && (
                       <>
-                        <p className="text-[11px] sm:text-xs text-green-400 font-medium mt-0.5">You are saving {formatPrice((item.price?.amount - item.variant.price?.amount), item.variant.price?.currency)} on this item.</p>
+                        <p className="text-[11px] sm:text-xs text-green-400 font-medium mt-0.5">
+                          You are saving{" "}
+                          {formatPrice(
+                            item.price?.amount - item.variant.price?.amount,
+                            item.variant.price?.currency,
+                          )}{" "}
+                          on this item.
+                        </p>
                       </>
                     )}
 
@@ -261,14 +271,17 @@ export const CartSidebar = () => {
                 <span>Total</span>
                 <span>{formatPrice(cartTotal, "INR")}</span>
               </div>
-              <button className="w-full py-3 sm:py-4 bg-[#f0f0f0] text-[#0a0a0a] rounded-xl font-semibold text-sm sm:text-base hover:bg-[#d4a76a] transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={() => proceedToCheckout()}
+                className="w-full py-3 sm:py-4 bg-[#f0f0f0] text-[#0a0a0a] rounded-xl font-semibold text-sm sm:text-base hover:bg-[#d4a76a] transition-colors flex items-center justify-center gap-2"
+              >
                 <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                 Proceed to Checkout
               </button>
               <button
                 onClick={() => {
                   setCartOpen(false);
-                  window.location.href = "/store";
+                  navigate("/store")
                 }}
                 className="w-full py-2.5 sm:py-3 border border-[#1a1a1a] text-[#777777] rounded-xl font-medium text-xs sm:text-sm hover:text-[#f0f0f0] hover:border-[#333333] transition-colors"
               >

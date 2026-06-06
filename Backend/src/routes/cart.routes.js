@@ -1,7 +1,7 @@
 import express from "express";
 import { authenticateUser } from "../middlewares/auth.middleware.js";
 import { addToCartValidator, decrementQuantityValidator, incrementQuantityValidator, removeItemValidator } from "../validators/cart.validator.js";
-import { addToCart, decrementQuantity, getCart, incrementQuantity, removeItem } from "../controllers/cart.controller.js";
+import { addToCart, createOrderController, decrementQuantity, getCart, incrementQuantity, removeItem, verifyOrderController } from "../controllers/cart.controller.js";
 
 const cartRouter = express.Router();
 
@@ -47,5 +47,12 @@ cartRouter.get("/", authenticateUser, getCart);
  * @access Private
 */
 cartRouter.post("/remove/:productId/:variantId", authenticateUser, removeItemValidator, removeItem);
+
+/**
+ * @route POST api/v1/cart/payment/create/order
+*/
+cartRouter.post('/payment/create/order', authenticateUser, createOrderController);
+
+cartRouter.post("/payment/verify/order", authenticateUser, verifyOrderController);
 
 export default cartRouter;

@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  /* Base neutrals — warm, not cold */
+  --color-cream: #FAF9F6;
+  --color-ivory: #F5F0E8;
+  --color-linen: #E8E0D5;
+  --color-stone: #C4B7A6;
+  --color-taupe: #A89F91;
+  
+  /* Accents — subtle luxury */
+  --color-gold: #C9A96E;
+  --color-gold-soft: #D4B896;
+  --color-blush: #E8D5D0;
+  --color-sage: #C5CEC0;
+  
+  /* Text — soft, readable */
+  --color-charcoal: #2C2C2C;
+  --color-graphite: #4A4A4A;
+  --color-ash: #8C8C8C;
+  
+  /* Functional */
+  --color-border: #E5E0D8;
+  --color-surface: #FFFFFF;
+  
+  /* Typography */
+  --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", "Helvetica Neue", system-ui, sans-serif;
+  
+  /* Spacing — generous, breathable */
+  --spacing-section: 6rem;
+  --spacing-content: 2.5rem;
+  
+  /* Shadows — soft, diffused */
+  --shadow-elegant: 0 4px 20px rgba(44, 44, 44, 0.06);
+  --shadow-lift: 0 8px 30px rgba(44, 44, 44, 0.08);
+}
