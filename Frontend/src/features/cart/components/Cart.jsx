@@ -1,5 +1,5 @@
 // Cart.jsx - Standalone Cart Component (No Login Required)
-import React from "react";
+import React, { useEffect } from "react";
 import { CartContext } from "../context/CartContext";
 import {
   ShoppingCart,
@@ -156,7 +156,7 @@ export const CartSidebar = () => {
           <>
             {/* Cart Items */}
             <div className="p-4 sm:p-5 space-y-3 sm:space-y-4 flex-1">
-              {cart.map((item, index) => (
+              {cart[0].items.map((item, index) => (
                 <div
                   key={`${item._id}-${index}`}
                   className="flex gap-3 sm:gap-4 p-3 sm:p-4 bg-[#111111] rounded-xl border border-[#1a1a1a]"

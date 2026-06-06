@@ -2,13 +2,17 @@ import cartModel from "../models/cart.model.js";
 import productModel from "../models/product.model.js";
 import variantModel from "../models/variants.model.js";
 import config from "../config/config.js";
+import mongoose from "mongoose";
 
 export const addToCart = async (req, res) => {
   try {
     const { productId, variantId } = req.params;
     const user = req.user;
 
-    const product = await productModel.findOne({ _id: productId, status: "Live" });
+    const product = await productModel.findOne({
+      _id: productId,
+      status: "Live",
+    });
 
     if (!product) {
       return res.status(400).json({
@@ -16,7 +20,7 @@ export const addToCart = async (req, res) => {
         message: "Product does not exists",
       });
     }
-    
+
     const variant = await variantModel.findOne({
       _id: variantId,
       product: product._id,
@@ -283,13 +287,71 @@ export const getCart = async (req, res) => {
   try {
     const user = req.user;
 
-    let cart = await cartModel
-      .findOne({ user: user._id })
-      .populate("items.product")
-      .populate("items.variant");
+    let cart = await cartModel.aggregate([
+      {
+        $match: {
+          user: new mongoose.Types.ObjectId(user._id),
+        },
+      },
+      {
+        $unwind: {
+          path: "$items",
+        },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.product",
+          foreignField: "_id",
+          as: "items.product",
+        },
+      },
+      {
+        $lookup: {
+          from: "variants",
+          localField: "items.variant",
+          foreignField: "_id",
+          as: "items.variant",
+        },
+      },
+      {
+        $unwind: {
+          path: "$items.product",
+        },
+      },
+      {
+        $unwind: {
+          path: "$items.variant",
+        },
+      },
+      {
+        $addFields: {
+          itemPrice: {
+            amount: {
+              $multiply: ["$items.quantity", "$items.variant.price.amount"],
+            },
+            currency: "$items.variant.price.currency",
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          totalPrice: {
+            $sum: "$itemPrice.amount",
+          },
+          currency: {
+            $first: "$itemPrice.currency",
+          },
+          items: {
+            $push: "$items",
+          },
+        },
+      },
+    ]);
 
     /* Create a cart only if user don't have a cart */
-    if (!cart) {
+    if (cart.length === 0) {
       cart = await cartModel.create({
         user: user._id,
       });
@@ -301,6 +363,7 @@ export const getCart = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: `We were unable to find your cart items at this time. Please try again later. If the problem persists, please contact support through ${

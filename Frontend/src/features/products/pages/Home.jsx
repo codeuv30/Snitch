@@ -3,441 +3,376 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import useProduct from "../hooks/useProduct";
 import {
-  ShoppingBag,
-  ArrowRight,
-  Star,
-  Truck,
-  Shield,
-  RotateCcw,
-  Heart,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
+  ShoppingBag, ArrowRight, Heart, Star, Search, X, SlidersHorizontal
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 
-// ─── Styles ───────────────────────────────────────────────────────
-const PageStyles = () => (
+const Keyframes = () => (
   <style>{`
-    @keyframes fade-up {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     @keyframes shimmer {
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
-    .anim-fade-up {
-      opacity: 0;
-      animation: fade-up 0.6s ease-out forwards;
-    }
-    .anim-shimmer {
-      background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-    }
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { scrollbar-width: none; }
   `}</style>
 );
 
-// ─── Hero ─────────────────────────────────────────────────────────
-const Hero = () => {
-  const navigate = useNavigate();
-  const [slide, setSlide] = useState(0);
-  const slides = [
-    {
-      img: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1400&h=800&fit=crop",
-      title: "New Season",
-      subtitle: "Refresh your wardrobe with curated essentials",
-    },
-    {
-      img: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=1400&h=800&fit=crop",
-      title: "Premium Denim",
-      subtitle: "Crafted for comfort, built to last",
-    },
-  ];
-
-  useEffect(() => {
-    const t = setInterval(() => setSlide((s) => (s + 1) % slides.length), 6000);
-    return () => clearInterval(t);
-  }, [slides.length]);
+/* ─── Hero — single reliable image ──────────────────────── */
+function Hero() {
+  const nav = useNavigate();
 
   return (
-    <section className="relative h-[60vh] sm:h-[70vh] overflow-hidden bg-[#0a0a0a]">
-      {slides.map((s, i) => (
-        <div
-          key={i}
-          className={`absolute inset-0 transition-opacity duration-700 ${
-            i === slide ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <img src={s.img} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/50" />
-        </div>
-      ))}
+    <section className="relative h-[80vh] min-h-[480px] bg-[#0a0a0c] overflow-hidden">
+      <img
+        src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1600&h=900&fit=crop&q=80"
+        alt="Hero"
+        className="absolute inset-0 w-full h-full object-cover object-center brightness-[0.35]"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(10,10,12,0.3)] via-[rgba(10,10,12,0.4)] to-[rgba(10,10,12,0.95)]" />
 
-      <div className="relative z-10 h-full flex items-center max-w-[1400px] mx-auto px-6">
-        <div className="max-w-lg">
-          <p className="text-[11px] tracking-[0.2em] text-[#c4956a] uppercase font-bold mb-3">
-            {slides[slide].title}
+      <div className="relative z-[2] h-full flex flex-col justify-end max-w-[1200px] mx-auto px-8 md:px-12 pb-20">
+        <div style={{ animation: "fadeUp 0.7s ease both" }}>
+          <p className="text-[10px] font-semibold text-[#d4a853] tracking-[0.25em] uppercase mb-5">
+            Spring / Summer 2026
           </p>
-          <h1 className="font-['Playfair_Display'] text-[36px] sm:text-[48px] lg:text-[56px] text-white leading-[1.1] mb-4">
-            {slides[slide].subtitle}
+          <h1 className="font-[Playfair_Display] text-[clamp(36px,5vw,56px)] font-semibold text-white leading-[1.05] mb-5 -tracking-[0.02em]">
+            The New Season Edit
           </h1>
+          <p className="text-sm text-white/45 leading-relaxed mb-10 max-w-[360px]">
+            Premium fabrics and contemporary cuts for the modern wardrobe.
+          </p>
           <button
-            onClick={() => navigate("/store")}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#0a0a0a] text-[12px] font-bold tracking-wider rounded-lg hover:bg-[#c4956a] transition-colors"
+            onClick={() => nav("/store")}
+            className="bg-[#d4a853] text-[#0a0a0c] font-semibold text-[11px] tracking-[0.12em] uppercase px-8 py-3.5 rounded-md hover:bg-[#e4c06d] transition-colors duration-200 inline-flex items-center gap-2"
           >
-            SHOP NOW <ArrowRight size={14} />
+            Shop Now <ArrowRight size={14} />
           </button>
         </div>
       </div>
-
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setSlide(i)}
-            className={`h-1 rounded-full transition-all ${
-              i === slide ? "w-6 bg-[#c4956a]" : "w-2 bg-white/40"
-            }`}
-          />
-        ))}
-      </div>
     </section>
   );
-};
+}
 
-// ─── Features Bar ─────────────────────────────────────────────────
-const Features = () => (
-  <div className="bg-[#111] border-b border-[#1a1a1a]">
-    <div className="max-w-[1400px] mx-auto px-6 py-4 flex justify-around">
-      {[
-        { icon: Truck, text: "Free Shipping", sub: "Orders over ₹1999" },
-        { icon: Shield, text: "Secure Checkout", sub: "SSL encrypted" },
-        { icon: RotateCcw, text: "Easy Returns", sub: "7 day policy" },
-      ].map(({ icon: Icon, text, sub }) => (
-        <div key={text} className="flex items-center gap-2.5">
-          <Icon size={16} className="text-[#c4956a]" />
-          <div className="hidden sm:block">
-            <p className="text-[11px] text-white font-bold leading-tight">{text}</p>
-            <p className="text-[10px] text-[#555]">{sub}</p>
+/* ─── Search Bar — works from navbar too ────────────────── */
+function SearchBar({ searchOpen, setSearchOpen }) {
+  const [query, setQuery] = useState("");
+  const nav = useNavigate();
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (searchOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      nav(`/store?search=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
+  if (!searchOpen) return null;
+
+  return (
+    <div className="bg-[#0a0a0c] border-b border-[#1a1a1d]" style={{ animation: "fadeUp 0.3s ease both" }}>
+      <div className="max-w-[1200px] mx-auto px-8 md:px-12 py-4">
+        <form onSubmit={handleSubmit} className="flex items-center gap-3">
+          <div className="flex-1 relative">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3a3a40]" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search products, categories..."
+              className="w-full bg-[#141418] border border-[#1a1a1d] rounded-xl py-3 pl-11 pr-10 text-sm text-[#e8e8ec] placeholder:text-[#3a3a40] outline-none focus:border-[#d4a853]/30 transition-colors"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3a3a40] hover:text-[#e8e8ec]"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
-        </div>
-      ))}
+          <button
+            type="submit"
+            className="bg-[#d4a853] text-[#0a0a0c] font-semibold text-[11px] tracking-[0.12em] uppercase px-6 py-3 rounded-xl hover:bg-[#e4c06d] transition-colors flex items-center gap-2"
+          >
+            <Search size={14} /> Search
+          </button>
+          <button
+            type="button"
+            onClick={() => nav("/store")}
+            className="text-[#6a6a70] border border-[#1a1a1d] font-medium text-[11px] tracking-wider uppercase px-4 py-3 rounded-xl hover:border-[#d4a853]/30 hover:text-[#d4a853] transition-all flex items-center gap-2"
+          >
+            <SlidersHorizontal size={14} /> Filter
+          </button>
+        </form>
+      </div>
     </div>
-  </div>
-);
+  );
+}
 
-// ─── Section Header ───────────────────────────────────────────────
-const SectionHeader = ({ label, title, action, onAction }) => (
-  <div className="flex items-end justify-between mb-8">
-    <div>
-      <p className="text-[10px] tracking-[0.2em] text-[#c4956a] uppercase font-bold mb-1">
-        {label}
+/* ─── Category Pills — filter on page, no redirect ──────── */
+const CAT_PILLS = ["All", "Shirts", "T-Shirts", "Denim", "Jackets", "Polos"];
+
+function CategoryPills({ active, setActive }) {
+  return (
+    <div className="bg-[#0a0a0c] border-b border-[#1a1a1d]">
+      <div className="max-w-[1200px] mx-auto px-8 md:px-12">
+        <div className="flex items-center gap-2 py-4 overflow-x-auto no-scrollbar">
+          {CAT_PILLS.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActive(cat)}
+              className={`shrink-0 px-4 py-2 rounded-full text-[11px] font-medium tracking-wide transition-all duration-200 border ${
+                active === cat
+                  ? "bg-[#d4a853] text-[#0a0a0c] border-[#d4a853]"
+                  : "bg-transparent text-[#6a6a70] border-[#2a2a2e] hover:border-[#3a3a3e] hover:text-[#8a8a90]"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Section Header ────────────────────────────────────── */
+function SectionHeader({ eyebrow, title }) {
+  return (
+    <div className="mb-10">
+      <p className="text-[10px] font-semibold text-[#d4a853] tracking-[0.2em] uppercase mb-2">
+        {eyebrow}
       </p>
-      <h2 className="font-['Playfair_Display'] text-[24px] sm:text-[28px] text-white">
+      <h2 className="font-[Playfair_Display] text-[clamp(22px,2.5vw,30px)] font-semibold text-[#e8e8ec] leading-[1.1]">
         {title}
       </h2>
     </div>
-    {action && (
-      <button
-        onClick={onAction}
-        className="hidden sm:flex items-center gap-1.5 text-[11px] text-[#888] hover:text-white transition-colors"
-      >
-        {action} <ArrowRight size={12} />
-      </button>
-    )}
-  </div>
-);
+  );
+}
 
-// ─── Product Card ─────────────────────────────────────────────────
-const ProductCard = ({ product, index }) => {
-  const navigate = useNavigate();
-  const [loaded, setLoaded] = useState(false);
+/* ─── Product Card ──────────────────────────────────────── */
+function ProductCard({ product, index = 0 }) {
+  const nav = useNavigate();
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  const discount = product.originalPrice && product.startingPrice
+    ? Math.round(((product.originalPrice - product.startingPrice.amount) / product.originalPrice) * 100)
+    : 0;
+
+  const goToProduct = () => nav(`/store/product/${product._id}`);
 
   return (
     <div
-      className="group cursor-pointer anim-fade-up"
-      style={{ animationDelay: `${index * 0.08}s` }}
-      onClick={() => navigate(`/store/product/${product._id}`)}
+      className="cursor-pointer group"
+      style={{ animation: `fadeUp 0.6s ease both ${index * 0.06}s` }}
+      onClick={goToProduct}
     >
-      <div className="relative aspect-[3/4] bg-[#111] rounded-xl overflow-hidden mb-3 border border-[#1a1a1a] group-hover:border-[#2a2a2a] transition-colors">
+      <div className="relative aspect-[3/4] bg-[#141418] overflow-hidden rounded-xl mb-3.5">
         {product.thumbnail ? (
           <>
             <img
               src={product.thumbnail}
               alt={product.title}
-              onLoad={() => setLoaded(true)}
-              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                loaded ? "opacity-100" : "opacity-0"
-              }`}
+              onLoad={() => setImgLoaded(true)}
+              className={`w-full h-full object-cover transition-all duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"} group-hover:scale-105`}
             />
-            {!loaded && <div className="absolute inset-0 anim-shimmer" />}
+            {!imgLoaded && (
+              <div
+                className="absolute inset-0 rounded-xl"
+                style={{
+                  background: "linear-gradient(90deg, #141418 25%, #1c1c20 50%, #141418 75%)",
+                  backgroundSize: "200% 100%",
+                  animation: "shimmer 1.5s ease infinite",
+                }}
+              />
+            )}
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <ShoppingBag size={24} className="text-[#222]" />
+            <ShoppingBag size={24} className="text-[#2a2a2e]" />
           </div>
         )}
 
-        {/* Badges */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {product.isNew && (
-            <span className="px-2 py-0.5 bg-[#c4956a] text-[#0a0a0a] text-[9px] font-bold rounded">
+            <span className="px-2 py-[3px] rounded bg-[#d4a853] text-[#0a0a0c] text-[8px] font-bold tracking-[0.1em] uppercase">
               NEW
             </span>
           )}
-          {(product.isBestseller || product.autoIsBestseller) && (
-            <span className="px-2 py-0.5 bg-white text-[#0a0a0a] text-[9px] font-bold rounded flex items-center gap-1">
-              <Star size={8} fill="currentColor" /> BEST
+          {discount > 0 && (
+            <span className="px-2 py-[3px] rounded bg-[#1a3a2a] text-[#6ab888] text-[8px] font-bold tracking-[0.1em] uppercase">
+              -{discount}%
             </span>
           )}
         </div>
 
-        {/* Wishlist */}
         <button
-          onClick={(e) => e.stopPropagation()}
-          className="absolute top-2.5 right-2.5 p-1.5 bg-black/40 backdrop-blur rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={goToProduct}
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/[0.06] flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-200"
         >
-          <Heart size={12} className="text-white" />
+          <Heart size={13} className="text-white/80" />
         </button>
 
-        {/* Quick Add */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <button className="w-full py-2.5 bg-white text-[#0a0a0a] text-[10px] font-bold tracking-wider rounded-lg hover:bg-[#c4956a] transition-colors">
-            ADD TO CART
+        <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button
+            onClick={goToProduct}
+            className="w-full bg-[#d4a853] text-[#0a0a0c] font-semibold text-[10px] tracking-[0.12em] uppercase py-2.5 rounded-lg hover:bg-[#e4c06d] transition-colors flex items-center justify-center gap-1.5"
+          >
+            <ShoppingBag size={12} /> Add to Bag
           </button>
         </div>
       </div>
 
       <div>
-        <p className="text-[11px] text-[#c4956a] mb-0.5">{product.category}</p>
-        <h3 className="text-[13px] text-white font-medium leading-snug line-clamp-1 mb-1 group-hover:text-[#c4956a] transition-colors">
+        <p className="text-[10px] font-semibold text-[#d4a853] tracking-[0.12em] uppercase mb-1">
+          {product.category}
+        </p>
+        <h3 className="text-[13px] font-medium text-[#c8c8cc] leading-snug mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
           {product.title}
         </h3>
-        <div className="flex items-center gap-2">
-          <span className="text-[13px] text-white font-bold">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[13px] font-semibold text-[#e8e8ec]">
             ₹{parseInt(product.startingPrice?.amount || 0).toLocaleString()}
           </span>
-          {product.views > 0 && (
-            <span className="flex items-center gap-1 text-[10px] text-[#555]">
-              <Eye size={10} /> {product.views}
+          {product.originalPrice && (
+            <span className="text-[11px] text-[#4a4a50] line-through">
+              ₹{parseInt(product.originalPrice).toLocaleString()}
             </span>
           )}
+        </div>
+        <div className="flex items-center gap-1">
+          <Star size={10} className="text-[#d4a853] fill-[#d4a853]" />
+          <span className="text-[10px] text-[#5a5a60]">4.8</span>
+          <span className="text-[10px] text-[#3a3a40]">(124)</span>
         </div>
       </div>
     </div>
   );
-};
+}
 
-// ─── Product Grid ─────────────────────────────────────────────────
-const ProductGrid = ({ products, loading, title, label, filter }) => {
-  const navigate = useNavigate();
-  const filtered = filter ? products.filter(filter) : products;
-
-  if (loading) {
-    return (
-      <section className="py-14">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <SectionHeader label={label} title={title} />
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] bg-[#111] rounded-xl anim-shimmer" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (filtered.length === 0) return null;
+/* ─── Product Grid ──────────────────────────────────────── */
+function ProductGrid({ products, loading, eyebrow, title, filter, limit = 8 }) {
+  const filtered = filter ? (products || []).filter(filter) : (products || []);
 
   return (
-    <section className="py-14">
-      <div className="max-w-[1400px] mx-auto px-6">
-        <SectionHeader
-          label={label}
-          title={title}
-          action="View All"
-          onAction={() => navigate("/store")}
-        />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filtered.slice(0, 8).map((p, i) => (
-            <ProductCard key={p._id} product={p} index={i} />
-          ))}
+    <section className="bg-[#0a0a0c] py-20">
+      <div className="max-w-[1200px] mx-auto px-8 md:px-12">
+        <SectionHeader eyebrow={eyebrow} title={title} />
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-[3/4] rounded-xl"
+                  style={{
+                    background: "linear-gradient(90deg, #141418 25%, #1c1c20 50%, #141418 75%)",
+                    backgroundSize: "200% 100%",
+                    animation: "shimmer 1.5s ease infinite",
+                  }}
+                />
+              ))
+            : filtered.slice(0, limit).map((p, i) => (
+                <ProductCard key={p._id} product={p} index={i} />
+              ))
+          }
         </div>
       </div>
     </section>
   );
-};
+}
 
-// ─── Promo Strip ──────────────────────────────────────────────────
-const PromoStrip = () => {
-  const navigate = useNavigate();
-
+/* ─── Minimal Footer ────────────────────────────────────── */
+function Footer() {
   return (
-    <section className="py-14 bg-[#0a0a0a]">
-      <div className="max-w-[1400px] mx-auto px-6">
-        <div className="relative overflow-hidden rounded-2xl bg-[#111] border border-[#1a1a1a]">
-          <div className="grid lg:grid-cols-2">
-            <div className="p-8 sm:p-12 flex flex-col justify-center">
-              <p className="text-[10px] tracking-[0.2em] text-[#c4956a] uppercase font-bold mb-3">
-                Member Exclusive
-              </p>
-              <h2 className="font-['Playfair_Display'] text-[28px] sm:text-[36px] text-white leading-tight mb-4">
-                25% Off Your First Order
-              </h2>
-              <p className="text-[13px] text-[#888] mb-6 max-w-sm">
-                Join the club. Get early access to drops, exclusive discounts, and style tips.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => navigate("/store")}
-                  className="px-5 py-2.5 bg-white text-[#0a0a0a] text-[11px] font-bold tracking-wider rounded-lg hover:bg-[#c4956a] transition-colors"
-                >
-                  SHOP NOW
-                </button>
-                <button
-                  onClick={() => navigate("/register")}
-                  className="px-5 py-2.5 border border-[#2a2a2a] text-[#888] text-[11px] font-bold tracking-wider rounded-lg hover:text-white hover:border-[#444] transition-colors"
-                >
-                  SIGN UP
-                </button>
-              </div>
-            </div>
-            <div className="hidden lg:block relative">
-              <img
-                src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&h=600&fit=crop"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#111] to-transparent" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// ─── Footer ───────────────────────────────────────────────────────
-const Footer = () => {
-  const navigate = useNavigate();
-
-  return (
-    <footer className="bg-[#050505] border-t border-[#1a1a1a] pt-12 pb-8">
-      <div className="max-w-[1400px] mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-          <div className="col-span-2 md:col-span-1">
-            <h3 className="font-['Playfair_Display'] text-[18px] text-white mb-3">SNITCH</h3>
-            <p className="text-[11px] text-[#555] leading-relaxed mb-4">
-              Premium fashion for the modern individual. Designed in India, worn worldwide.
-            </p>
-          </div>
-          {[
-            { title: "Shop", links: ["New Arrivals", "Men", "Women", "Sale"] },
-            { title: "Support", links: ["Contact", "Shipping", "Returns", "FAQ"] },
-            { title: "Company", links: ["About", "Careers", "Press", "Sustainability"] },
-          ].map((col) => (
-            <div key={col.title}>
-              <h4 className="text-[10px] tracking-[0.15em] text-[#555] uppercase font-bold mb-3">
-                {col.title}
-              </h4>
-              <ul className="space-y-2">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <button
-                      onClick={() => navigate(`/${link.toLowerCase().replace(/\s+/g, "-")}`)}
-                      className="text-[11px] text-[#777] hover:text-white transition-colors"
-                    >
-                      {link}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="border-t border-[#1a1a1a] pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-[10px] text-[#444]">© 2026 Snitch. All rights reserved.</p>
-          <div className="flex gap-4">
-            {["Privacy", "Terms", "Cookies"].map((t) => (
-              <button key={t} className="text-[10px] text-[#444] hover:text-[#777] transition-colors">
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
+    <footer className="bg-[#0a0a0c] border-t border-[#1a1a1d] py-10">
+      <div className="max-w-[1200px] mx-auto px-8 md:px-12 flex justify-between items-center flex-wrap gap-4">
+        <p className="text-[10px] text-[#2a2a30]">© 2026 Snitch</p>
+        <p className="text-[10px] text-[#2a2a30]">Premium fashion. Designed in India.</p>
       </div>
     </footer>
   );
-};
+}
 
-// ═══════════════════════════════════════════════════════════════════
-// HOME PAGE
-// ═══════════════════════════════════════════════════════════════════
-const Home = () => {
-  const products = useSelector((state) => state.products.products);
-  const user = useSelector((state) => state.auth?.user);
+/* ═══════════════════════════════════════════════════════════════════════
+   HOME
+   ═══════════════════════════════════════════════════════════════════════ */
+export default function Home() {
+  const products = useSelector(s => s.products.products);
+  const user = useSelector(s => s.auth?.user);
   const { handleGetAllProducts } = useProduct();
   const [loading, setLoading] = useState(true);
-  const hasLoaded = useRef(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const loaded = useRef(false);
 
   useEffect(() => {
-    if (hasLoaded.current) return;
-    hasLoaded.current = true;
-    async function load() {
-      setLoading(true);
-      try {
-        await handleGetAllProducts();
-      } catch (err) {
-        console.error("Failed to load products:", err);
-      } finally {
-        setTimeout(() => setLoading(false), 600);
-      }
-    }
-    load();
+    if (loaded.current) return;
+    loaded.current = true;
+    (async () => {
+      try { await handleGetAllProducts(); }
+      catch (e) { console.error(e); }
+      finally { setTimeout(() => setLoading(false), 400); }
+    })();
   }, [handleGetAllProducts]);
 
+  const prods = products || [];
+
+  // Category filter
+  const getFiltered = (baseFilter) => {
+    let filtered = baseFilter ? prods.filter(baseFilter) : [...prods];
+    if (activeCategory !== "All") {
+      filtered = filtered.filter(p =>
+        p.category?.toLowerCase().includes(activeCategory.toLowerCase())
+      );
+    }
+    return filtered;
+  };
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      <PageStyles />
-
-      <Navbar isLoggedIn={!!user} user={user} />
-
+    <div className="min-h-screen bg-[#0a0a0c]">
+      <Keyframes />
+      <Navbar isLoggedIn={!!user} user={user} onSearchOpen={() => setSearchOpen(s => !s)} />
       <Hero />
-      <Features />
+      <SearchBar searchOpen={searchOpen} setSearchOpen={setSearchOpen} />
+      <CategoryPills active={activeCategory} setActive={setActiveCategory} />
 
       <ProductGrid
-        products={products || []}
+        products={getFiltered(p => p.isBestseller || p.autoIsBestseller || p.views > 30)}
         loading={loading}
-        title="Trending Now"
-        label="Popular"
-        filter={(p) => p.isBestseller || p.autoIsBestseller || p.views > 30}
+        eyebrow="Trending"
+        title="Best Sellers"
+        limit={8}
       />
 
       <ProductGrid
-        products={products || []}
+        products={getFiltered(p => p.isNew)}
         loading={loading}
-        title="New Arrivals"
-        label="Fresh Drops"
-        filter={(p) => p.isNew}
+        eyebrow="New"
+        title="Just Dropped"
+        limit={8}
       />
 
-      <PromoStrip />
-
       <ProductGrid
-        products={products || []}
+        products={getFiltered()}
         loading={loading}
-        title="All Products"
-        label="Browse"
+        eyebrow="All"
+        title="The Collection"
+        limit={12}
       />
 
       <Footer />
     </div>
   );
-};
-
-export default Home;
+}

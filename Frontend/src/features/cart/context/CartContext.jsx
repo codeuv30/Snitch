@@ -1,8 +1,9 @@
 // src/context/CartContext.js
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import useCart from "../hooks/useCart";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Toast from "@/components/ui/Toast";
+import { setTotalCount, setTotalPrice } from "../state/cart.slice";
 
 export const CartContext = React.createContext();
 
@@ -15,30 +16,45 @@ export const CartProvider = ({ children }) => {
     handleRemoveItem,
   } = useCart();
 
+  const dispatch = useDispatch();
+
   const user = useSelector((state) => state.auth.user);
 
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
 
+  const [cartTotalPrice, setCartTotalPrice] = useState(null);
+  const [cartTotalCount, setCartTotalCount] = useState(null);
+
+  const totalPrice = useSelector(state => state.cart.totalPrice);
+  const totalCount = useSelector(state => state.cart.totalCount);
+
   const loading = useSelector((state) => state.cart.loading);
+
+  const loadCart = async () => {
+    try {
+      const result = await handleGetCart();
+      
+      dispatch(setTotalPrice(result.cart[0].totalPrice));
+      dispatch(setTotalCount(result.cart[0].items.length));
+
+      setCartTotalPrice(totalPrice);
+      setCartTotalCount(totalCount);
+
+      if (result?.success) {
+        setCart(result.cart || []);
+      }
+    } catch (err) {
+      console.error("Failed to load cart:", err);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
 
-    const loadCart = async () => {
-      try {
-        const result = await handleGetCart();
-        if (result?.success) {
-          setCart(result.cart.items || []);
-        }
-      } catch (err) {
-        console.error("Failed to load cart:", err);
-      }
-    };
-
     loadCart();
-  }, [handleGetCart, user]);
+  }, [handleGetCart, user, totalPrice, totalCount, cartTotalCount, cartTotalPrice]);
 
   const addToCart = useCallback(
     async (product, variant = null) => {
@@ -52,10 +68,7 @@ export const CartProvider = ({ children }) => {
 
         if (result?.success) {
           // Refresh cart from API
-          const cartResult = await handleGetCart();
-          if (cartResult?.success) {
-            setCart(cartResult.cart?.items || []);
-          }
+          loadCart();
 
           setAddedToCart(true);
           setTimeout(() => setAddedToCart(false), 2000);
@@ -77,8 +90,7 @@ export const CartProvider = ({ children }) => {
 
       try {
         await handleIncrementItem(productId, variantId);
-        const result = await handleGetCart();
-        if (result?.success) setCart(result.cart?.items || []);
+        loadCart();
       } catch (err) {
         Toast.error("Something went wrong");
         console.error(err);
@@ -96,8 +108,7 @@ export const CartProvider = ({ children }) => {
 
       try {
         await handleDecrementItem(productId, variantId);
-        const result = await handleGetCart();
-        if (result?.success) setCart(result.cart?.items || []);
+        loadCart();
       } catch (err) {
         Toast.error("Something went wrong");
         console.error(err);
@@ -107,17 +118,11 @@ export const CartProvider = ({ children }) => {
   );
 
   const cartTotal = useMemo(() => {
-    return cart.reduce((sum, item) => {
-      const price = Number(
-        item.variant?.price?.amount ?? item.product?.startingPrice?.amount ?? 0,
-      );
-      const quantity = typeof item.quantity === "number" ? item.quantity : 1;
-      return sum + price * quantity;
-    }, 0);
+    return cartTotalPrice;
   }, [cart]);
 
   const cartItemCount = useMemo(() => {
-    return cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    return cartTotalCount;
   }, [cart]);
 
   const removeItem = useCallback(
@@ -129,8 +134,7 @@ export const CartProvider = ({ children }) => {
 
       try {
         await handleRemoveItem(productId, variantId);
-        const result = await handleGetCart();
-        if (result?.success) setCart(result.cart?.items || []);
+        loadCart();
       } catch (err) {
         Toast.error("Something went wrong");
         console.error(err);

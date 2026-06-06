@@ -24,7 +24,7 @@ const useCart = () => {
     const data = await getCart(dispatch);
 
     if (data?.cart?.items) {
-      dispatch(setItems(data.cart.items));
+      dispatch(setItems(data.cart));
     }
 
     return data;
