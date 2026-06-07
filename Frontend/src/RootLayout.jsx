@@ -19,21 +19,6 @@ import useCart from "./features/cart/hooks/useCart";
 const RootLayout = () => {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    async function load() {
-      const res = await fetch(
-        "https://snitch-cpuq.onrender.com/api/v1/auth/me",
-        {
-          credentials: "include",
-        },
-      );
-
-      console.log(await res.text());
-    }
-
-    load();
-  }, []);
-
   const { handleGetCart } = useCart();
 
   // Fetch current user on app mount.

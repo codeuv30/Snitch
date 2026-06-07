@@ -177,10 +177,11 @@ export const googleCallback = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({
-      success: true,
-      token,
-    });
+    return res.redirect(
+      config.NODE_ENV === "production"
+        ? config.FRONTEND_PRODUCTION_URL
+        : config.FRONTEND_DEVELOPMENT_URL,
+    );
   }
 
   const email = encodeURIComponent(req.user.googleProfile.emails[0].value);
@@ -188,9 +189,6 @@ export const googleCallback = async (req, res) => {
   const fullName = encodeURIComponent(req.user.googleProfile.displayName);
 
   const redirectURL = `${config.FRONTEND_PRODUCTION_URL}/register?email=${email}&fullName=${fullName}`;
-
-  return res.status(200).json({
-    success: true,
-    token,
-  });
+  
+  return res.redirect(redirectURL);
 };
