@@ -295,7 +295,6 @@ export default function CreateProductVariant() {
 
   // Redirect if no product data
   useEffect(() => {
-    console.log(productId);
     if (!product && productId) {
       Toast.error("Product data not found. Please create a product first.");
       navigate("/seller/dashboard/products");

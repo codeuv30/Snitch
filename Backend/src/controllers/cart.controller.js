@@ -314,7 +314,6 @@ export const getCart = async (req, res) => {
       cart,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: `We were unable to find your cart items at this time. Please try again later. If the problem persists, please contact support through ${

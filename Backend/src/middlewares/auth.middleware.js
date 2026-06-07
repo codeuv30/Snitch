@@ -102,8 +102,6 @@ export const optionalAuth = async (req, res, next) => {
 
     const user = await userModel.findById(decoded.id);
 
-    console.log("Authenticated user:", user);
-
     req.user = user || null;
 
     next();

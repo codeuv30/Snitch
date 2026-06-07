@@ -80,7 +80,6 @@ export const register = async (req, res) => {
 
     await sendTokenResponse(user, res, "User registered successfully");
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: `We were unable to create your account at this time. Please try again later. If the problem persists, please contact support through ${
@@ -126,7 +125,6 @@ export const login = async (req, res) => {
 
     await sendTokenResponse(user, res, "User logged in successfully");
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: `We were unable to log you in at this time. Please try again later. If the problem persists, please contact support through ${

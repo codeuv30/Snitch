@@ -954,7 +954,6 @@ const ProductDetails = () => {
     if (productId && !viewTracked.current) {
       viewTracked.current = true;
       handleCreateView(productId).catch((err) => {
-        console.log("View tracking failed:", err);
       });
     }
   }, [productId, handleCreateView]);

@@ -55,7 +55,6 @@ export const register = async (user, dispatch) => {
 
     return response.data;
   } catch (error) {
-    console.log(error);
     if (error.response && error.response.data) {
       dispatch(setError(error.response.data.message));
       return null;

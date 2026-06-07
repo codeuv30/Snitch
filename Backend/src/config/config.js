@@ -1,7 +1,5 @@
 import "dotenv/config";
 
-console.log({ BACKEND_URL: process.env.BACKEND_URL });
-
 if (!process.env.NODE_ENV) {
   throw new Error("NODE_ENV is not defined in environment variables");
 }

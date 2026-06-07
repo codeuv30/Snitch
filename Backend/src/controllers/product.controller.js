@@ -76,7 +76,6 @@ export const createProduct = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: `We were unable to create the product at this time. Please try again later. If the problem continues, please contact support through ${
@@ -253,7 +252,6 @@ export const createProductVariant = async (req, res) => {
       variant,
     });
   } catch (error) {
-    console.log(error);
 
     return res.status(500).json({
       success: false,
