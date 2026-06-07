@@ -174,6 +174,7 @@ export const googleCallback = async (req, res) => {
       httpOnly: true,
       secure: config.NODE_ENV === "production",
       sameSite: config.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.redirect(
@@ -183,16 +184,11 @@ export const googleCallback = async (req, res) => {
     );
   }
 
-  console.log(req.user.googleProfile.displayName);
-  console.log(req.user.googleProfile.emails[0].value);
-
   const email = encodeURIComponent(req.user.googleProfile.emails[0].value);
 
   const fullName = encodeURIComponent(req.user.googleProfile.displayName);
 
   const redirectURL = `${config.FRONTEND_PRODUCTION_URL}/register?email=${email}&fullName=${fullName}`;
   
-  console.log(redirectURL);
-
   return res.redirect(redirectURL);
 };
