@@ -12,63 +12,114 @@ const drainBody = (req) =>
   });
 
 export const authenticateSeller = async (req, res, next) => {
-    const token = req.cookies.token;
+  const token = req.cookies.token;
 
-    if (!token) {
-        await drainBody(req);
-        return res.status(401).json({ success: false, message: "Unauthorized access. Please log in and try again.", redirect: "/login" });
+  if (!token) {
+    await drainBody(req);
+    return res
+      .status(401)
+      .json({
+        success: false,
+        message: "Unauthorized access. Please log in and try again.",
+        redirect: "/login",
+      });
+  }
+
+  try {
+    const decoded = jwt.verify(token, config.JWT_SECRET); // sync, no await needed
+
+    const user = await userModel.findById(decoded.id);
+
+    if (!user) {
+      await drainBody(req);
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: "Unauthorized access. Please log in and try again.",
+          redirect: "/login",
+        });
     }
 
-    try {
-        const decoded = jwt.verify(token, config.JWT_SECRET); // sync, no await needed
-
-        const user = await userModel.findById(decoded.id);
-
-        if (!user) {
-            await drainBody(req);
-            return res.status(401).json({ success: false, message: "Unauthorized access. Please log in and try again.", redirect: "/login" });
-        }
-
-        if (user.role !== "seller") {
-            await drainBody(req);
-            return res.status(403).json({ success: false, message: "Forbidden access. You do not have permission to perform this action.", redirect: "/" });
-        }
-
-        req.user = user;
-        next();
-    } catch (error) {
-        await drainBody(req);
-        return res.status(401).json({ success: false, message: "Unauthorized access. Please log in and try again.", redirect: "/login" });
+    if (user.role !== "seller") {
+      await drainBody(req);
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message:
+            "Forbidden access. You do not have permission to perform this action.",
+          redirect: "/",
+        });
     }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    await drainBody(req);
+    return res
+      .status(401)
+      .json({
+        success: false,
+        message: "Unauthorized access. Please log in and try again.",
+        redirect: "/login",
+      });
+  }
 };
 
 export const authenticateUser = async (req, res, next) => {
-    const token = req.cookies.token;
+  console.log("cookies:", req.cookies);
+  console.log("origin:", req.headers.origin);
+  const token = req.cookies.token;
 
-    if(!token) {
-        return res.status(401).json({ success: false, message: "Unauthorized access. Please log in and try again.", redirect: "/login" });
+  if (!token) {
+    return res
+      .status(401)
+      .json({
+        success: false,
+        message: "Unauthorized access. Please log in and try again.",
+        redirect: "/login",
+      });
+  }
+
+  try {
+    const decoded = await jwt.verify(token, config.JWT_SECRET);
+
+    if (!decoded) {
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: "Unauthorized access. Please log in and try again.",
+          redirect: "/login",
+        });
     }
 
-    try {
-        const decoded = await jwt.verify(token, config.JWT_SECRET);
+    const user = await userModel.findById(decoded.id);
 
-        if(!decoded) {
-            return res.status(401).json({ success: false, message: "Unauthorized access. Please log in and try again.", redirect: "/login" });
-        }
-
-        const user = await userModel.findById(decoded.id);
-
-        if(!user) {
-            return res.status(401).json({ success: false, message: "Unauthorized access. Please log in and try again.", redirect: "/login" });
-        }
-
-        req.user = user;
-        
-        next();
-    } catch (error) {
-        return res.status(401).json({ success: false, message: "Unauthorized access. Please log in and try again.", redirect: "/login" });
+    if (!user) {
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: "Unauthorized access. Please log in and try again.",
+          redirect: "/login",
+        });
     }
-}
+
+    req.user = user;
+
+    next();
+  } catch (error) {
+    return res
+      .status(401)
+      .json({
+        success: false,
+        message: "Unauthorized access. Please log in and try again.",
+        redirect: "/login",
+      });
+  }
+};
 
 export const setVisitorId = (req, res, next) => {
   let visitorId = req.cookies.visitorId;
@@ -85,8 +136,8 @@ export const setVisitorId = (req, res, next) => {
   }
 
   req.visitorId = visitorId;
-  
-  next()
+
+  next();
 };
 
 export const optionalAuth = async (req, res, next) => {
