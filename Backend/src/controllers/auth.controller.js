@@ -109,12 +109,10 @@ export const login = async (req, res) => {
     }
 
     if (user.provider === "google") {
-      return res
-        .status(400)
-        .json({
-          message:
-            "This account uses Google sign-in. Please continue with Google.",
-        });
+      return res.status(400).json({
+        message:
+          "This account uses Google sign-in. Please continue with Google.",
+      });
     }
 
     const isMatch = await user.comparePassword(password);
@@ -185,9 +183,16 @@ export const googleCallback = async (req, res) => {
     );
   }
 
-  return res.redirect(
-    config.NODE_ENV === "production"
-      ? `${config.FRONTEND_PRODUCTION_URL}/register?email=${req.user.googleProfile.emails[0].value}&fullName=${req.user.googleProfile.displayName}`
-      : `${config.FRONTEND_DEVELOPMENT_URL}/register?email=${req.user.googleProfile.emails[0].value}&fullName=${req.user.googleProfile.displayName}`,
-  );
+  console.log(req.user.googleProfile.displayName);
+  console.log(req.user.googleProfile.emails[0].value);
+
+  const email = encodeURIComponent(req.user.googleProfile.emails[0].value);
+
+  const fullName = encodeURIComponent(req.user.googleProfile.displayName);
+
+  const redirectURL = `${config.FRONTEND_PRODUCTION_URL}/register?email=${email}&fullName=${fullName}`;
+  
+  console.log(redirectURL);
+
+  return res.redirect(redirectURL);
 };
