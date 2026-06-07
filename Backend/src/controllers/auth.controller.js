@@ -177,11 +177,10 @@ export const googleCallback = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return res.redirect(
-      config.NODE_ENV === "production"
-        ? config.FRONTEND_PRODUCTION_URL
-        : config.FRONTEND_DEVELOPMENT_URL,
-    );
+    return res.status(200).json({
+      success: true,
+      token,
+    });
   }
 
   const email = encodeURIComponent(req.user.googleProfile.emails[0].value);
