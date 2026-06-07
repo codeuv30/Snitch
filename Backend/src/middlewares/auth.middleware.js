@@ -70,6 +70,8 @@ export const authenticateSeller = async (req, res, next) => {
 export const authenticateUser = async (req, res, next) => {
   console.log("cookies:", req.cookies);
   console.log("origin:", req.headers.origin);
+  console.log("headers.cookie:", req.headers.cookie);
+  
   const token = req.cookies.token;
 
   if (!token) {
