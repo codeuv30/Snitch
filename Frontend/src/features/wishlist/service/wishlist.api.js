@@ -1,7 +1,7 @@
 import axios from "axios";
 import { setError, setLoading, setSuccessMessage } from "../state/wishlist.slice";
 
-const baseURL = "/api/v1/wishlist";
+const baseURL = import.meta.env.VITE_BACKEND_URL + "/api/v1/wishlist";
 
 const wishlistApiInstance = axios.create({
   baseURL: baseURL,

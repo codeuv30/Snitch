@@ -12,15 +12,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   
   server: {
-    allowedHosts: ["features-heaven-render-ping.trycloudflare.com"],
     port: 3001,
-    proxy: {
-      "/api": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-        secure: false
-      }
-    }
   },
 
   resolve: {

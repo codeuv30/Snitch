@@ -7,7 +7,7 @@ import {
   setUser,
 } from "../state/auth.slice.js";
 
-const BASE_API_URL = "/api/v1/auth";
+const BASE_API_URL = import.meta.env.VITE_BACKEND_URL + "/api/v1/auth";
 
 const authApiInstance = axios.create({
   baseURL: BASE_API_URL,

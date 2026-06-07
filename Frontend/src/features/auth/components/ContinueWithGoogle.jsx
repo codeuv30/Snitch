@@ -32,7 +32,7 @@ const ContinueWithGoogle = ({ dark = false }) => {
       className={containerClasses}
     >
       <GoogleIcon />
-      <a href="/api/v1/auth/google">Continue with Google</a>
+      <a href={`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google`}>Continue with Google</a>
     </button>
   );
 };

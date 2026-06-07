@@ -5,7 +5,7 @@ import {
   setSuccessMessage,
 } from "../state/product.slice";
 
-const API_BASE_URL = "/api/v1/products";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL + "/api/v1/products";
 
 const productApiInstance = axios.create({
   baseURL: API_BASE_URL,
