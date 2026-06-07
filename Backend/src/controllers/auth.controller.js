@@ -189,6 +189,9 @@ export const googleCallback = async (req, res) => {
   const fullName = encodeURIComponent(req.user.googleProfile.displayName);
 
   const redirectURL = `${config.FRONTEND_PRODUCTION_URL}/register?email=${email}&fullName=${fullName}`;
-  
-  return res.redirect(redirectURL);
+
+  return res.status(200).json({
+    success: true,
+    token,
+  });
 };
